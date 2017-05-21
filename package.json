@@ -1,0 +1,28 @@
+{
+  "name": "mobile-app-distribution",
+  "version": "0.0.1",
+  "description": "A NodeJS project to build and distribute mobile app for wireless distribution",
+  "main": "distribute.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "bin": {
+    "distribute": "bin/distribute.js"
+  },
+  "keywords": [
+    "nodejs",
+    "cordova",
+    "ios",
+    "android",
+    "wireless",
+    "distribution",
+    "distribute",
+    "build"
+  ],
+  "author": "Luca Caprini",
+  "license": "ISC",
+  "dependencies": {
+    "commander": "^2.9.0",
+    "winston": "^2.3.1"
+  }
+}
