@@ -7,21 +7,42 @@
         {
             "type": "node",
             "request": "launch",
-            "name": "Launch Program",
-            "program": "${workspaceRoot}/index.js",
+            "name": "Build",
+            "program": "${workspaceRoot}/libs/bin/distribute-build.js",
             "args": [
+                "1.0.0",
                 "--config",
-                "test/distribute.json",
-                "--app-version",
-                "1.5.2",
+                "/Users/Masterplan/Development/Distribute/resources/distribute.json",
                 "--app-version-label",
-                "'1.5.2 patch01'",
+                "1.5.2 patch01",
                 "--android-version-code",
                 "10502",
                 "--ios-bundle-version",
                 "152",
                 "--change-log",
-                "last-changelog.txt"
+                "../resources/last-changelog.txt",
+                "--tasks",
+                "vciafj",
+                "-h",
+                "-v",
+                "-f"
+            ]
+        },{
+            "type": "node",
+            "request": "launch",
+            "name": "Help",
+            "program": "${workspaceRoot}/libs/bin/distribute.js",
+            "args": [
+                "help",
+                "build"
+            ]
+        },{
+            "type": "node",
+            "request": "launch",
+            "name": "Version",
+            "program": "${workspaceRoot}/libs/bin/distribute.js",
+            "args": [
+                "--version"
             ]
         }
     ]

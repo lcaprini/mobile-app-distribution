@@ -1,0 +1,17 @@
+Sun May 21 2017 23:33:31 GMT+0200 (CEST) [ERROR]:  
+{
+  "message": "ENOENT: no such file or directory, open 'distribute.json'",
+  "name": "Error",
+  "cause": {
+    "errno": -2,
+    "code": "ENOENT",
+    "syscall": "open",
+    "path": "distribute.json"
+  },
+  "isOperational": true,
+  "stack": "Error: ENOENT: no such file or directory, open 'distribute.json'",
+  "errno": -2,
+  "code": "ENOENT",
+  "syscall": "open",
+  "path": "distribute.json"
+}

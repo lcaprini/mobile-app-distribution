@@ -1,0 +1,48 @@
+{
+    "app-name": "Intercos",
+    "app-label": "Intercos",
+    "app-url-schema": "intercos",
+
+    "src-sources-path": ".",
+
+    "cmd-compile-sources": "",
+
+    "cordova-root-path": ".",
+
+    "ios-bundle-id": "it.engds.intercos",
+    "ios-provisioning-profile": "intercos_distribution",
+    "ios-ipa-url-path": "https://cert1.engbms.it/build/intercos/iOS/",
+
+    "android-bundle-id": "it.engds.intercos",
+    "android-keystore-path": "../../../../../resources/android/keystore/android_engineering.keystore",
+    "android-keystore-alias": "engineering",
+    "android-keystore-password": "engineering",
+    "android-apk-url-path": "https://cert1.engbms.it/build/intercos/Android/",
+    
+    "ftp-builds-host": "172.20.0.243",
+    "ftp-builds-username": "userdevbuild",
+    "ftp-builds-password": "Us3rD3v$Bu1ld014",
+    "ftp-builds-iOS-working-dir": "/usr/local/apache2/htdocs/build/intercos/iOS",
+    "ftp-builds-android-working-dir": "/usr/local/apache2/htdocs/build/intercos/Android",
+
+    "ftp-sources-host": "172.20.1.120",
+    "ftp-sources-username": "intercos",
+    "ftp-sources-password": "intercos",
+    "ftp-sources-working-dir": "/var/www/html/intercos/scambio",
+
+    "ftp-repo-host": "172.20.1.120",
+    "ftp-repo-username": "intercos",
+    "ftp-repo-password": "intercos",
+    "ftp-repo-working-dir": "/var/www/html/intercos/WirelessDistribution",
+    "wireless-dist-url-page": "http://intercos-coll.engds.it/intercos/WirelessDistribution/Intercos.php",
+
+    "smtp-server": "mail.ds.eng.it",
+    "smtp-port": 25,
+    "smtp-user": "internal@ds.eng.it",
+    "smtp-pass": "1engXX2010",
+    "mail-from": "internal@ds.eng.it",
+    "mail-to": ["luca.caprini@eng.it"],
+
+    "buildsDir": "builds/"
+
+}
