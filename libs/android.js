@@ -1,20 +1,13 @@
 
 const logger = require('./logger');
-const config = require('./config');
 
 class Android {
 
-    constructor() {}
-
-    calculateVersionCode() {
+    calculateVersionCode(appVersion) {
         let version = [];
-        let tempVersions = config.appVersion.split(".");
+        let tempVersions = appVersion.split(".");
 
-        for(let i = 0; i < version.length; i++){
-            version[i] = (tempVersions[i]) ? tempVersions[i] : 0;
-        }
-
-        config.androidVersionCode = parseInt(versions[2]) + (parseInt(versions[1]) * 100) + (parseInt(versions[0]) * 10000);
+        return parseInt(versions[2]) + (parseInt(versions[1]) * 100) + (parseInt(versions[0]) * 10000);
     }
 }
 

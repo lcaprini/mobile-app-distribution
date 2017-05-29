@@ -10,11 +10,9 @@
             "name": "Build",
             "program": "${workspaceRoot}/libs/bin/distribute-build.js",
             "args": [
-                "1.0.0",
+                "1.0.0 patch01",
                 "--config",
                 "/Users/Masterplan/Development/Distribute/resources/distribute.json",
-                "--app-version-label",
-                "1.5.2 patch01",
                 "--android-version-code",
                 "10502",
                 "--ios-bundle-version",

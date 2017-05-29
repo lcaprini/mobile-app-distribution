@@ -8,10 +8,6 @@ const config = require('./config');
 
 class Utils {
 
-    constructor() {
-        
-    }
-
     prompt(text){
         const utils = this;
         return new Promise(function (resolve, reject) {
@@ -34,7 +30,7 @@ class Utils {
                 logger.info('  App version:\t\t\t',                config.appVersion);
                 logger.info('  App version label:\t\t',            config.appVersionLabel);
                 if(config.tasks.indexOf('i') > -1){
-                    logger.info('  iOS bundle id:\t\t',          config.iosBundleId);
+                    logger.info('  iOS bundle id:\t\t',            config.iosBundleId);
                     logger.info('  iOS provisioning profile:\t',   config.iosProvisioningProfile);
                     logger.info('  iOS bundle version:\t\t',       config.iosBundleVersion);
                 }
