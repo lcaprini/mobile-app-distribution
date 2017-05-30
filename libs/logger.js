@@ -1,5 +1,6 @@
 const winston = require('winston');
 const path = require('path');
+const _ = require('lodash');
 
 // Custom winston logger initialization
 logger = new (winston.Logger)({
@@ -16,7 +17,9 @@ logger = new (winston.Logger)({
 
 logger.section = (text, level = 'info') => {
     logger[level]('\n####################################');
-    logger[level](`${text}`);
+    _.each(text.split('\n'), log => {
+        logger[level](`# ${log}`);
+    });
     logger[level]('####################################\n');
 }
 

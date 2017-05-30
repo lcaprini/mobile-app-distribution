@@ -10,7 +10,7 @@ const logger = require('./logger');
 const utils = require('./utils');
 const android = require('./android');
 const ios = require('./ios');
-const cordovaTasks = require('./cordova').tasks;
+const cordovaTasks = require('./cordova').TASKS;
 
 
 class Config {
@@ -129,13 +129,7 @@ class Config {
                                     return;
                                 }
 
-                                try{
-                                    config.verify();
-                                    config.printRecap().then(resolve, reject);
-                                }
-                                catch(e){
-                                    reject(e);
-                                }
+                                resolve();
                             });
                         }
                     }
@@ -185,23 +179,15 @@ class Config {
     readChangeLog(changeLog, next){
         let config = this;
 
-        // If changelog is file I try to read it
-        fs.readFileAsync(changeLog, 'utf8').then(
+        const changeLogPath = path.join(config.rootPath, changeLog);
+        return fs.readFileAsync(changeLogPath, 'utf8').then(
             changeLogText => {
-                config.changeLog = changeLogText.split('\n').join('***');
+                config.changeLog = changeLogText.split('\n');
                 next();
             },
             () => {
-                var changeLogPath = path.join(config.rootPath, changeLog);
-                return fs.readFileAsync(changeLogPath, 'utf8').then(
-                    changeLogText => {
-                        config.changeLog = changeLogText.split('\n').join('***');
-                        next();
-                    },
-                    () => {
-                        config.changeLog = changeLog;
-                        next();
-                    });
+                config.changeLog = changeLog.split('***');
+                next();
             });
     }
 
@@ -209,11 +195,6 @@ class Config {
      * Verifies all configuration and params
      */
     verify(){
-
-        // Check params for compile sources
-        if(this.tasks.contains(cordovaTasks.COMPILE_SOURCES)){
-            this.verifyCompileSteps();
-        }
 
         // Check params for iOS build
         if(this.tasks.contains(cordovaTasks.BUILD_IOS)){
@@ -244,18 +225,6 @@ class Config {
         if(this.tasks.contains(cordovaTasks.SEND_EMAIL)){
             this.verifySendEmailSteps();
         }
-    }
-
-    verifyCompileSteps(){
-        if(!this.compileSourcesPath){
-            throw new Error('Source compile error: missing "compile-sources-path" value in config file');
-        }
-        if(!this.compileSourcesCmd){
-            throw new Error('Source compile error: missing "compile-sources-cmd" value in config file');
-        }
-        // if(!this.cordovaRootPath){
-        //     throw new Error('Source compile error: missing "cordova-root-path" value in config file');
-        // }
     }
 
     verifyIosSteps(){
@@ -372,7 +341,7 @@ class Config {
 
     printRecap() {
         const config = this;
-        return new Promise((resolve, reject) => {
+        return new Promise(resolve => {
             asciimo.write('  '+config.appName, 'Ogre', art => {
                 logger.info('\n#########################################################');
                 logger.info(art);
@@ -390,9 +359,13 @@ class Config {
                     logger.info('  Android bundle id:\t\t',        config.androidBundleId);
                     logger.info('  Android version code:\t\t',     config.androidVersionCode);
                 }
+                logger.info('  Change log:\t\t\t',                 config.changeLog[0])
+                for(let i = 1; i < config.changeLog.length; i++){
+                    logger.info('\t\t\t\t',                        config.changeLog[i]);
+                }
                 logger.info('#########################################################\n');
 
-                const validateRecap = (resolve, reject) => {
+                const validateRecap = resolve => {
                     utils.prompt('Press \'y\' to continue the build process, \'n\' to stop it').then(
                         result => {
                             if(result == 'y'){
@@ -403,7 +376,7 @@ class Config {
                                 process.exit(0);
                             }
                             else{
-                                validateRecap(resolve, reject);
+                                validateRecap(resolve);
                             }
                         },
                         err => {
@@ -416,7 +389,7 @@ class Config {
                     resolve();
                 }
                 else{
-                    validateRecap(resolve, reject);
+                    validateRecap(resolve);
                 }
             });
         });

@@ -7,5 +7,5 @@ const program = require('commander');
 program
   .version('1.0.0')
   .command('init', 'initialize distribution')
-  .command('build <version>', 'build new version')
+  .command('cordova <version>', 'build new version of a Cordova app')
   .parse(process.argv);
