@@ -3,9 +3,8 @@
     "app-label": "App Test",
     "app-schema": "apptest",
 
-    "src-sources-path": "src",
-
-    "cmd-compile-sources": "",
+    "compile-sources-path": "src",
+    "compile-sources-cmd": "grunt build:production",
 
     "cordova-root-path": ".",
 
