@@ -5,9 +5,9 @@ class Ios {
 
     calculateBundleVersion(appVersion) {
         let version = [];
-        let tempVersions = appVersion.split(".");
+        let versions = appVersion.split(".");
 
-        return `$(versions[0]).$(versions[1]).$(versions[2])`;
+        return `${versions[0]}.${versions[1]}.${versions[2]}`;
     }
 }
 

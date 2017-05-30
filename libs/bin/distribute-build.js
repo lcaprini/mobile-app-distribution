@@ -4,7 +4,6 @@
 require('../protos');
 const program = require('commander');
 
-const logger = require('../logger');
 const config = require('../config');
 const utils = require('../utils');
 const cordova = require('../cordova').cordova;
@@ -15,7 +14,6 @@ program
     .allowUnknownOption()
     .usage('<app version> -ts <[v,c,i,a,f,j,z,e]>[options]')
     .option('-p, --config <config>', 'config file for app distribution', config.path)
-    // .option('-l, --app-version-label <version>', 'app version label')
     .option('-a, --android-version-code <version code>', 'Android version code')
     .option('-i, --ios-bundle-version <bundle version>', 'iOS bundle version')
     .option('-c, --change-log <change-log.txt or "First edit***Other edit...">', 'file path or list with "***" separator', config.changeLog)
@@ -40,13 +38,11 @@ config.init({
 }).then(
     () => {
         // logger.debug(config);
-        if(config.tasks.contains(cordovaTasks.COMPILE_SOURCES)){
-            cordova.build();
-        }
+        cordova.exec();
     },
     err => {
         // logger.error(err.message);
-        logger.error(err);
-        // program.help();
+        console.error(err);
+        program.help();
     }
 );

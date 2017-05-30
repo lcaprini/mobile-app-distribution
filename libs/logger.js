@@ -1,4 +1,5 @@
 const winston = require('winston');
+const path = require('path');
 
 // Custom winston logger initialization
 logger = new (winston.Logger)({
@@ -9,25 +10,34 @@ logger = new (winston.Logger)({
             prettyPrint: true,
             showLevel: false,
             stderrLevels: ['error']
-        }),
-        new (winston.transports.File)({
-            name: 'stderr',
-            level: 'error',
-            filename: './distribute-err.log',
-            json: false,
-            prettyPrint: true,
-            showLevel: true,
-            formatter(options) {
-                return `${new Date()} [${options.level.toUpperCase()}]: ` +
-                    `${(options.message ? options.message : '')} ` +
-                    `${(options.meta && Object.keys(options.meta).length ? '\n' + JSON.stringify(options.meta, null, 2) : '')}`;
-            },
-            options: {
-                flags: 'w'
-            }
         })
     ]
 });
+
+logger.section = (text, level = 'info') => {
+    logger[level]('\n####################################');
+    logger[level](`${text}`);
+    logger[level]('####################################\n');
+}
+
+logger.setErrorLog = rootPath => {
+    logger.add(winston.transports.File,{
+        name: 'stderr',
+        level: 'error',
+        filename: path.join(rootPath, './distribute-err.log'),
+        json: false,
+        prettyPrint: true,
+        showLevel: true,
+        formatter(options) {
+            return `${new Date()} [${options.level.toUpperCase()}]: ` +
+                `${(options.message ? options.message : '')} ` +
+                `${(options.meta && Object.keys(options.meta).length ? '\n' + JSON.stringify(options.meta, null, 2) : '')}`;
+        },
+        options: {
+            flags: 'w'
+        }
+    })
+}
 
 // Set custom logger colors and styles
 winston.addColors({

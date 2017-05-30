@@ -5,7 +5,7 @@ class Android {
 
     calculateVersionCode(appVersion) {
         let version = [];
-        let tempVersions = appVersion.split(".");
+        let versions = appVersion.split(".");
 
         return parseInt(versions[2]) + (parseInt(versions[1]) * 100) + (parseInt(versions[0]) * 10000);
     }

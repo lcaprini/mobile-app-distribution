@@ -5,9 +5,9 @@ class Utils {
 
     prompt(text){
         const utils = this;
-        return new Promise(function (resolve, reject) {
+        return new Promise((resolve, reject) => {
             prompt.start();
-            prompt.get([text], function (err, result) {
+            prompt.get([text], (err, result) => {
                 if (err) { reject(); }
                 resolve(result[text].toLowerCase());
             });

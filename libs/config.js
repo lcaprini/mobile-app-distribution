@@ -32,8 +32,9 @@ class Config {
         this.appLabel = '';
         this.appSchema = '';
 
-        this.srcSourcesPath = '';
-        this.cmdCompileSources = '';
+        this.compileSourcesPath = '';
+        this.compileSourcesCmd = '';
+
         this.cordovaRootPath = '';
 
         this.cmdCordovaIOS = 'cordova build ios';
@@ -110,6 +111,8 @@ class Config {
                         // Set project root dir
                         config.rootPath = path.dirname(configPath);
 
+                        logger.setErrorLog(config.rootPath);
+
                         // Set task list
                         config.tasks = program.tasks.split('');
 
@@ -139,6 +142,9 @@ class Config {
                     catch(e){
                         reject(e);
                     }
+                },
+                err => {
+                    reject(err);
                 }
             );
         });
@@ -241,15 +247,15 @@ class Config {
     }
 
     verifyCompileSteps(){
-        if(!this.srcSourcesPath){
-            throw new Error('Source compile error: missing "src-sources-path" value in config file');
+        if(!this.compileSourcesPath){
+            throw new Error('Source compile error: missing "compile-sources-path" value in config file');
         }
-        // if(!this.cmdCompileSources){
-        //     throw new Error('Source compile error: missing "cmd-compile-sources" value in config file');
+        if(!this.compileSourcesCmd){
+            throw new Error('Source compile error: missing "compile-sources-cmd" value in config file');
+        }
+        // if(!this.cordovaRootPath){
+        //     throw new Error('Source compile error: missing "cordova-root-path" value in config file');
         // }
-        if(!this.cordovaRootPath){
-            throw new Error('Source compile error: missing "cordova-root-path" value in config file');
-        }
     }
 
     verifyIosSteps(){
@@ -366,9 +372,9 @@ class Config {
 
     printRecap() {
         const config = this;
-        return new Promise(function (resolve, reject) {
-            asciimo.write('   '+config.appName, 'Ogre', function(art){
-                logger.info('#########################################################');
+        return new Promise((resolve, reject) => {
+            asciimo.write('  '+config.appName, 'Ogre', art => {
+                logger.info('\n#########################################################');
                 logger.info(art);
                 logger.info('#########################################################');
                 logger.info('  App name:\t\t\t',                   config.appName);
@@ -384,9 +390,9 @@ class Config {
                     logger.info('  Android bundle id:\t\t',        config.androidBundleId);
                     logger.info('  Android version code:\t\t',     config.androidVersionCode);
                 }
-                logger.info('#########################################################');
+                logger.info('#########################################################\n');
 
-                const validateRecap = () => {
+                const validateRecap = (resolve, reject) => {
                     utils.prompt('Press \'y\' to continue the build process, \'n\' to stop it').then(
                         result => {
                             if(result == 'y'){
@@ -397,7 +403,7 @@ class Config {
                                 process.exit(0);
                             }
                             else{
-                                validateRecap().then(resolove, reject);
+                                validateRecap(resolve, reject);
                             }
                         },
                         err => {
@@ -410,7 +416,7 @@ class Config {
                     resolve();
                 }
                 else{
-                    validateRecap().then(resolove, reject);
+                    validateRecap(resolve, reject);
                 }
             });
         });
