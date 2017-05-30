@@ -53,6 +53,7 @@ const startDistribution = () => {
          */
         if(config.tasks.contains(TASKS.COMPILE_SOURCES)){
             cordova.compileSource();
+            cordova.setVersion();
         }
 
         logger.section('Distribution process completed');

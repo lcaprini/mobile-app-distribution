@@ -2,6 +2,7 @@
 const shell = require('shelljs');
 const fs = require('fs');
 const path = require('path');
+const Config = require('cordova-config');
 const logger = require('./logger');
 const utils = require('./utils');
 
@@ -23,15 +24,27 @@ class Cordova {
         rootPath,
         compileSourcesPath,
         compileSourcesCmd,
+        cordovaRootPath,
+        appVersion,
+        // appVersionLabel,
+        // androidVersionCode,
+        // iosBundleVersion,
         verbose
     }){
         this.tasks = tasks;
         this.rootPath = rootPath;
         this.compileSourcesPath = compileSourcesPath;
         this.compileSourcesCmd = compileSourcesCmd;
+        this.cordovaRootPath = cordovaRootPath;
+        this.appVersion = appVersion;
+        // this.appVersionLabel = appVersionLabel;
+        // this.androidVersionCode = androidVersionCode;
+        // this.iosBundleVersion = iosBundleVersion;
         this.verbose = verbose;
 
         this.sourcePath = path.isAbsolute(this.compileSourcesPath)? this.compileSourcesPath : path.join(this.rootPath, this.compileSourcesPath);
+        this.cordovaPath = path.isAbsolute(this.cordovaRootPath)? this.cordovaRootPath : path.join(this.rootPath, this.cordovaRootPath);
+        this.cordovaConfigPath = path.join(this.cordovaPath, './config.xml');
 
         this.verifyTaskFields();
     }
@@ -48,7 +61,19 @@ class Cordova {
             }
 
             if(!fs.existsSync(this.sourcePath)){
-                throw new Error('Source compile error: directory "compile-sources-path" doesn\'t exists');
+                throw new Error(`Source compile error: directory "compile-sources-path" doesn\'t exists at ${this.sourcePath}`);
+            }
+
+            if(!fs.existsSync(this.cordovaPath)){
+                throw new Error(`Source compile error: directory "cordova-root-path" doesn\'t exists at ${this.cordovaPath}`);
+            }
+
+            if(!fs.existsSync(this.cordovaConfigPath)){
+                throw new Error(`Source compile error: config.xml file doesn\'t exists in ${this.cordovaConfigPath}`);
+            }
+            
+            if(!this.appVersion){
+                throw new Error('Invalid build version format: please, see http://semver.org');
             }
         }
     }
@@ -61,6 +86,20 @@ class Cordova {
         logger.section(`Compile source:\n$ ${this.compileSourcesCmd}`);
         shell.exec(this.compileSourcesCmd, {silent: !this.verbose});
     }
+
+    /**
+     * Set app version in config.xml
+     */
+    setVersion(){
+        logger.section('Set version in config.xml');
+        const config = new Config(this.cordovaConfigPath);
+        config.setVersion(this.appVersion);
+        config.writeSync();
+    }
+
+    /**
+     * 
+     */
 
     // build() {
     //     const config = require('./config');
