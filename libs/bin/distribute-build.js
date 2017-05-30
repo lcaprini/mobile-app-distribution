@@ -1,11 +1,14 @@
 #!/usr/bin/env node
 'use strict';
 
+require('../protos');
 const program = require('commander');
 
 const logger = require('../logger');
 const config = require('../config');
 const utils = require('../utils');
+const cordova = require('../cordova').cordova;
+const cordovaTasks = require('../cordova').tasks;
 
 
 program
@@ -16,15 +19,15 @@ program
     .option('-a, --android-version-code <version code>', 'Android version code')
     .option('-i, --ios-bundle-version <bundle version>', 'iOS bundle version')
     .option('-c, --change-log <change-log.txt or "First edit***Other edit...">', 'file path or list with "***" separator', config.changeLog)
-    .option('-t, --tasks <[v,c,i,a,f,j,z,e]>', `
-      v : preprocess file seting app version
-      c : builds HTML, CSS, JAVSCRIPT files for Cordova projects
-      i : builds, archives ad exports iOS project
-      a : builds, archives ad exports Android project
-      f : uploads builds on remote FTP server
-      j : updates build.json file on remote FTP server
-      z : archives www sources with NodeJS server to test and view
-      e:  send email when finish with URL and QRCode for download`, config.tasks)
+    .option(`-t, --tasks <[${cordovaTasks.CHANGE_VERSION},${cordovaTasks.COMPILE_SOURCES},${cordovaTasks.BUILD_IOS},${cordovaTasks.BUILD_ANDROID},${cordovaTasks.UPLOAD_BUILDS},${cordovaTasks.UPDATE_REPO},${cordovaTasks.UPLOAD_SOURCES},${cordovaTasks.SEND_EMAIL}]>`, `
+      ${cordovaTasks.CHANGE_VERSION} : preprocess file setting app version
+      ${cordovaTasks.COMPILE_SOURCES} : builds HTML, CSS, JAVASCRIPT files for Cordova projects
+      ${cordovaTasks.BUILD_IOS} : builds, archives ad exports iOS project
+      ${cordovaTasks.BUILD_ANDROID} : builds, archives ad exports Android project
+      ${cordovaTasks.UPLOAD_BUILDS} : uploads builds on remote FTP server
+      ${cordovaTasks.UPDATE_REPO} : updates build.json file on remote FTP server
+      ${cordovaTasks.UPLOAD_SOURCES} : archives www sources with NodeJS server to test and view
+      ${cordovaTasks.SEND_EMAIL}:  send email when finish with URL and QRCode for download`, config.tasks)
     .option('-h, --hidden', 'hides build in HTML download page', config.hidden)
     .option('-v, --verbose', 'prints all log in console', config.verbose)
     .option('-f, --force', 'force with yes all questions', config.force)
@@ -36,12 +39,14 @@ config.init({
     program: program
 }).then(
     () => {
-        // utils.printRecap();
-        logger.debug(config);
+        // logger.debug(config);
+        if(config.tasks.contains(cordovaTasks.COMPILE_SOURCES)){
+            cordova.build();
+        }
     },
     err => {
         // logger.error(err.message);
         logger.error(err);
-        program.help();
+        // program.help();
     }
 );

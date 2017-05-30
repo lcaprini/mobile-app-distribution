@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 'use strict';
 
+require('../protos');
 const program = require('commander');
 
 program

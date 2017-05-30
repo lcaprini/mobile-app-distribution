@@ -1,4 +1,5 @@
 
+const asciimo = require('asciimo').Figlet;
 const Promise = require('bluebird');
 const fs = Promise.promisifyAll(require('fs'));
 const _ = require('lodash');
@@ -6,8 +7,10 @@ const path = require('path');
 const findVersions = require('find-versions');
 
 const logger = require('./logger');
+const utils = require('./utils');
 const android = require('./android');
 const ios = require('./ios');
+const cordovaTasks = require('./cordova').tasks;
 
 
 class Config {
@@ -27,7 +30,7 @@ class Config {
         this.appVersionLabel = '';
         this.appName = '';
         this.appLabel = '';
-        this.appUrlSchema = '';
+        this.appSchema = '';
 
         this.srcSourcesPath = '';
         this.cmdCompileSources = '';
@@ -86,7 +89,6 @@ class Config {
     }
 
     init({configPath, program}) {
-
         let config = this;
 
         return new Promise(function(resolve, reject) {
@@ -109,7 +111,7 @@ class Config {
                         config.rootPath = path.dirname(configPath);
 
                         // Set task list
-                        config.tasks = program.tasks.split();
+                        config.tasks = program.tasks.split('');
 
                         // Set verbose mode
                         config.verbose = (_.isBoolean(program.verbose)) ? program.verbose : false;
@@ -118,24 +120,20 @@ class Config {
                         config.force = (_.isBoolean(program.force)) ? program.force : false;
 
                         if(program.changeLog){
-                            // If changelog is file I try to read it
-                            fs.readFileAsync(program.changeLog, 'utf8').then(
-                                changeLogText => {
-                                    config.changeLog = changeLogText.split('\n').join('***');
-                                    resolve();
-                                },
-                                () => {
-                                    var changeLogPath = path.join(config.rootPath, program.changeLog);
-                                    return fs.readFileAsync(changeLogPath, 'utf8').then(
-                                        changeLogText => {
-                                            config.changeLog = changeLogText.split('\n').join('***');
-                                            resolve();
-                                        },
-                                        () => {
-                                            config.changeLog = program.changeLog;
-                                            resolve();
-                                        });
-                                });
+                            config.readChangeLog(program.changeLog, (err, next) => {
+                                if(err){
+                                    reject(err);
+                                    return;
+                                }
+
+                                try{
+                                    config.verify();
+                                    config.printRecap().then(resolve, reject);
+                                }
+                                catch(e){
+                                    reject(e);
+                                }
+                            });
                         }
                     }
                     catch(e){
@@ -167,7 +165,7 @@ class Config {
         this.androidVersionCode = (program.androidVersionCode) ? program.androidVersionCode : android.calculateVersionCode(this.appVersion);
 
         // Set iOS Bundle Version
-        this.iosBundleVersion = (program.iosBundleVersion) ? program.iosBundleVersion : ios.calculateBundleVersion(this.appVersion);
+        this.iosBundleVersion = ios.calculateBundleVersion(this.appVersion);
 
         // Set if builds are hidden on wireless distribution html page
         if(_.isBoolean(program.hidden))
@@ -176,6 +174,246 @@ class Config {
         if(this.hidden){
             this.appVersionLabel += '-[DEV]';
         }
+    }
+
+    readChangeLog(changeLog, next){
+        let config = this;
+
+        // If changelog is file I try to read it
+        fs.readFileAsync(changeLog, 'utf8').then(
+            changeLogText => {
+                config.changeLog = changeLogText.split('\n').join('***');
+                next();
+            },
+            () => {
+                var changeLogPath = path.join(config.rootPath, changeLog);
+                return fs.readFileAsync(changeLogPath, 'utf8').then(
+                    changeLogText => {
+                        config.changeLog = changeLogText.split('\n').join('***');
+                        next();
+                    },
+                    () => {
+                        config.changeLog = changeLog;
+                        next();
+                    });
+            });
+    }
+
+    /**
+     * Verifies all configuration and params
+     */
+    verify(){
+
+        // Check params for compile sources
+        if(this.tasks.contains(cordovaTasks.COMPILE_SOURCES)){
+            this.verifyCompileSteps();
+        }
+
+        // Check params for iOS build
+        if(this.tasks.contains(cordovaTasks.BUILD_IOS)){
+            this.verifyIosSteps();
+        }
+
+        // Check params for Android build
+        if(this.tasks.contains(cordovaTasks.BUILD_ANDROID)){
+            this.verifyAndroidSteps();
+        }
+
+        // Check params for FTP build upload
+        if(this.tasks.contains(cordovaTasks.UPLOAD_BUILDS)){
+            this.verifyBuildUploadSteps();
+        }
+
+        // Check params for repo update
+        if(this.tasks.contains(cordovaTasks.UPDATE_REPO)){
+            this.verifyUpdateRepoSteps();
+        }
+
+        // Check params for FTP sources upload
+        if(this.tasks.contains(cordovaTasks.UPLOAD_SOURCES)){
+            this.verifySourcesUploadSteps();
+        }
+
+        // Check params for FTP sources upload
+        if(this.tasks.contains(cordovaTasks.SEND_EMAIL)){
+            this.verifySendEmailSteps();
+        }
+    }
+
+    verifyCompileSteps(){
+        if(!this.srcSourcesPath){
+            throw new Error('Source compile error: missing "src-sources-path" value in config file');
+        }
+        // if(!this.cmdCompileSources){
+        //     throw new Error('Source compile error: missing "cmd-compile-sources" value in config file');
+        // }
+        if(!this.cordovaRootPath){
+            throw new Error('Source compile error: missing "cordova-root-path" value in config file');
+        }
+    }
+
+    verifyIosSteps(){
+        if(!this.iosBundleId){
+            throw new Error('iOS build error: missing "ios-bundle-id" value in config file');
+        }
+        if(!this.iosProvisioningProfile){
+            throw new Error('iOS build error: missing "ios-provisioning-profile" value in config file');
+        }
+        if(!this.iosIpaUrlPath){
+            throw new Error('iOS build error: missing "ios-ipa-url-path" value in config file');
+        }
+        if(!this.buildsDir){
+            throw new Error('iOS build error: missing "builds-dir" value in config file');
+        }
+    }
+
+    verifyAndroidSteps(){
+        if(!this.androidBundleId){
+            throw new Error('Android build error: missing "android-bundle-id" value in config file');
+        }
+        if(!this.androidKeystorePath){
+            throw new Error('Android build error: missing "android-keystore-path" value in config file');
+        }
+        if(!this.androidKeystoreAlias){
+            throw new Error('Android build error: missing "android-keystore-alias" value in config file');
+        }
+        if(!this.androidKeystorePassword){
+            throw new Error('Android build error: missing "android-keystore-password" value in config file');
+        }
+        if(!this.androidApkUrlPath){
+            throw new Error('Android build error: missing "android-apk-url-path" value in config file');
+        }
+        if(!this.buildsDir){
+            throw new Error('Android build error: missing "builds-dir" value in config file');
+        }
+    }
+
+    verifyBuildUploadSteps(){
+        if(!this.ftpBuildsHost){
+            throw new Error('FTP build upload error: missing "ftp-builds-hosts" value in config file');
+        }
+        if(!this.ftpBuildsUsername){
+            throw new Error('FTP build upload error: missing "ftp-builds-username" value in config file');
+        }
+        if(!this.ftpBuildsPassword){
+            throw new Error('FTP build upload error: missing "ftp-builds-password" value in config file');
+        }
+        if(this.tasks.contains(cordovaTasks.BUILD_IOS)){
+            if(!this.ftpBuildsIOSWorkingDir){
+                throw new Error('FTP+iOS upload error: missing "ftp-builds-ios-working-dir" value in config file');
+            }
+        }
+        if(this.tasks.contains(cordovaTasks.BUILD_ANDROID)){
+            if(!this.ftpBuildsAndroidWorkingDir){
+                throw new Error('FTP+Android upload error: missing "ftp-builds-android-working-dir" value in config file');
+            }
+        }
+    }
+
+    verifyUpdateRepoSteps(){
+        if(!this.ftpRepoHost){
+            throw new Error('Repo update error: missing "ftp-repo-hosts" value in config file');
+        }
+        if(!this.ftpRepoUsername){
+            throw new Error('Repo update error: missing "ftp-repo-username" value in config file');
+        }
+        if(!this.ftpRepoPassword){
+            throw new Error('Repo update error: missing "ftp-repo-password" value in config file');
+        }
+        if(!this.ftpRepoWorkingDir){
+            throw new Error('Repo update error: missing "ftp-repo-working-dir" value in config file');
+        }
+        if(!this.wirelessDistUrlPage){
+            throw new Error('Repo update error: missing "wireless-dist-url-page" value in config file');
+        }
+    }
+
+    verifySourcesUploadSteps(){
+        if(!this.ftpSourcesHost){
+            throw new Error('FTP sources upload error: missing "ftp-sources-hosts" value in config file');
+        }
+        if(!this.ftpSourcesUsername){
+            throw new Error('FTP sources upload error: missing "ftp-sources-username" value in config file');
+        }
+        if(!ftpSourcesPassword){
+            throw new Error('FTP sources upload error: missing "ftp-sources-password" value in config file');
+        }
+        if(!this.ftpSourcesWorkingDir){
+            throw new Error('FTP sources upload error: missing "ftp-sources-working-dir" value in config file');
+        }
+    }
+
+    verifySendEmailSteps(){
+        if(!this.smtpServer){
+            throw new Error('Send email error: missing "smtp-server" value in config file');
+        }
+        if(!this.smtpPort){
+            throw new Error('Send email error: missing "smtp-port" value in config file');
+        }
+        if(!this.smtpUser){
+            throw new Error('Send email error: missing "smtp-user" value in config file');
+        }
+        if(!this.smtpPass){
+            throw new Error('Send email error: missing "smtp-pass" value in config file');
+        }
+        if(!this.mailFrom){
+            throw new Error('Send email error: missing "mail-from" value in config file');
+        }
+        if(!this.mailTo){
+            throw new Error('Send email error: missing "mail-to" value in config file');
+        }
+    }
+
+    printRecap() {
+        const config = this;
+        return new Promise(function (resolve, reject) {
+            asciimo.write('   '+config.appName, 'Ogre', function(art){
+                logger.info('#########################################################');
+                logger.info(art);
+                logger.info('#########################################################');
+                logger.info('  App name:\t\t\t',                   config.appName);
+                logger.info('  App label:\t\t\t',                  config.appLabel);
+                logger.info('  App version:\t\t\t',                config.appVersion);
+                logger.info('  App version label:\t\t',            config.appVersionLabel);
+                if(config.tasks.contains(cordovaTasks.BUILD_IOS)){
+                    logger.info('  iOS bundle id:\t\t',            config.iosBundleId);
+                    logger.info('  iOS provisioning profile:\t',   config.iosProvisioningProfile);
+                    logger.info('  iOS bundle version:\t\t',       config.iosBundleVersion);
+                }
+                if(config.tasks.contains(cordovaTasks.BUILD_ANDROID)){
+                    logger.info('  Android bundle id:\t\t',        config.androidBundleId);
+                    logger.info('  Android version code:\t\t',     config.androidVersionCode);
+                }
+                logger.info('#########################################################');
+
+                const validateRecap = () => {
+                    utils.prompt('Press \'y\' to continue the build process, \'n\' to stop it').then(
+                        result => {
+                            if(result == 'y'){
+                                resolve();
+                            }
+                            else if(result == 'n'){
+                                logger.info('\n\nExit process...\n\n');
+                                process.exit(0);
+                            }
+                            else{
+                                validateRecap().then(resolove, reject);
+                            }
+                        },
+                        err => {
+                            logger.error(err);
+                            process.exit(1);
+                        }
+                    )
+                }
+                if(config.force){
+                    resolve();
+                }
+                else{
+                    validateRecap().then(resolove, reject);
+                }
+            });
+        });
     }
 }
 
