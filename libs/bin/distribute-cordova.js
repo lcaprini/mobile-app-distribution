@@ -6,9 +6,8 @@ const program = require('commander');
 
 const config = require('../config');
 const utils = require('../utils');
-const Cordova = require('../cordova').Cordova;
+const cordova = require('../cordova').cordova;
 const TASKS = require('../cordova').TASKS;
-const cordova = new Cordova();
 
 program
     .allowUnknownOption()
@@ -52,8 +51,15 @@ const startDistribution = () => {
          * COMPILE SOURCES
          */
         if(config.tasks.contains(TASKS.COMPILE_SOURCES)){
-            cordova.compileSource();
-            cordova.setVersion();
+            cordova.compileSource({
+                sourcePath : config.sourcePath,
+                compileSourcesCmd : config.compileSourcesCmd,
+                verbose : config.verbose
+            });
+            cordova.setVersion({
+                cordovaConfigPath : config.cordovaConfigPath,
+                appVersion : config.appVersion
+            });
         }
 
         logger.section('Distribution process completed');
@@ -69,7 +75,6 @@ const startDistribution = () => {
  */
 const initCordova = () => {
     try{
-        cordova.init(config);
         config.printRecap().then(startDistribution);
     }
     catch(err){

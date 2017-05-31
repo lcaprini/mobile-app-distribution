@@ -12,7 +12,6 @@ const android = require('./android');
 const ios = require('./ios');
 const cordovaTasks = require('./cordova').TASKS;
 
-
 class Config {
 
     constructor() {
@@ -34,8 +33,11 @@ class Config {
 
         this.compileSourcesPath = '';
         this.compileSourcesCmd = '';
+        this.sourcePath = '';
+        this.cordovaPath = '';
 
         this.cordovaRootPath = '';
+        this.cordovaConfigPath = '';
 
         this.cmdCordovaIOS = 'cordova build ios';
         this.iosBundleVersion = '';
@@ -92,7 +94,7 @@ class Config {
     init({configPath, program}) {
         let config = this;
 
-        return new Promise(function(resolve, reject) {
+        return new Promise((resolve, reject) => {
             fs.readFileAsync(configPath, 'utf8').then(
                 fileData => {
                     try{
@@ -110,6 +112,9 @@ class Config {
 
                         // Set project root dir
                         config.rootPath = path.dirname(configPath);
+                        config.sourcePath = path.isAbsolute(config.compileSourcesPath)? config.compileSourcesPath : path.join(config.rootPath, config.compileSourcesPath);
+                        config.cordovaPath = path.isAbsolute(config.cordovaRootPath)? config.cordovaRootPath : path.join(config.rootPath, config.cordovaRootPath);
+                        config.cordovaConfigPath = path.join(config.cordovaPath, './config.xml');
 
                         logger.setErrorLog(config.rootPath);
 
@@ -129,6 +134,7 @@ class Config {
                                     return;
                                 }
 
+                                config.verify();
                                 resolve();
                             });
                         }
@@ -196,6 +202,11 @@ class Config {
      */
     verify(){
 
+        // Check params for compile sources
+        if(this.tasks.contains(cordovaTasks.COMPILE_SOURCES)){
+            this.verifyCompileSources();
+        }
+
         // Check params for iOS build
         if(this.tasks.contains(cordovaTasks.BUILD_IOS)){
             this.verifyIosSteps();
@@ -224,6 +235,24 @@ class Config {
         // Check params for FTP sources upload
         if(this.tasks.contains(cordovaTasks.SEND_EMAIL)){
             this.verifySendEmailSteps();
+        }
+    }
+
+    verifyCompileSources(){
+        if(!this.compileSourcesCmd){
+            throw new Error('Source compile error: missing "compile-sources-cmd" value in config file');
+        }
+        if(!fs.existsSync(this.sourcePath)){
+            throw new Error(`Source compile error: directory "compile-sources-path" doesn\'t exists at ${this.sourcePath}`);
+        }
+        if(!fs.existsSync(this.cordovaPath)){
+            throw new Error(`Source compile error: directory "cordova-root-path" doesn\'t exists at ${this.cordovaPath}`);
+        }
+        if(!fs.existsSync(this.cordovaConfigPath)){
+            throw new Error(`Source compile error: config.xml file doesn\'t exists in ${this.cordovaConfigPath}`);
+        }
+        if(!this.appVersion){
+            throw new Error('Invalid build version format: please, see http://semver.org');
         }
     }
 

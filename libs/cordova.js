@@ -19,81 +19,22 @@ const TASKS = {
 
 class Cordova {
 
-    init({
-        tasks,
-        rootPath,
-        compileSourcesPath,
-        compileSourcesCmd,
-        cordovaRootPath,
-        appVersion,
-        // appVersionLabel,
-        // androidVersionCode,
-        // iosBundleVersion,
-        verbose
-    }){
-        this.tasks = tasks;
-        this.rootPath = rootPath;
-        this.compileSourcesPath = compileSourcesPath;
-        this.compileSourcesCmd = compileSourcesCmd;
-        this.cordovaRootPath = cordovaRootPath;
-        this.appVersion = appVersion;
-        // this.appVersionLabel = appVersionLabel;
-        // this.androidVersionCode = androidVersionCode;
-        // this.iosBundleVersion = iosBundleVersion;
-        this.verbose = verbose;
-
-        this.sourcePath = path.isAbsolute(this.compileSourcesPath)? this.compileSourcesPath : path.join(this.rootPath, this.compileSourcesPath);
-        this.cordovaPath = path.isAbsolute(this.cordovaRootPath)? this.cordovaRootPath : path.join(this.rootPath, this.cordovaRootPath);
-        this.cordovaConfigPath = path.join(this.cordovaPath, './config.xml');
-
-        this.verifyTaskFields();
-    }
-
-    /**
-     * Verify all params for Cordova ditribution
-     */
-    verifyTaskFields(){
-        // Check params for compile sources
-        if(this.tasks.contains(TASKS.COMPILE_SOURCES)){
-            
-            if(!this.compileSourcesCmd){
-                throw new Error('Source compile error: missing "compile-sources-cmd" value in config file');
-            }
-
-            if(!fs.existsSync(this.sourcePath)){
-                throw new Error(`Source compile error: directory "compile-sources-path" doesn\'t exists at ${this.sourcePath}`);
-            }
-
-            if(!fs.existsSync(this.cordovaPath)){
-                throw new Error(`Source compile error: directory "cordova-root-path" doesn\'t exists at ${this.cordovaPath}`);
-            }
-
-            if(!fs.existsSync(this.cordovaConfigPath)){
-                throw new Error(`Source compile error: config.xml file doesn\'t exists in ${this.cordovaConfigPath}`);
-            }
-            
-            if(!this.appVersion){
-                throw new Error('Invalid build version format: please, see http://semver.org');
-            }
-        }
-    }
-
     /**
      * Compile web app sources in cordova app using task manager like, grunt, gulp, webpack, ecc...
      */
-    compileSource(){
-        process.chdir(this.sourcePath);
-        logger.section(`Compile source:\n$ ${this.compileSourcesCmd}`);
-        shell.exec(this.compileSourcesCmd, {silent: !this.verbose});
+    compileSource({sourcePath, compileSourcesCmd, verbose = false}){
+        process.chdir(sourcePath);
+        logger.section(`Compile source:\n$ ${compileSourcesCmd}`);
+        shell.exec(compileSourcesCmd, {silent: !verbose});
     }
 
     /**
      * Set app version in config.xml
      */
-    setVersion(){
+    setVersion({cordovaConfigPath, appVersion}){
         logger.section('Set version in config.xml');
-        const config = new Config(this.cordovaConfigPath);
-        config.setVersion(this.appVersion);
+        const config = new Config(cordovaConfigPath);
+        config.setVersion(appVersion);
         config.writeSync();
     }
 
@@ -136,6 +77,6 @@ class Cordova {
 }
 
 module.exports = {
-    Cordova : Cordova,
+    cordova : new Cordova(),
     TASKS : TASKS
 }
