@@ -1,6 +1,8 @@
+'use strict';
 
 const shell = require('shelljs');
 const fs = require('fs');
+const et = require('elementtree');
 const path = require('path');
 const Config = require('cordova-config');
 const logger = require('./logger');
@@ -39,8 +41,50 @@ class Cordova {
     }
 
     /**
-     * 
+     * Set bundle id in config.xml
      */
+    setId({cordovaConfigPath, id}){
+        logger.section('Set id in config.xml');
+        const config = new Config(cordovaConfigPath);
+        config.setID(id);
+        config.writeSync();
+    }
+
+    /**
+     * Set Android version code in config.xml
+     */
+    setAndroidVersionCode({cordovaConfigPath, versionCode}){
+        logger.section('Set Android version code in config.xml');
+        const config = new Config(cordovaConfigPath);
+        config.setAndroidVersionCode(versionCode);
+        config.writeSync();
+    }
+
+    /**
+     * Set Android app launcher name in strings.xml file 
+     */
+    setLauncherName({cordovaAndroidStringsPath, launcherName}){
+        logger.section('Set Android launcher name in strings.xml');
+        try{
+            let strings = fs.readFileSync(cordovaAndroidStringsPath, 'utf-8');
+            let stringsTree = new et.ElementTree(et.XML(strings));
+            let launcherNameElement = stringsTree.findall('./string/[@name="launcher_name"]')[0];
+            launcherNameElement.text = launcherName;
+            fs.writeFileSync(cordovaAndroidStringsPath, stringsTree.write({indent: 4}), 'utf-8');
+        }
+        catch(err){
+            logger.error(err);
+        }
+    }
+
+    /**
+     * Exec all task to prepare and build the Android platform
+     */
+    buildAndroid({cordovaConfigPath, id, versionCode, launcherName, cordovaAndroidStringsPath}){
+        this.setId({cordovaConfigPath, id});
+        this.setAndroidVersionCode({cordovaConfigPath, versionCode});
+        this.setLauncherName({cordovaAndroidStringsPath, launcherName})
+    }
 
     // build() {
     //     const config = require('./config');

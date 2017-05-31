@@ -1,3 +1,4 @@
+'use strict';
 
 const asciimo = require('asciimo').Figlet;
 const Promise = require('bluebird');
@@ -112,11 +113,13 @@ class Config {
 
                         // Set project root dir
                         config.rootPath = path.dirname(configPath);
+                        // Calculate and set other dirs
                         config.sourcePath = path.isAbsolute(config.compileSourcesPath)? config.compileSourcesPath : path.join(config.rootPath, config.compileSourcesPath);
                         config.cordovaPath = path.isAbsolute(config.cordovaRootPath)? config.cordovaRootPath : path.join(config.rootPath, config.cordovaRootPath);
                         config.cordovaConfigPath = path.join(config.cordovaPath, './config.xml');
+                        config.cordovaAndroidStringsPath = path.join(config.cordovaPath, './platforms/android/res/values/strings.xml');
 
-                        logger.setErrorLog(config.rootPath);
+                        logger.setFileLogger(config.rootPath);
 
                         // Set task list
                         config.tasks = program.tasks.split('');
@@ -274,6 +277,9 @@ class Config {
     verifyAndroidSteps(){
         if(!this.androidBundleId){
             throw new Error('Android build error: missing "android-bundle-id" value in config file');
+        }
+        if(!fs.existsSync(this.cordovaAndroidStringsPath)){
+            throw new Error(`Android build error: ${this.cordovaAndroidStringsPath} doesn\'t exists`);
         }
         if(!this.androidKeystorePath){
             throw new Error('Android build error: missing "android-keystore-path" value in config file');

@@ -1,9 +1,11 @@
+'use strict';
+
 const winston = require('winston');
 const path = require('path');
 const _ = require('lodash');
 
 // Custom winston logger initialization
-logger = new (winston.Logger)({
+const logger = new (winston.Logger)({
     transports: [
         new (winston.transports.Console)({
             level: 'debug',
@@ -23,7 +25,23 @@ logger.section = (text, level = 'info') => {
     logger[level]('####################################\n');
 }
 
-logger.setErrorLog = rootPath => {
+logger.setFileLogger = rootPath => {
+    logger.add(winston.transports.File,{
+        name: 'stdout',
+        level: 'debug',
+        filename: path.join(rootPath, './distribute.log'),
+        json: false,
+        prettyPrint: true,
+        showLevel: true,
+        formatter(options) {
+            return `${new Date()} [${options.level.toUpperCase()}]: ` +
+                `${(options.message ? options.message : '')} ` +
+                `${(options.meta && Object.keys(options.meta).length ? '\n' + JSON.stringify(options.meta, null, 2) : '')}`;
+        },
+        options: {
+            flags: 'w'
+        }
+    });
     logger.add(winston.transports.File,{
         name: 'stderr',
         level: 'error',
@@ -39,7 +57,7 @@ logger.setErrorLog = rootPath => {
         options: {
             flags: 'w'
         }
-    })
+    });
 }
 
 // Set custom logger colors and styles

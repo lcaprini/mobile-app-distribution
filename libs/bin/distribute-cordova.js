@@ -56,11 +56,34 @@ const startDistribution = () => {
                 compileSourcesCmd : config.compileSourcesCmd,
                 verbose : config.verbose
             });
-            cordova.setVersion({
+        }
+        /**
+         * Set version and name in config.xml
+         */
+        cordova.setVersion({
+            cordovaConfigPath : config.cordovaConfigPath,
+            appVersion : config.appVersion
+        });
+
+        /**
+         * BUILD IOS PLATFORM
+         */
+        // if(config.tasks.contains(TASKS.BUILD_IOS)){
+        // }
+
+        /**
+         * BUILD ANDROID PLATFORM
+         */
+        if(config.tasks.contains(TASKS.BUILD_ANDROID)){
+            cordova.buildAndroid({
                 cordovaConfigPath : config.cordovaConfigPath,
-                appVersion : config.appVersion
+                id : config.androidBundleId,
+                versionCode : config.androidVersionCode,
+                cordovaAndroidStringsPath : config.cordovaAndroidStringsPath,
+                launcherName : config.appLabel
             });
         }
+
 
         logger.section('Distribution process completed');
         process.exit(0);

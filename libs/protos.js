@@ -1,3 +1,4 @@
+'use strict';
 
 // Prototype for Array contains
 Array.prototype.contains = function(element){
