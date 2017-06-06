@@ -6,9 +6,11 @@ const fs = Promise.promisifyAll(require('fs'));
 const _ = require('lodash');
 const path = require('path');
 const findVersions = require('find-versions');
+const shell = require('shelljs');
 
 const logger = require('./logger');
 const utils = require('./utils');
+const cordova = require('./cordova');
 const android = require('./android');
 const ios = require('./ios');
 const cordovaTasks = require('./cordova').TASKS;
@@ -36,9 +38,9 @@ class Config {
         this.compileSourcesCmd = '';
         this.sourcePath = '';
         this.cordovaPath = '';
+        this.cordovaConfigPath = '';
 
         this.cordovaRootPath = '';
-        this.cordovaConfigPath = '';
 
         this.cmdCordovaIOS = 'cordova build ios';
         this.iosBundleVersion = '';
@@ -47,6 +49,7 @@ class Config {
         this.iosIpaUrlPath = '';
 
         this.cmdCordovaAndroid = 'cordova build --release android';
+        this.androidProjectPath = '';
         this.androidVersionCode = '';
         this.androidBundleId = '';
         this.androidKeystorePath = '';
@@ -117,7 +120,8 @@ class Config {
                         config.sourcePath = path.isAbsolute(config.compileSourcesPath)? config.compileSourcesPath : path.join(config.rootPath, config.compileSourcesPath);
                         config.cordovaPath = path.isAbsolute(config.cordovaRootPath)? config.cordovaRootPath : path.join(config.rootPath, config.cordovaRootPath);
                         config.cordovaConfigPath = path.join(config.cordovaPath, './config.xml');
-                        config.cordovaAndroidStringsPath = path.join(config.cordovaPath, './platforms/android/res/values/strings.xml');
+                        config.androidProjectPath = path.join(config.cordovaPath, './platforms/android');
+                        config.androidKeystorePath = path.isAbsolute(config.androidKeystorePath)? config.androidKeystorePath : path.join(config.rootPath, config.androidKeystorePath);
 
                         logger.setFileLogger(config.rootPath);
 
@@ -207,7 +211,7 @@ class Config {
 
         // Check params for compile sources
         if(this.tasks.contains(cordovaTasks.COMPILE_SOURCES)){
-            this.verifyCompileSources();
+            cordova.verifyConfigs(this);
         }
 
         // Check params for iOS build
@@ -217,7 +221,11 @@ class Config {
 
         // Check params for Android build
         if(this.tasks.contains(cordovaTasks.BUILD_ANDROID)){
-            this.verifyAndroidSteps();
+            const cordovaAndroidStringsPath = path.join(this.cordovaPath, './platforms/android/res/values/strings.xml');
+            if(!fs.existsSync(cordovaAndroidStringsPath)){
+                throw new Error(`Android build error: file "${cordovaAndroidStringsPath}" doesn\'t exists`);
+            }
+            android.verifyConfigs(this);
         }
 
         // Check params for FTP build upload
@@ -241,24 +249,6 @@ class Config {
         }
     }
 
-    verifyCompileSources(){
-        if(!this.compileSourcesCmd){
-            throw new Error('Source compile error: missing "compile-sources-cmd" value in config file');
-        }
-        if(!fs.existsSync(this.sourcePath)){
-            throw new Error(`Source compile error: directory "compile-sources-path" doesn\'t exists at ${this.sourcePath}`);
-        }
-        if(!fs.existsSync(this.cordovaPath)){
-            throw new Error(`Source compile error: directory "cordova-root-path" doesn\'t exists at ${this.cordovaPath}`);
-        }
-        if(!fs.existsSync(this.cordovaConfigPath)){
-            throw new Error(`Source compile error: config.xml file doesn\'t exists in ${this.cordovaConfigPath}`);
-        }
-        if(!this.appVersion){
-            throw new Error('Invalid build version format: please, see http://semver.org');
-        }
-    }
-
     verifyIosSteps(){
         if(!this.iosBundleId){
             throw new Error('iOS build error: missing "ios-bundle-id" value in config file');
@@ -271,30 +261,6 @@ class Config {
         }
         if(!this.buildsDir){
             throw new Error('iOS build error: missing "builds-dir" value in config file');
-        }
-    }
-
-    verifyAndroidSteps(){
-        if(!this.androidBundleId){
-            throw new Error('Android build error: missing "android-bundle-id" value in config file');
-        }
-        if(!fs.existsSync(this.cordovaAndroidStringsPath)){
-            throw new Error(`Android build error: ${this.cordovaAndroidStringsPath} doesn\'t exists`);
-        }
-        if(!this.androidKeystorePath){
-            throw new Error('Android build error: missing "android-keystore-path" value in config file');
-        }
-        if(!this.androidKeystoreAlias){
-            throw new Error('Android build error: missing "android-keystore-alias" value in config file');
-        }
-        if(!this.androidKeystorePassword){
-            throw new Error('Android build error: missing "android-keystore-password" value in config file');
-        }
-        if(!this.androidApkUrlPath){
-            throw new Error('Android build error: missing "android-apk-url-path" value in config file');
-        }
-        if(!this.buildsDir){
-            throw new Error('Android build error: missing "builds-dir" value in config file');
         }
     }
 

@@ -46,6 +46,8 @@ const quit = err => {
  * Start Cordova distribution process
  */
 const startDistribution = () => {
+    const logger = require('../logger');
+
     try{
         /**
          * COMPILE SOURCES
@@ -54,6 +56,7 @@ const startDistribution = () => {
             cordova.compileSource({
                 sourcePath : config.sourcePath,
                 compileSourcesCmd : config.compileSourcesCmd,
+
                 verbose : config.verbose
             });
         }
@@ -61,7 +64,7 @@ const startDistribution = () => {
          * Set version and name in config.xml
          */
         cordova.setVersion({
-            cordovaConfigPath : config.cordovaConfigPath,
+            cordovaPath : config.cordovaPath,
             appVersion : config.appVersion
         });
 
@@ -75,17 +78,27 @@ const startDistribution = () => {
          * BUILD ANDROID PLATFORM
          */
         if(config.tasks.contains(TASKS.BUILD_ANDROID)){
-            cordova.buildAndroid({
-                cordovaConfigPath : config.cordovaConfigPath,
+            cordova.distributeAndroid({
+                launcherName : config.appLabel,
                 id : config.androidBundleId,
                 versionCode : config.androidVersionCode,
-                cordovaAndroidStringsPath : config.cordovaAndroidStringsPath,
-                launcherName : config.appLabel
+
+                cmdCordovaAndroid : config.cmdCordovaAndroid,
+                cordovaPath: config.cordovaPath,
+                keystore : {
+                    path: config.androidKeystorePath,
+                    alias : config.androidKeystoreAlias,
+                    password : config.androidKeystorePassword
+                },
+
+                verbose : config.verbose
             });
         }
 
 
-        logger.section('Distribution process completed');
+        logger.printEnd({
+            url : config.wirelessDistUrlPage
+        });
         process.exit(0);
     }
     catch(err){

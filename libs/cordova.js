@@ -7,6 +7,8 @@ const path = require('path');
 const Config = require('cordova-config');
 const logger = require('./logger');
 const utils = require('./utils');
+const android = require('./android');
+const ios = require('./ios');
 
 const TASKS = {
     CHANGE_VERSION : 'v',
@@ -31,41 +33,45 @@ class Cordova {
     }
 
     /**
-     * Set app version in config.xml
+     * Set app version in config.xml using cordova-config module
      */
-    setVersion({cordovaConfigPath, appVersion}){
-        logger.section('Set version in config.xml');
+    setVersion({cordovaPath, appVersion}){
+        logger.section(`Set version in config.xml to ${appVersion}`);
+        const cordovaConfigPath = path.join(cordovaPath, './config.xml');
         const config = new Config(cordovaConfigPath);
         config.setVersion(appVersion);
         config.writeSync();
     }
 
     /**
-     * Set bundle id in config.xml
+     * Set bundle id in config.xml using cordova-config module
      */
-    setId({cordovaConfigPath, id}){
-        logger.section('Set id in config.xml');
+    setId({cordovaPath, id}){
+        logger.section(`Set id in config.xml to ${id}`);
+        const cordovaConfigPath = path.join(cordovaPath, './config.xml');
         const config = new Config(cordovaConfigPath);
         config.setID(id);
         config.writeSync();
     }
 
     /**
-     * Set Android version code in config.xml
+     * Set Android version code in config.xml using cordova-config module
      */
-    setAndroidVersionCode({cordovaConfigPath, versionCode}){
-        logger.section('Set Android version code in config.xml');
+    setAndroidVersionCode({cordovaPath, versionCode}){
+        logger.section(`Set Android version code in config.xml to ${versionCode}`);
+        const cordovaConfigPath = path.join(cordovaPath, './config.xml');
         const config = new Config(cordovaConfigPath);
         config.setAndroidVersionCode(versionCode);
         config.writeSync();
     }
 
     /**
-     * Set Android app launcher name in strings.xml file 
+     * Set Android app launcher name in strings.xml file using elementtre module
      */
-    setLauncherName({cordovaAndroidStringsPath, launcherName}){
-        logger.section('Set Android launcher name in strings.xml');
+    setLauncherName({cordovaPath, launcherName}){
+        logger.section(`Set Android launcher name in strings.xml to ${launcherName}`);
         try{
+            const cordovaAndroidStringsPath = path.join(cordovaPath, './platforms/android/res/values/strings.xml');
             let strings = fs.readFileSync(cordovaAndroidStringsPath, 'utf-8');
             let stringsTree = new et.ElementTree(et.XML(strings));
             let launcherNameElement = stringsTree.findall('./string/[@name="launcher_name"]')[0];
@@ -78,46 +84,52 @@ class Cordova {
     }
 
     /**
-     * Exec all task to prepare and build the Android platform
+     * Build Android Cordova Platform
      */
-    buildAndroid({cordovaConfigPath, id, versionCode, launcherName, cordovaAndroidStringsPath}){
-        this.setId({cordovaConfigPath, id});
-        this.setAndroidVersionCode({cordovaConfigPath, versionCode});
-        this.setLauncherName({cordovaAndroidStringsPath, launcherName})
+    buildAndroid({cmdCordovaAndroid, cordovaPath, verbose}){
+        logger.section(`Build Android platform:\n$ ${cmdCordovaAndroid}`);
+        process.chdir(cordovaPath);
+        let err = shell.exec(cmdCordovaAndroid, {silent: !verbose}).stderr;
+        if(shell.error()){
+            // shelljs has already printed error,
+            // so I print it only if verbose mode is OFF
+            if(!verbose){
+                logger.error(err);
+            }
+            process.exit(1);
+        }
     }
 
-    // build() {
-    //     const config = require('./config');
-        
-    //     let v1 = shell.exec('node --version', {silent:true}).stdout;
-    //     logger.debug(v1);
-    //     let err = shell.exec('noaasdde --version', {silent:true}).stderr;
-    //     logger.debug(err);
-    //     if(shell.error()){
-    //         logger.debug(shell.error());
-    //     }
-    //     process.chdir(config.rootPath)
-    //     console.log('New directory: ' + process.cwd());
-    //     // shell.exec('npm install', function(code, stdout, stderr) {
-    //     //     console.log('Exit code:', code);
-    //     //     console.log('Program output:', stdout);
-    //     //     console.log('Program stderr:', stderr);
-    //     // });
+    /**
+     * Exec all task to prepare and build the Android platform
+     */
+    distributeAndroid({launcherName, id, versionCode, cmdCordovaAndroid = 'cordova build --release android', cordovaPath, keystore, verbose = false}){
+        this.setId({cordovaPath, id});
+        this.setAndroidVersionCode({cordovaPath, versionCode});
+        this.setLauncherName({cordovaPath, launcherName})
+        this.buildAndroid({cmdCordovaAndroid, cordovaPath, verbose});
+        const androidProjectPath = path.join(cordovaPath, './platforms/android');
+        android.signAPK({androidProjectPath, keystore, verbose});
+        android.alignAPK();
+    }
 
-    //     var child = shell.exec('npasdm inita', {async:true, silent:true});
-    //     child.stdout.on('data', function(data) {
-    //         console.log(data);
-    //     });
-    //     child.stderr.on('data', function(data){
-    //         console.log('err', data);
-    //     });
-    //     child.stdout.on('end', function(data) {
-    //         console.log('end--', data);
-    //     });
-    //     child.stderr.on('end', function(data){
-    //         console.log('end--', 'err', data);
-    //     });
-    // }
+    verifyConfigs(config){
+        if(!config.compileSourcesCmd){
+            throw new Error('Source compile error: missing "compile-sources-cmd" value in config file');
+        }
+        if(!fs.existsSync(config.sourcePath)){
+            throw new Error(`Source compile error: directory "compile-sources-path" doesn\'t exists at ${config.sourcePath}`);
+        }
+        if(!fs.existsSync(config.cordovaPath)){
+            throw new Error(`Source compile error: directory "cordova-root-path" doesn\'t exists at ${config.cordovaPath}`);
+        }
+        if(!fs.existsSync(config.cordovaConfigPath)){
+            throw new Error(`Source compile error: config.xml file doesn\'t exists in ${config.cordovaPath}`);
+        }
+        if(!config.appVersion){
+            throw new Error('Invalid build version format: please, see http://semver.org');
+        }
+    }
 }
 
 module.exports = {

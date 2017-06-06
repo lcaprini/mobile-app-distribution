@@ -18,12 +18,27 @@ const logger = new (winston.Logger)({
 });
 
 logger.section = (text, level = 'info') => {
-    logger[level]('\n####################################');
+    logger[level]('\n#########################################################');
     _.each(text.split('\n'), log => {
-        logger[level](`# ${log}`);
+        logger[level](`#  ${log}`);
     });
-    logger[level]('####################################\n');
+    logger[level]('#########################################################\n');
 }
+
+logger.printEnd = ({url}) => {
+    logger.info('\n###########################################################################');
+    logger.info('###########################################################################');
+    logger.info('###\t\t\t\t\t\t\t\t\t###');
+    logger.info('###\t\t\tDISTRIBUTE PROCESS COMPLETE\t\t\t###');
+    logger.info('###\t\t\t\t\t\t\t\t\t###');
+    logger.info('###########################################################################');
+    logger.info('###########################################################################\n');
+
+    if(url){
+        var qrcode = require('qrcode-terminal');
+        qrcode.generate(url);
+    }
+};
 
 logger.setFileLogger = rootPath => {
     logger.add(winston.transports.File,{
