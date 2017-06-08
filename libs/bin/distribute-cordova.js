@@ -85,6 +85,7 @@ const startDistribution = () => {
 
                 cmdCordovaAndroid : config.cmdCordovaAndroid,
                 cordovaPath: config.cordovaPath,
+                apkFilePath : config.apkFilePath,
                 keystore : {
                     path: config.androidKeystorePath,
                     alias : config.androidKeystoreAlias,

@@ -1,0 +1,19 @@
+{
+    "appName": "App Test",
+    "builds": [
+        {
+            "androidBuildPath": "https://lcaprini.com/test/Android/App_Test_v.1.0.0_RC.apk",
+            "changelog": "First version",
+            "iosBuildPath": "https://lcaprini.com/test/iOS/manifest_App_Test_v.1.0.0_RC.plist",
+            "name": "App Test v.1.0.0 RC",
+            "version": "1.0.0 RC"
+        },
+        {
+            "changelog": "Some edits...",
+            "dev": "dev",
+            "iosBuildPath": "https://lcaprini.com/test/iOS/manifest_App_Test_v.0.9.6_beta-[DEV].plist",
+            "name": "App Test v.0.9.6 beta-[DEV]",
+            "version": "0.9.6 beta-[DEV]"
+        }
+    ]
+}

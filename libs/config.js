@@ -120,8 +120,11 @@ class Config {
                         config.sourcePath = path.isAbsolute(config.compileSourcesPath)? config.compileSourcesPath : path.join(config.rootPath, config.compileSourcesPath);
                         config.cordovaPath = path.isAbsolute(config.cordovaRootPath)? config.cordovaRootPath : path.join(config.rootPath, config.cordovaRootPath);
                         config.cordovaConfigPath = path.join(config.cordovaPath, './config.xml');
+                        config.buildsDir = path.isAbsolute(config.buildsDir)? config.buildsDir : path.join(config.rootPath, config.buildsDir);
                         config.androidProjectPath = path.join(config.cordovaPath, './platforms/android');
                         config.androidKeystorePath = path.isAbsolute(config.androidKeystorePath)? config.androidKeystorePath : path.join(config.rootPath, config.androidKeystorePath);
+                        config.apkFileName = `${config.appLabel}_v.${config.appVersionLabel}.apk`.replace(/ /g, '_');
+                        config.apkFilePath = path.join(config.buildsDir, config.apkFileName);
 
                         logger.setFileLogger(config.rootPath);
 

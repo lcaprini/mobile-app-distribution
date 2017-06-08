@@ -103,14 +103,14 @@ class Cordova {
     /**
      * Exec all task to prepare and build the Android platform
      */
-    distributeAndroid({launcherName, id, versionCode, cmdCordovaAndroid = 'cordova build --release android', cordovaPath, keystore, verbose = false}){
+    distributeAndroid({launcherName, id, versionCode, cmdCordovaAndroid = 'cordova build --release android', cordovaPath, apkFilePath, keystore, verbose = false}){
         this.setId({cordovaPath, id});
         this.setAndroidVersionCode({cordovaPath, versionCode});
         this.setLauncherName({cordovaPath, launcherName})
         this.buildAndroid({cmdCordovaAndroid, cordovaPath, verbose});
         const androidProjectPath = path.join(cordovaPath, './platforms/android');
         android.signAPK({androidProjectPath, keystore, verbose});
-        android.alignAPK();
+        android.alignAPK({androidProjectPath, apkFilePath, verbose});
     }
 
     verifyConfigs(config){

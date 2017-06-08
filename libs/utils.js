@@ -1,6 +1,7 @@
 'use strict';
 
 const prompt = require('prompt');
+const shell = require('shelljs');
 
 class Utils {
 
@@ -13,6 +14,13 @@ class Utils {
                 resolve(result[text].toLowerCase());
             });
         });
+    }
+
+    createPath({workingPath = null, path}){
+        if(workingPath){
+            process.chdir(workingPath);
+        }
+        shell.mkdir('-p', path);
     }
 }
 
