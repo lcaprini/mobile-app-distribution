@@ -79,22 +79,22 @@ const startDistribution = () => {
          * BUILD ANDROID PLATFORM
          */
         if(config.tasks.contains(TASKS.BUILD_ANDROID)){
-            // cordova.distributeAndroid({
-            //     launcherName : config.appLabel,
-            //     id : config.androidBundleId,
-            //     versionCode : config.androidVersionCode,
+            cordova.distributeAndroid({
+                launcherName : config.appLabel,
+                id : config.androidBundleId,
+                versionCode : config.androidVersionCode,
 
-            //     cmdCordovaAndroid : config.cmdCordovaAndroid,
-            //     cordovaPath: config.cordovaPath,
-            //     apkFilePath : config.apkFilePath,
-            //     keystore : {
-            //         path: config.androidKeystorePath,
-            //         alias : config.androidKeystoreAlias,
-            //         password : config.androidKeystorePassword
-            //     },
+                cmdCordovaAndroid : config.cmdCordovaAndroid,
+                cordovaPath: config.cordovaPath,
+                apkFilePath : config.apkFilePath,
+                keystore : {
+                    path: config.androidKeystorePath,
+                    alias : config.androidKeystoreAlias,
+                    password : config.androidKeystorePassword
+                },
 
-            //     verbose : config.verbose
-            // });
+                verbose : config.verbose
+            });
             if(config.tasks.contains(TASKS.UPLOAD_BUILDS)){
                 android.uploadAPK({
                     apkFilePath : config.apkFilePath,
