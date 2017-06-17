@@ -38,6 +38,8 @@ logger.printEnd = ({url}) => {
         var qrcode = require('qrcode-terminal');
         qrcode.generate(url);
     }
+    
+    process.exit(0);
 };
 
 logger.setFileLogger = rootPath => {

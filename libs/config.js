@@ -7,6 +7,7 @@ const _ = require('lodash');
 const path = require('path');
 const findVersions = require('find-versions');
 const shell = require('shelljs');
+const commandExists = require('command-exists').sync;
 
 const logger = require('./logger');
 const utils = require('./utils');
@@ -46,7 +47,6 @@ class Config {
         this.iosBundleVersion = '';
         this.iosBundleId = '';
         this.iosProvisioningProfile = '';
-        this.iosIpaUrlPath = '';
 
         this.cmdCordovaAndroid = 'cordova build --release android';
         this.androidProjectPath = '';
@@ -55,32 +55,36 @@ class Config {
         this.androidKeystorePath = '';
         this.androidKeystoreAlias = '';
         this.androidKeystorePassword = '';
-        this.androidApkUrlPath = '';
         
         this.ftpBuildsHost = '';
-        this.ftpBuildsUsername = '';
+        this.ftpBuildsPort = 21;
+        this.ftpBuildsUser = '';
         this.ftpBuildsPassword = '';
-        this.ftpBuildsIOSWorkingDir = '';
-        this.ftpBuildsAndroidWorkingDir = '';
+        this.ftpBuildsIOSDestinationPath = '';
+        this.ftpBuildsIOSUrlPath = '';
+        this.ftpBuildsAndroidDestinationPath = '';
+        this.ftpBuildsAndroidUrlPath = '';
 
         this.ftpSourcesHost = '';
-        this.ftpSourcesUsername = '';
+        this.ftpSourcesPort = 21;
+        this.ftpSourcesUser = '';
         this.ftpSourcesPassword = '';
-        this.ftpSourcesWorkingDir = '';
+        this.ftpSourcesDestinationPath = '';
 
         this.ftpRepoHost = '';
-        this.ftpRepoUsername = '';
+        this.ftpRepoPort = 21;
+        this.ftpRepoUser = '';
         this.ftpRepoPassword = '';
-        this.ftpBuildsIOSWorkingDir = '';
-        this.ftpBuildsAndroidWorkingDir = '';
+        this.ftpBuildsIOSDestinationPath = '';
+        this.ftpBuildsAndroidDestinationPath = '';
         
         this.ftpSourcesHost = '';
-        this.ftpSourcesUsername = '';
+        this.ftpSourcesUser = '';
         this.ftpSourcesPassword = '';
-        this.ftpSourcesWorkingDir = '';
+        this.ftpSourcesDestinationPath = '';
 
         this.ftpRepoHost = '';
-        this.ftpRepoUsername = '';
+        this.ftpRepoUser = '';
         this.ftpRepoPassword = '';
         this.ftpRepoWorkingDir = '';
         this.wirelessDistUrlPage = '';
@@ -97,7 +101,7 @@ class Config {
 
     init({configPath, program}) {
         let config = this;
-
+        
         return new Promise((resolve, reject) => {
             fs.readFileAsync(configPath, 'utf8').then(
                 fileData => {
@@ -212,26 +216,26 @@ class Config {
      */
     verify(){
 
-        // Check params for compile sources
+        // Check params for sources compiler steps
         if(this.tasks.contains(cordovaTasks.COMPILE_SOURCES)){
             cordova.verifyConfigs(this);
         }
 
-        // Check params for iOS build
+        // Check params for iOS app builder
         if(this.tasks.contains(cordovaTasks.BUILD_IOS)){
             this.verifyIosSteps();
         }
 
-        // Check params for Android build
+        // Check params for Android app builder
         if(this.tasks.contains(cordovaTasks.BUILD_ANDROID)){
             const cordovaAndroidStringsPath = path.join(this.cordovaPath, './platforms/android/res/values/strings.xml');
             if(!fs.existsSync(cordovaAndroidStringsPath)){
                 throw new Error(`Android build error: file "${cordovaAndroidStringsPath}" doesn\'t exists`);
             }
-            android.verifyConfigs(this);
+            this.verifyAndroidSteps();
         }
 
-        // Check params for FTP build upload
+        // Check params for FTP build uploader
         if(this.tasks.contains(cordovaTasks.UPLOAD_BUILDS)){
             this.verifyBuildUploadSteps();
         }
@@ -259,7 +263,7 @@ class Config {
         if(!this.iosProvisioningProfile){
             throw new Error('iOS build error: missing "ios-provisioning-profile" value in config file');
         }
-        if(!this.iosIpaUrlPath){
+        if(!this.ftpBuildsIOSUrlPath){
             throw new Error('iOS build error: missing "ios-ipa-url-path" value in config file');
         }
         if(!this.buildsDir){
@@ -267,23 +271,53 @@ class Config {
         }
     }
 
+    verifyAndroidSteps(){
+        if(!this.androidBundleId){
+            throw new Error('Android build error: missing "android-bundle-id" value in config file');
+        }
+        if(!fs.existsSync(this.androidProjectPath)){
+            throw new Error(`Android build error: no Android project in "${this.androidProjectPath}" directory`);
+        }
+        if(!fs.existsSync(this.androidKeystorePath)){
+            throw new Error(`Android build error: missing file "${this.androidKeystorePath}"`);
+        }
+        if(!this.androidKeystoreAlias){
+            throw new Error('Android build error: missing "android-keystore-alias" value in config file');
+        }
+        if(!this.androidKeystorePassword){
+            throw new Error('Android build error: missing "android-keystore-password" value in config file');
+        }
+        if(!fs.existsSync(this.buildsDir)){
+            utils.createPath({workingPath:this.rootPath, path:this.buildsDir});
+        }
+        if(!commandExists('jarsigner')){
+            throw new Error('Android build error: command "jarsigner" not found, please add Android SDK tools in $PATH');
+        }
+        if(!commandExists('zipalign')){
+            throw new Error('Android build error: command "zipalign" not found, please add last Android SDK build-tools in $PATH');
+        }
+    }
+
     verifyBuildUploadSteps(){
         if(!this.ftpBuildsHost){
             throw new Error('FTP build upload error: missing "ftp-builds-hosts" value in config file');
         }
-        if(!this.ftpBuildsUsername){
-            throw new Error('FTP build upload error: missing "ftp-builds-username" value in config file');
+        if(!this.ftpBuildsPort){
+            throw new Error('FTP build upload error: missing "ftp-builds-port" value in config file');
+        }
+        if(!this.ftpBuildsUser){
+            throw new Error('FTP build upload error: missing "ftp-builds-user" value in config file');
         }
         if(!this.ftpBuildsPassword){
             throw new Error('FTP build upload error: missing "ftp-builds-password" value in config file');
         }
         if(this.tasks.contains(cordovaTasks.BUILD_IOS)){
-            if(!this.ftpBuildsIOSWorkingDir){
+            if(!this.ftpBuildsIOSDestinationPath){
                 throw new Error('FTP+iOS upload error: missing "ftp-builds-ios-working-dir" value in config file');
             }
         }
         if(this.tasks.contains(cordovaTasks.BUILD_ANDROID)){
-            if(!this.ftpBuildsAndroidWorkingDir){
+            if(!this.ftpBuildsAndroidDestinationPath){
                 throw new Error('FTP+Android upload error: missing "ftp-builds-android-working-dir" value in config file');
             }
         }
@@ -293,8 +327,8 @@ class Config {
         if(!this.ftpRepoHost){
             throw new Error('Repo update error: missing "ftp-repo-hosts" value in config file');
         }
-        if(!this.ftpRepoUsername){
-            throw new Error('Repo update error: missing "ftp-repo-username" value in config file');
+        if(!this.ftpRepoUser){
+            throw new Error('Repo update error: missing "ftp-repo-user" value in config file');
         }
         if(!this.ftpRepoPassword){
             throw new Error('Repo update error: missing "ftp-repo-password" value in config file');
@@ -305,19 +339,22 @@ class Config {
         if(!this.wirelessDistUrlPage){
             throw new Error('Repo update error: missing "wireless-dist-url-page" value in config file');
         }
+        // if(!this.ftpBuildsAndroidUrlPath){
+        //     throw new Error('Android build error: missing "android-apk-url-path" value in config file');
+        // }
     }
 
     verifySourcesUploadSteps(){
         if(!this.ftpSourcesHost){
             throw new Error('FTP sources upload error: missing "ftp-sources-hosts" value in config file');
         }
-        if(!this.ftpSourcesUsername){
-            throw new Error('FTP sources upload error: missing "ftp-sources-username" value in config file');
+        if(!this.ftpSourcesUser){
+            throw new Error('FTP sources upload error: missing "ftp-sources-user" value in config file');
         }
         if(!ftpSourcesPassword){
             throw new Error('FTP sources upload error: missing "ftp-sources-password" value in config file');
         }
-        if(!this.ftpSourcesWorkingDir){
+        if(!this.ftpSourcesDestinationPath){
             throw new Error('FTP sources upload error: missing "ftp-sources-working-dir" value in config file');
         }
     }

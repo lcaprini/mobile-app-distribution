@@ -15,8 +15,8 @@ const TASKS = {
     COMPILE_SOURCES : 'c',
     BUILD_IOS : 'i',
     BUILD_ANDROID : 'a',
-    UPLOAD_BUILDS : 'f',
-    UPDATE_REPO : 'j',
+    UPLOAD_BUILDS : 'u',
+    UPDATE_REPO : 'r',
     UPLOAD_SOURCES : 'z',
     SEND_EMAIL : 'e'
 }

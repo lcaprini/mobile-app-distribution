@@ -7,18 +7,19 @@ const program = require('commander');
 const config = require('../config');
 const utils = require('../utils');
 const cordova = require('../cordova').cordova;
+const android = require('../android');
 const TASKS = require('../cordova').TASKS;
 
 program
     .allowUnknownOption()
-    .usage('<app version> -ts <[v,c,i,a,f,j,z,e]>[options]')
+    .usage(`<app version> -ts <[${TASKS.COMPILE_SOURCES},${TASKS.CHANGE_VERSION},${TASKS.BUILD_IOS},${TASKS.BUILD_ANDROID},${TASKS.UPLOAD_BUILDS},${TASKS.UPDATE_REPO},${TASKS.UPLOAD_SOURCES},${TASKS.SEND_EMAIL}]>[options]`)
     .option('-p, --config <config>', 'config file for app distribution', config.path)
     .option('-a, --android-version-code <version code>', 'Android version code')
     .option('-i, --ios-bundle-version <bundle version>', 'iOS bundle version')
     .option('-c, --change-log <change-log.txt or "First edit***Other edit...">', 'file path or list with "***" separator', config.changeLog)
     .option(`-t, --tasks <[${TASKS.CHANGE_VERSION},${TASKS.COMPILE_SOURCES},${TASKS.BUILD_IOS},${TASKS.BUILD_ANDROID},${TASKS.UPLOAD_BUILDS},${TASKS.UPDATE_REPO},${TASKS.UPLOAD_SOURCES},${TASKS.SEND_EMAIL}]>`, `
-      ${TASKS.CHANGE_VERSION} : preprocess file setting app version
       ${TASKS.COMPILE_SOURCES} : builds HTML, CSS, JAVASCRIPT files for Cordova projects
+      ${TASKS.CHANGE_VERSION} : preprocess file setting app version
       ${TASKS.BUILD_IOS} : builds, archives ad exports iOS project
       ${TASKS.BUILD_ANDROID} : builds, archives ad exports Android project
       ${TASKS.UPLOAD_BUILDS} : uploads builds on remote FTP server
@@ -78,29 +79,49 @@ const startDistribution = () => {
          * BUILD ANDROID PLATFORM
          */
         if(config.tasks.contains(TASKS.BUILD_ANDROID)){
-            cordova.distributeAndroid({
-                launcherName : config.appLabel,
-                id : config.androidBundleId,
-                versionCode : config.androidVersionCode,
+            // cordova.distributeAndroid({
+            //     launcherName : config.appLabel,
+            //     id : config.androidBundleId,
+            //     versionCode : config.androidVersionCode,
 
-                cmdCordovaAndroid : config.cmdCordovaAndroid,
-                cordovaPath: config.cordovaPath,
-                apkFilePath : config.apkFilePath,
-                keystore : {
-                    path: config.androidKeystorePath,
-                    alias : config.androidKeystoreAlias,
-                    password : config.androidKeystorePassword
-                },
+            //     cmdCordovaAndroid : config.cmdCordovaAndroid,
+            //     cordovaPath: config.cordovaPath,
+            //     apkFilePath : config.apkFilePath,
+            //     keystore : {
+            //         path: config.androidKeystorePath,
+            //         alias : config.androidKeystoreAlias,
+            //         password : config.androidKeystorePassword
+            //     },
 
-                verbose : config.verbose
-            });
+            //     verbose : config.verbose
+            // });
+            if(config.tasks.contains(TASKS.UPLOAD_BUILDS)){
+                android.uploadAPK({
+                    apkFilePath : config.apkFilePath,
+                    server : {
+                        host : config.ftpBuildsHost,
+                        port : config.ftpBuildsPort,
+                        user : config.ftpBuildsUser,
+                        pass : config.ftpBuildsPassword
+                    },
+                    apkDestinationPath : config.ftpBuildsAndroidDestinationPath
+                });
+            }
         }
 
 
-        logger.printEnd({
-            url : config.wirelessDistUrlPage
-        });
-        process.exit(0);
+        if(utils.uploading && utils.uploading.isPending()){
+            utils.uploading.then(() => {
+                logger.printEnd({
+                    url : config.wirelessDistUrlPage
+                });
+            });
+        }
+        else{
+            logger.printEnd({
+                url : config.wirelessDistUrlPage
+            });
+        }
     }
     catch(err){
         quit(err);
