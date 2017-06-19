@@ -71,12 +71,26 @@ class Android {
 
     uploadAPK({launcherName, apkFilePath, server, apkDestinationPath}){
         logger.section(`Upload Android apk on ${apkDestinationPath}`);
-        utils.uploadFile({
+        const remoteFile = path.join(apkDestinationPath, path.basename(apkFilePath));
+        return utils.uploadFile({
             localFile : apkFilePath,
             server : server,
-            remotePath : apkDestinationPath
+            remoteFile : remoteFile
         });
     };
+
+    updateRepository({repoPath, server, androidBuildPath, version, changelog, hidden, rootPath}){
+        logger.section(`Update Android repository`);
+        utils.updateRepo({
+            repoPath,
+            server,
+            version,
+            hidden,
+            changelog,
+            androidBuildPath,
+            rootPath
+        })
+    }
 }
 
 module.exports = new Android();

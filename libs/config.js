@@ -22,12 +22,13 @@ class Config {
         this.verbose = false;
         this.force = false;
         this.hidden = false;
+        this.qrcode = false;
         
         this.path = 'distribute.json';
         this.rootPath = '';
         this.tasks = 'vciafjze';
 
-        this.changeLog = 'No changelog';
+        this.changeLog = ['No changelog'];
         
         this.appVersion = '';
         this.appVersionLabel = '';
@@ -35,20 +36,27 @@ class Config {
         this.appLabel = '';
         this.appSchema = '';
 
+        // Souces
         this.compileSourcesPath = '';
         this.compileSourcesCmd = '';
         this.sourcePath = '';
         this.cordovaPath = '';
         this.cordovaConfigPath = '';
 
+        // Cordova
         this.cordovaRootPath = '';
-
         this.cmdCordovaIOS = 'cordova build ios';
+        this.cmdCordovaAndroid = 'cordova build --release android';
+        
+        // Builds
+        this.buildsDir = 'builds/';
+
+        // iOS
         this.iosBundleVersion = '';
         this.iosBundleId = '';
         this.iosProvisioningProfile = '';
 
-        this.cmdCordovaAndroid = 'cordova build --release android';
+        // Android
         this.androidProjectPath = '';
         this.androidVersionCode = '';
         this.androidBundleId = '';
@@ -56,47 +64,38 @@ class Config {
         this.androidKeystoreAlias = '';
         this.androidKeystorePassword = '';
         
+        // FTP Builds
         this.ftpBuildsHost = '';
         this.ftpBuildsPort = 21;
         this.ftpBuildsUser = '';
         this.ftpBuildsPassword = '';
         this.ftpBuildsIOSDestinationPath = '';
-        this.ftpBuildsIOSUrlPath = '';
         this.ftpBuildsAndroidDestinationPath = '';
-        this.ftpBuildsAndroidUrlPath = '';
 
+        // FTP Repository
+        this.ftpRepoHost = '';
+        this.ftpRepoPort = 21;
+        this.ftpRepoUser = '';
+        this.ftpRepoPassword = '';
+        this.ftpRepoJsonPath = '';
+        this.repoIOSUrlPath = '';
+        this.repoAndroidUrlPath = '';
+        this.repoHomepageUrl = '';
+
+        // FTP Sources
         this.ftpSourcesHost = '';
         this.ftpSourcesPort = 21;
         this.ftpSourcesUser = '';
         this.ftpSourcesPassword = '';
         this.ftpSourcesDestinationPath = '';
 
-        this.ftpRepoHost = '';
-        this.ftpRepoPort = 21;
-        this.ftpRepoUser = '';
-        this.ftpRepoPassword = '';
-        this.ftpBuildsIOSDestinationPath = '';
-        this.ftpBuildsAndroidDestinationPath = '';
-        
-        this.ftpSourcesHost = '';
-        this.ftpSourcesUser = '';
-        this.ftpSourcesPassword = '';
-        this.ftpSourcesDestinationPath = '';
-
-        this.ftpRepoHost = '';
-        this.ftpRepoUser = '';
-        this.ftpRepoPassword = '';
-        this.ftpRepoWorkingDir = '';
-        this.wirelessDistUrlPage = '';
-
+        // Email
         this.smtpServer = '';
         this.smtpPort = 25;
         this.smtpUser = '';
         this.smtpPass = '';
         this.mailFrom = '';
         this.mailTo = [];
-
-        this.buildsDir = 'builds/';
     }
 
     init({configPath, program}) {
@@ -129,6 +128,7 @@ class Config {
                         config.androidKeystorePath = path.isAbsolute(config.androidKeystorePath)? config.androidKeystorePath : path.join(config.rootPath, config.androidKeystorePath);
                         config.apkFileName = `${config.appLabel}_v.${config.appVersionLabel}.apk`.replace(/ /g, '_');
                         config.apkFilePath = path.join(config.buildsDir, config.apkFileName);
+                        config.ftpRepoJsonPath = path.join(config.ftpRepoJsonPath, './builds.json');
 
                         logger.setFileLogger(config.rootPath);
 
@@ -140,6 +140,9 @@ class Config {
 
                         // Set force mode
                         config.force = (_.isBoolean(program.force)) ? program.force : false;
+
+                        // Set qrcode print
+                        config.qrcode = (_.isBoolean(program.qrCode)) ? program.qrCode : false;
 
                         if(program.changeLog){
                             config.readChangeLog(program.changeLog, (err, next) => {
@@ -237,17 +240,12 @@ class Config {
 
         // Check params for FTP build uploader
         if(this.tasks.contains(cordovaTasks.UPLOAD_BUILDS)){
-            this.verifyBuildUploadSteps();
-        }
-
-        // Check params for repo update
-        if(this.tasks.contains(cordovaTasks.UPDATE_REPO)){
-            this.verifyUpdateRepoSteps();
+            this.verifyUploadBuildsSteps();
         }
 
         // Check params for FTP sources upload
         if(this.tasks.contains(cordovaTasks.UPLOAD_SOURCES)){
-            this.verifySourcesUploadSteps();
+            this.verifyUploadSourcesSteps();
         }
 
         // Check params for FTP sources upload
@@ -262,9 +260,6 @@ class Config {
         }
         if(!this.iosProvisioningProfile){
             throw new Error('iOS build error: missing "ios-provisioning-profile" value in config file');
-        }
-        if(!this.ftpBuildsIOSUrlPath){
-            throw new Error('iOS build error: missing "ios-ipa-url-path" value in config file');
         }
         if(!this.buildsDir){
             throw new Error('iOS build error: missing "builds-dir" value in config file');
@@ -298,7 +293,7 @@ class Config {
         }
     }
 
-    verifyBuildUploadSteps(){
+    verifyUploadBuildsSteps(){
         if(!this.ftpBuildsHost){
             throw new Error('FTP build upload error: missing "ftp-builds-hosts" value in config file');
         }
@@ -310,6 +305,9 @@ class Config {
         }
         if(!this.ftpBuildsPassword){
             throw new Error('FTP build upload error: missing "ftp-builds-password" value in config file');
+        }
+        if(this.tasks.contains(cordovaTasks.BUILD_IOS) || this.tasks.contains(cordovaTasks.BUILD_ANDROID)){
+            this.verifyUpdateRepoSteps();
         }
         if(this.tasks.contains(cordovaTasks.BUILD_IOS)){
             if(!this.ftpBuildsIOSDestinationPath){
@@ -327,24 +325,24 @@ class Config {
         if(!this.ftpRepoHost){
             throw new Error('Repo update error: missing "ftp-repo-hosts" value in config file');
         }
+        if(!this.ftpRepoPort){
+            throw new Error('Repo update error: missing "ftp-repo-port" value in config file');
+        }
         if(!this.ftpRepoUser){
             throw new Error('Repo update error: missing "ftp-repo-user" value in config file');
         }
         if(!this.ftpRepoPassword){
             throw new Error('Repo update error: missing "ftp-repo-password" value in config file');
         }
-        if(!this.ftpRepoWorkingDir){
+        if(!this.ftpRepoJsonPath){
             throw new Error('Repo update error: missing "ftp-repo-working-dir" value in config file');
         }
-        if(!this.wirelessDistUrlPage){
-            throw new Error('Repo update error: missing "wireless-dist-url-page" value in config file');
+        if(!this.repoHomepageUrl){
+            throw new Error('Repo update error: missing "repo-homepage-url" value in config file');
         }
-        // if(!this.ftpBuildsAndroidUrlPath){
-        //     throw new Error('Android build error: missing "android-apk-url-path" value in config file');
-        // }
     }
 
-    verifySourcesUploadSteps(){
+    verifyUploadSourcesSteps(){
         if(!this.ftpSourcesHost){
             throw new Error('FTP sources upload error: missing "ftp-sources-hosts" value in config file');
         }

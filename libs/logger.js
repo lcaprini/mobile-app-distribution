@@ -25,7 +25,7 @@ logger.section = (text, level = 'info') => {
     logger[level]('#########################################################\n');
 }
 
-logger.printEnd = ({url}) => {
+logger.printEnd = () => {
     logger.info('\n###########################################################################');
     logger.info('###########################################################################');
     logger.info('###\t\t\t\t\t\t\t\t\t###');
@@ -33,13 +33,6 @@ logger.printEnd = ({url}) => {
     logger.info('###\t\t\t\t\t\t\t\t\t###');
     logger.info('###########################################################################');
     logger.info('###########################################################################\n');
-
-    if(url){
-        var qrcode = require('qrcode-terminal');
-        qrcode.generate(url);
-    }
-    
-    process.exit(0);
 };
 
 logger.setFileLogger = rootPath => {

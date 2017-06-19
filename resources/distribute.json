@@ -22,20 +22,20 @@
     "ftp-builds-user": "lcaprini-user",
     "ftp-builds-password": "lcaprini-passwd",
     "ftp-builds-iOS-destination-path": "/var/www/html/test/iOS",
-    "ftp-builds-iOS-url-path": "https://lcaprini.com/test/iOS",
     "ftp-builds-android-destination-path": "/var/www/html/test/Android",
-    "ftp-builds-android-url-path": "https://lcaprini.com/test/Android",
-
-    "ftp-sources-host": "lcapriniftp",
-    "ftp-sources-user": "lcaprini-user",
-    "ftp-sources-password": "lcaprini-passwd",
-    "ftp-sources-working-dir": "/var/www/html/test/sources",
 
     "ftp-repo-host": "lcapriniftp",
     "ftp-repo-user": "lcaprini-user",
     "ftp-repo-password": "lcaprini-passwd",
     "ftp-repo-working-dir": "/var/www/html/test/WirelessDistribution",
-    "wireless-dist-url-page": "https://lcaprini.com/test/WirelessDistribution",
+    "ftp-repo-iOS-url-path": "https://lcaprini.com/test/iOS",
+    "ftp-repo-android-url-path": "https://lcaprini.com/test/Android",
+    "repo-homepage-url": "https://lcaprini.com/test/WirelessDistribution",
+
+    "ftp-sources-host": "lcapriniftp",
+    "ftp-sources-user": "lcaprini-user",
+    "ftp-sources-password": "lcaprini-passwd",
+    "ftp-sources-working-dir": "/var/www/html/test/sources",
 
     "smtp-server": "mail.gmail.com",
     "smtp-port": 25,
