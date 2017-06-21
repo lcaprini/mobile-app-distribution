@@ -27,22 +27,26 @@
                 "-f"
             ]
         },{
+            "name": "Webpack",
             "type": "node",
             "request": "launch",
-            "name": "Help",
-            "program": "${workspaceRoot}/libs/bin/distribute.js",
+            "program": "${workspaceRoot}/resources/wd/node_modules/.bin/webpack-dev-server",
             "args": [
-                "help",
-                "build"
-            ]
-        },{
-            "type": "node",
-            "request": "launch",
-            "name": "Version",
-            "program": "${workspaceRoot}/libs/bin/distribute.js",
-            "args": [
-                "--version"
-            ]
+                "--inline",
+                "--hot"
+            ],
+            "outFiles": [
+                "${workspaceRoot}/resources/wd/dist/*"
+            ],
+            "stopOnEntry": false,
+            "cwd": "${workspaceRoot}/resources/wd/",
+            "runtimeExecutable": null,
+            "runtimeArgs": [],
+            "env": {
+                "NODE_ENV": "development"
+            },
+            "console": "internalConsole",
+            "sourceMaps": true
         }
     ]
 }
