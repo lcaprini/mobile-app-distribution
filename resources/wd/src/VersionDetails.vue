@@ -3,7 +3,7 @@
         <h2> {{ appName }} v.{{ version }} </h2>
         <div class="row">
             <div class="bold changelogLabel col-xs-12 col-sm-2">Changelog</div>
-            <div class="changelogText col-xs-9">
+            <div class="changelogText col-xs-12 col-sm-9 pull-right">
                 <ul>
                     <li v-for="log in changelog"> {{ log }} </li>
                 </ul>
@@ -14,14 +14,19 @@
             <div class="col-xs-8"> {{ date }} </div>
         </div>
         <div class="row downloaders">
+            
             <a v-if="iosLink"
                 class="btn col-xs-12 col-sm-4 btn-ios"
                 :class="androidLink? 'col-sm-offset-1' : 'col-sm-offset-4'"
-                :href="'itms-services://?action=download-manifest&amp;url='+iosLink"> Download IPA </a>
+                :href="'itms-services://?action=download-manifest&amp;url='+iosLink"
+                v-qr-code-tooltip data-toggle="tooltip" :title="`<img src='https://chart.googleapis.com/chart?cht=qr&chs=300x300&choe=UTF-8&chld=H|0&chl=${iosLink}'/>`"> Download IPA </a>
+
             <a v-if="androidLink"
                 class="btn col-xs-12 col-sm-4 btn-android"
                 :class="iosLink? 'col-sm-offset-2' : 'col-sm-offset-4'"
-                :href="androidLink"> Download APK </a>
+                :href="androidLink"
+                v-qr-code-tooltip data-toggle="tooltip" :title="`<img src='https://chart.googleapis.com/chart?cht=qr&chs=300x300&choe=UTF-8&chld=H|0&chl=${androidLink}'/>`"> Download APK </a>
+
         </div>
     </div>
 </template>
@@ -61,80 +66,96 @@ export default {
             type: Boolean,
             default: false
         }
+    },
+    directives : {
+        qrCodeTooltip : {
+            // bind(el){
+            //     $(el).tooltip({
+            //         animated: 'fade',
+            //         placement: 'bottom',
+            //         html: true,
+            //         delay: { "hide": 250 }
+            //     });
+            // }
+        }
     }
 }
 </script>
 <style lang="sass" scoped>
 
-$tabColor: #374d72;
+@import "assets/css/colors";
 
 .details {
-    margin-bottom: 1px;
     max-height: 0;
-    overflow: hidden;
+    overflow: auto;
     padding: 0 2rem;
-    background-color: #efefef;
-    -webkit-transition: all 0.5s;
-    -moz-transition: all 0.5s;
-    transition: all 0.5s;
+    -webkit-transition: max-height 0.5s, opacity 0.5s;
+    -moz-transition: max-height 0.5s, opacity 0.5s;
+    transition: max-height 0.5s, opacity 0.5s;
+    z-index: -1;
 
     @media screen and (min-width: 35rem) {
         max-height: none;
+        height: 100%;
         position: absolute;
         right: 0;
         top: 0;
         width: 70%;
         opacity: 0;
-        padding: 0rem 2rem 2rem 2rem;
-        //@include transform(translateX(100%));
+        padding: 1rem 2rem;
     }
     &.visible {
         max-height: 1000px;
-        -webkit-transition: all 2s;
-        -moz-transition: all 2s;
-        transition: all 2s;
+        z-index: 10;
+
+        &.visible-xs {
+            border-bottom: 1px solid $mainColor;
+        }
 
         @media screen and (min-width: 35rem) {
             max-height: none;
             opacity: 1;
-            -webkit-transform: none;
-            -moz-transform: none;
-            -ms-transform: none;
-            -o-transform: none;
-            transform: none;
         }
     }
     
     h2 {
-        color: $tabColor;
+        color: $mainColor;
         font-weight: bold;
         text-align: center;
         font-size: 16pt;
-        margin-top: 10px;
-        margin-bottom: 15px;
+        margin: 20px;
     }
 
     .row {
-        margin-top: 20px;
+        margin: 20px 0;
     }
 
     .bold {
         font-weight: bold;
     }
 
+    .changelogText {
+        min-height: 130px;
+        border: 1px solid #bdbdbd;
+        padding: 5px 10px;
+
+        ul {
+            padding-left: 15px;
+        }
+    }
+
     @media only screen and (max-width: 767px){
         
         .changelogText {
-            width: 91%;
-            float: right;
             margin-top: 10px;
-
-            ul {
-                padding-left: 15px;
-            }
+            border: none;
         }
         .downloaders {
-            margin-bottom: 20px;
+            margin: 20px;
+
+            .tooltip-inner {
+                max-width: 1000px;
+            }
         }
     }
 
@@ -157,4 +178,18 @@ $tabColor: #374d72;
     }
 }
 
+</style>
+<style lang="sass">
+    .downloaders {
+        .tooltip {
+
+            @media screen and (max-width: 35rem) {
+                display: none !important;
+            }
+
+            .tooltip-inner {
+                max-width: 1000px;
+            }
+        }
+    }
 </style>

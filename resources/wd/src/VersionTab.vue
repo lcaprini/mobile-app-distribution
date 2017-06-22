@@ -57,130 +57,43 @@ export default {
 </script>
 <style lang="sass" scoped>
 
-$tabColor: #374d72;
-$tabColorArrow: #8099c2;
+@import "assets/css/colors";
 
 .tab {
 
-    @media screen and (min-width: 35rem) {
-        float: left;
-        clear: left;
-        width: 30%;
-    }
-
     .tab-toggle {
-        padding: 1rem 4rem 1rem 2rem;
         position: relative;
         outline: none;
         width: 100%;
         display: inline-block;
-        color: $tabColor;
-        padding: 0.75rem 2rem;
+        color: $mainColor;
+        padding: 0.75rem 1rem 0.75rem 1.5rem;
         margin: 0 auto;
         background-color: white;
-        border: 1px solid $tabColor;
+        border: none;
+        border-bottom: 1px solid $mainColor;
         font-weight: bold;
         text-align: left;
-        -webkit-transition: all 0.3s;
-        -moz-transition: all 0.3s;
-        transition: all 0.3s;
-
-        &:after {
-            content: "\25BC";
-            position: absolute;
-            display: block;
-            right: 2rem;
-            top: 50%;
-            -webkit-transform: rotate(0deg) translateY(-50%);
-            -moz-transform: rotate(0deg) translateY(-50%);
-            -ms-transform: rotate(0deg) translateY(-50%);
-            -o-transform: rotate(0deg) translateY(-50%);
-            transform: rotate(0deg) translateY(-50%);
-
-            @media screen and (min-width: 35rem) {
-                -webkit-transform: rotate(-90deg) translateX(50%);
-                -moz-transform: rotate(-90deg) translateX(50%);
-                -ms-transform: rotate(-90deg) translateX(50%);
-                -o-transform: rotate(-90deg) translateX(50%);
-                transform: rotate(-90deg) translateX(50%);
-            }
-        }
+        -webkit-transition: color 0.3s, background 0.3s;
+        -moz-transition: color 0.3s, background 0.3s;
+        transition: color 0.3s, background 0.3s;
 
         &.active {
             color: white;
-            background-color: $tabColor;
+            background-color: $mainColor;
             cursor: default;
-
-            &:after {
-                color: $tabColorArrow;
-                -webkit-transform: rotate(180deg) translateY(50%);
-                -moz-transform: rotate(180deg) translateY(50%);
-                -ms-transform: rotate(180deg) translateY(50%);
-                -o-transform: rotate(180deg) translateY(50%);
-                transform: rotate(180deg) translateY(50%);
-
-                @media screen and (min-width: 35rem) {
-                    -webkit-transform: rotate(-90deg) translateX(50%) translateY(0);
-                    -moz-transform: rotate(-90deg) translateX(50%) translateY(0);
-                    -ms-transform: rotate(-90deg) translateX(50%) translateY(0);
-                    -o-transform: rotate(-90deg) translateX(50%) translateY(0);
-                    transform: rotate(-90deg) translateX(50%) translateY(0);
-                    right: 1rem;
-                }
-            }
         }
 
         .icon {
             width: 20px;
             height: auto;
             float: right;
-            position: relative;
-            top: -1px;
-            right: 25px;
             margin-left: 5px;
         }
     }
-}
 
-.details {
-    margin-bottom: 1px;
-    max-height: 0;
-    overflow: hidden;
-    padding: 0 2rem;
-    background-color: #efefef;
-    -webkit-transition: all 0.5s;
-    -moz-transition: all 0.5s;
-    transition: all 0.5s;
-
-    @media screen and (min-width: 35rem) {
-        max-height: none;
-        position: absolute;
-        right: 0;
-        top: 0;
-        width: 70%;
-        opacity: 0;
-        padding: 0rem 2rem 2rem 2rem;
-        //@include transform(translateX(100%));
-    }
-    &.active {
-        max-height: 1000px;
-        -webkit-transition: all 2s;
-        -moz-transition: all 2s;
-        transition: all 2s;
-
-        @media screen and (min-width: 35rem) {
-            max-height: none;
-            opacity: 1;
-            -webkit-transform: none;
-            -moz-transform: none;
-            -ms-transform: none;
-            -o-transform: none;
-            transform: none;
-        }
-    }
-    > .heading {
-        font-size: 1.5rem;
-        margin-bottom: 1rem;
+    &:last-of-type button.tab-toggle {
+        border-bottom-width: 0;
     }
 }
 

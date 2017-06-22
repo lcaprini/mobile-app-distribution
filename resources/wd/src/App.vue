@@ -1,6 +1,6 @@
 <template>
     <div id="app" class="container">
-        <h3 id="header"> Applicazione Intercos</h3>
+        <h3 id="header"> {{ appName }} </h3>
         <div class="tabs">
 
             <div class="versions">
@@ -23,9 +23,8 @@
                             :androidLink="build.androidBuildPath"
                             :iosLink="build.iosBuildPath"
                             :visible="active == build.version"
-                            class="visible-xs-*"></version-details>
+                            class="visible-xs"></version-details>
                 </template>
-
             </div>
 
             <version-details
@@ -64,14 +63,22 @@ export default {
         }
     },
     beforeCreate() {
-        this.$http.get('http://www.eol.unipg.it/builds.json').then(
+        const url = new URL(window.location.href);
+        let showAll = false;
+        if(url.searchParams.get('all')){
+            showAll = url.searchParams.get('all') === 'true';
+        }
+        this.$http.get(`http://www.eol.unipg.it/builds.json?t=${new Date().getTime()}`).then(
             jsonFile => {
                 try{
                     this.appName = jsonFile.body.appName;
-                    this.builds = jsonFile.body.builds;
+
+                    this.builds = (showAll)? jsonFile.body.builds : _.remove(jsonFile.body.builds, {hidden : false});
+
                     if(this.builds.length > 0){
                         this.active = this.builds[0].version;
                     }
+
                     document.title = this.appName;
                 }
                 catch(err){
@@ -99,6 +106,8 @@ export default {
 
 <style lang="sass" scoped>
 
+@import "assets/css/colors";
+
 body * {
     font-family: 'Roboto', sans-serif;
 }
@@ -115,6 +124,7 @@ body * {
         text-align: center;
         font-weight: bolder;
         margin-bottom: 20px;
+        color: $mainColor;
     }
 
     .tabs {
@@ -122,14 +132,19 @@ body * {
         min-height: 0;
         overflow: hidden;
         height: 100%;
-        padding-bottom: 40px;
+        margin-bottom: 40px;
         -webkit-transition: all 0.5s;
         -moz-transition: all 0.5s;
         transition: all 0.5s;
+        border: 1px solid $mainColor;
 
         .versions {
             height: 100%;
             overflow-y: auto;
+            @media screen and (min-width: 35rem) {
+                width: 30%;
+                border-right: 1px solid $mainColor;
+            }
         }
     }
 }
