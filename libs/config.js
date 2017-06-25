@@ -202,7 +202,7 @@ class Config {
     readChangeLog(changeLog, next){
         let config = this;
 
-        const changeLogPath = path.join(config.rootPath, changeLog);
+        const changeLogPath = path.isAbsolute(changeLog)? changeLog : path.join(config.rootPath, changeLog);
         return fs.readFileAsync(changeLogPath, 'utf8').then(
             changeLogText => {
                 config.changeLog = changeLogText.split('\n');
