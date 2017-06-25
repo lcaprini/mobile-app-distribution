@@ -112,7 +112,7 @@ const Utils = {
                             }
                         }
                         build.changelog = changelog;
-                        build.date = moment().format('DD MM YYYY HH:mm:ss');
+                        build.date = moment().format('DD/MM/YYYY HH:mm:ss');
                         if(androidBuildPath){
                             build.androidBuildPath = androidBuildPath;
                         }
@@ -132,6 +132,9 @@ const Utils = {
                                 resolve();
                             }
                         )
+                    },
+                    err => {
+                        logger.error(err);
                     }
                 )                
             });
