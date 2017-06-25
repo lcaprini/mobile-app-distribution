@@ -138,7 +138,7 @@ const startDistribution = () => {
                         pass : config.ftpRepoPassword
                     },
                     androidBuildPath : androidBuildPath,
-                    version : config.appVersion,
+                    version : config.appVersionLabel,
                     changelog : config.changeLog,
                     hidden : config.hidden,
                     rootPath : config.rootPath
