@@ -20,7 +20,7 @@ const TASKS = {
     SEND_EMAIL : 'e'
 }
 
-class Cordova {
+const Cordova = {
 
     /**
      * Compile web app sources in cordova app using task manager like, grunt, gulp, webpack, ecc...
@@ -29,7 +29,7 @@ class Cordova {
         process.chdir(sourcePath);
         logger.section(`Compile source:\n$ ${compileSourcesCmd}`);
         shell.exec(compileSourcesCmd, {silent: !verbose});
-    }
+    },
 
     /**
      * Set app version in config.xml using cordova-config module
@@ -40,7 +40,7 @@ class Cordova {
         const config = new Config(cordovaConfigPath);
         config.setVersion(appVersion);
         config.writeSync();
-    }
+    },
 
     /**
      * Set bundle id in config.xml using cordova-config module
@@ -51,7 +51,7 @@ class Cordova {
         const config = new Config(cordovaConfigPath);
         config.setID(id);
         config.writeSync();
-    }
+    },
 
     /**
      * Set Android version code in config.xml using cordova-config module
@@ -62,7 +62,7 @@ class Cordova {
         const config = new Config(cordovaConfigPath);
         config.setAndroidVersionCode(versionCode);
         config.writeSync();
-    }
+    },
 
     /**
      * Set Android app launcher name in strings.xml file using elementtre module
@@ -80,7 +80,7 @@ class Cordova {
         catch(err){
             logger.error(err);
         }
-    }
+    },
 
     /**
      * Build Android Cordova Platform
@@ -97,7 +97,7 @@ class Cordova {
             }
             process.exit(1);
         }
-    }
+    },
 
     /**
      * Exec all task to prepare and build the Android platform
@@ -110,8 +110,109 @@ class Cordova {
         const androidProjectPath = path.join(cordovaPath, './platforms/android');
         android.signAPK({androidProjectPath, keystore, verbose});
         android.alignAPK({androidProjectPath, apkFilePath, verbose});
-    }
+    },
 
+    /**
+     * Compose email for 
+     */
+    composeEmail({appName, appLabel, appVersion, hidden, repoHomepageUrl, androidBuildPath = null, iosBuildPath = null}){
+        if(hidden){
+            repoHomepageUrl += '?all=true';
+        }
+        let bodyEmail = `
+        <!DOCTYPE html>
+            <head>
+            <meta charset="utf-8">
+            <title>${appLabel}</title>
+            <meta name="viewport" content="width=500">
+                <style type="text/css" media="screen">
+                    body {
+                        font-family: Helvetica;
+                    }
+                    .center{
+                        text-align: center;
+                    }
+                    div#main {
+                        font-size: 1em;
+                    }
+                    .emph {
+                        font-weight: bold;
+                        font-size: large;
+                    }
+                    div#main table {
+                        width: 90%;
+                  		border: none;
+                        margin: 0 auto;
+                    }
+                    div#main table td,
+                    div#main table th {
+                        border: none;
+                    }
+                    .qrcode-container {
+                        width: 400px;
+                        margin: 0 auto;
+                    }
+                    .qrcode {
+                        width: 200px;
+                        margin: 0 auto;
+                    }
+                </style>
+            </head>
+            <body>
+                <header> <h1 class="center"> ${appName} </h1> </header>
+                <div id="main">
+                    <p>The version <span class="emph">${appVersion}</span> of <span class="emph">${appName}</span> app is now available</p>
+                    <p>Please scan the following QRCode, ora click the following link; if it does not work please copy it and paste it into your browser</p>
+                    <p class="center"><a href="${repoHomepageUrl}">${repoHomepageUrl}</a></p>
+                    <div  class="center qrcode-container">
+                        <a href="${repoHomepageUrl}"><img class="qrcode" src="https://chart.googleapis.com/chart?cht=qr&chs=300x300&choe=UTF-8&chld=H|0&chl=${repoHomepageUrl}"/></a>
+                    </div>
+                    <br/>
+                    <p>You can also directly download the app by scanning the following QRCodes o by tapping on it</p>
+                    <table>
+                        <tr>
+        `
+        
+        const androidDirectDownload = androidBuildPath;
+        const iosDirectDownload = (iosBuildPath)? 'itms-services://?action=download-manifest&amp;url=' + iosBuildPath : null;
+        
+        if(androidDirectDownload){
+            bodyEmail += '<th class="emph"> Android </th>'
+        }
+        if(iosDirectDownload){
+            bodyEmail += '<th class="emph"> iOS </th>'
+        }
+        bodyEmail += '</tr>'
+
+        bodyEmail += '<tr>'
+        if(androidDirectDownload){
+            bodyEmail += `
+                <td class="center qrcode-container">
+                    <a href="${androidDirectDownload}"><img class="qrcode" src="https://chart.googleapis.com/chart?cht=qr&chs=300x300&choe=UTF-8&chld=H|0&chl=${androidDirectDownload}"/></a>
+                </td>
+            `
+        }
+        if(iosDirectDownload){
+            bodyEmail += `
+                <td class="center qrcode-container">
+                    <a href="${iosDirectDownload}"><img class="qrcode" src="https://chart.googleapis.com/chart?cht=qr&chs=300x300&choe=UTF-8&chld=H|0&chl=${iosDirectDownload}"/></a>
+                </td>
+            `
+        }
+        bodyEmail += `  </tr>
+                    </table>
+                </div>
+            </body>
+        </html>
+        `
+        
+        return bodyEmail;
+    },
+
+    /**
+     * Verify configuration for compile and config update steps
+     * @param {Object} config 
+     */
     verifyConfigs(config){
         if(!config.compileSourcesCmd){
             throw new Error('Source compile error: missing "compile-sources-cmd" value in config file');
@@ -128,10 +229,30 @@ class Cordova {
         if(!config.appVersion){
             throw new Error('Invalid build version format: please, see http://semver.org');
         }
+    },
+
+    /**
+     * Verify configuration for build Android APK
+     * @param {Object} config 
+     */
+    verifyAndroid(config){
+        const cordovaAndroidStringsPath = path.join(config.cordovaPath, './platforms/android/res/values/strings.xml');
+        if(!fs.existsSync(cordovaAndroidStringsPath)){
+            throw new Error(`Android build error: file "${cordovaAndroidStringsPath}" does not exists`);
+        }
+        android.verify(config);
+    },
+    
+    /**
+     * Verify configuration for build iOS IPA
+     * @param {Object} config 
+     */
+    verifyIos(config){
+        ios.verify(config);
     }
 }
 
 module.exports = {
-    cordova : new Cordova(),
+    CORDOVA : Cordova,
     TASKS : TASKS
 }

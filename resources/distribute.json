@@ -27,21 +27,21 @@
     "ftp-repo-host": "lcapriniftp",
     "ftp-repo-user": "lcaprini-user",
     "ftp-repo-password": "lcaprini-passwd",
-    "ftp-repo-working-dir": "/var/www/html/test/WirelessDistribution",
-    "ftp-repo-iOS-url-path": "https://lcaprini.com/test/iOS",
-    "ftp-repo-android-url-path": "https://lcaprini.com/test/Android",
+    "ftp-repo-json-path": "/var/www/html/test/WirelessDistribution",
+    "repo-iOS-url-path": "https://lcaprini.com/test/iOS",
+    "repo-android-url-path": "https://lcaprini.com/test/Android",
     "repo-homepage-url": "https://lcaprini.com/test/WirelessDistribution",
 
     "ftp-sources-host": "lcapriniftp",
     "ftp-sources-user": "lcaprini-user",
     "ftp-sources-password": "lcaprini-passwd",
-    "ftp-sources-working-dir": "/var/www/html/test/sources",
+    "ftp-sources-destination-path": "/var/www/html/test/sources",
 
-    "smtp-server": "mail.gmail.com",
-    "smtp-port": 25,
-    "smtp-user": "lcaprini-user",
-    "smtp-pass": "lcaprini-passwd",
-    "mail-from": "luca.caprini@gmail.com",
-    "mail-to": ["luca.caprini@gmail.com"]
+    "email-host": "mail.gmail.com",
+    "email-port": 25,
+    "email-user": "lcaprini-user",
+    "email-password": "lcaprini-passwd",
+    "email-from": "luca.caprini@gmail.com",
+    "email-to": ["luca.caprini@gmail.com"]
 
 }

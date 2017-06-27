@@ -3,7 +3,9 @@
 const fs = require('fs');
 const path = require('path');
 const shell = require('shelljs');
+const commandExists = require('command-exists').sync;
 
+const repo = require('./repo');
 const logger = require('./logger');
 const utils = require('./utils');
 
@@ -77,11 +79,11 @@ class Android {
             server : server,
             remoteFile : remoteFile
         });
-    };
+    }
 
     updateRepository({repoPath, server, androidBuildPath, version, changelog, hidden, rootPath}){
         logger.section(`Update Android repository`);
-        utils.updateRepo({
+        repo.update({
             repoPath,
             server,
             version,
@@ -90,6 +92,33 @@ class Android {
             androidBuildPath,
             rootPath
         })
+    }
+
+    verify(config){
+        if(!config.androidBundleId){
+            throw new Error('Android build error: missing "android-bundle-id" value in config file');
+        }
+        if(!fs.existsSync(config.androidProjectPath)){
+            throw new Error(`Android build error: no Android project in "${config.androidProjectPath}" directory`);
+        }
+        if(!fs.existsSync(config.androidKeystorePath)){
+            throw new Error(`Android build error: missing file "${config.androidKeystorePath}"`);
+        }
+        if(!config.androidKeystoreAlias){
+            throw new Error('Android build error: missing "android-keystore-alias" value in config file');
+        }
+        if(!config.androidKeystorePassword){
+            throw new Error('Android build error: missing "android-keystore-password" value in config file');
+        }
+        if(!fs.existsSync(config.buildsDir)){
+            utils.createPath({workingPath: config.rootPath, path: config.buildsDir});
+        }
+        if(!commandExists('jarsigner')){
+            throw new Error('Android build error: command "jarsigner" not found, please add Android SDK tools in $PATH');
+        }
+        if(!commandExists('zipalign')){
+            throw new Error('Android build error: command "zipalign" not found, please add last Android SDK build-tools in $PATH');
+        }
     }
 }
 

@@ -2,18 +2,25 @@
     "appName": "App Test",
     "builds": [
         {
-            "androidBuildPath": "https://lcaprini.com/test/Android/App_Test_v.1.0.0_RC.apk",
-            "changelog": "First version",
-            "iosBuildPath": "https://lcaprini.com/test/iOS/manifest_App_Test_v.1.0.0_RC.plist",
-            "name": "App Test v.1.0.0 RC",
-            "version": "1.0.0 RC"
+            "version": "1.5.3",
+            "hidden": true,
+            "changelog": [
+                "test 1",
+                "test 2",
+                "test3"
+            ],
+            "date": "19 06 2017 23:49:07",
+            "androidBuildPath": "https://lcaprini.com/test/Android/App_Test_v.1.0.0_RC.apk"
         },
         {
-            "changelog": "Some edits...",
-            "dev": "dev",
+            "androidBuildPath": "https://lcaprini.com/test/Android/App_Test_v.1.0.0_RC.apk",
+            "changelog": [
+                "First version"
+            ],
+            "date": "19/05/2017 16:22:51",
+            "hidden": false,
             "iosBuildPath": "https://lcaprini.com/test/iOS/manifest_App_Test_v.0.9.6_beta-[DEV].plist",
-            "name": "App Test v.0.9.6 beta-[DEV]",
-            "version": "0.9.6 beta-[DEV]"
+            "version": "1.0.0 RC"
         }
     ]
 }

@@ -7,14 +7,14 @@ const _ = require('lodash');
 const path = require('path');
 const findVersions = require('find-versions');
 const shell = require('shelljs');
-const commandExists = require('command-exists').sync;
 
 const logger = require('./logger');
 const utils = require('./utils');
-const cordova = require('./cordova');
+const cordovaTasks = require('./cordova').TASKS;
+const cordova = require('./cordova').CORDOVA;
 const android = require('./android');
 const ios = require('./ios');
-const cordovaTasks = require('./cordova').TASKS;
+const repo = require('./repo');
 
 class Config {
 
@@ -90,12 +90,12 @@ class Config {
         this.ftpSourcesDestinationPath = '';
 
         // Email
-        this.smtpServer = '';
-        this.smtpPort = 25;
-        this.smtpUser = '';
-        this.smtpPass = '';
-        this.mailFrom = '';
-        this.mailTo = [];
+        this.emailHost = '';
+        this.emailPort = 25;
+        this.emailUser = '';
+        this.emailPassword = '';
+        this.emailFrom = '';
+        this.emailTo = [];
     }
 
     init({configPath, program}) {
@@ -226,16 +226,12 @@ class Config {
 
         // Check params for iOS app builder
         if(this.tasks.contains(cordovaTasks.BUILD_IOS)){
-            this.verifyIosSteps();
+            cordova.verifyIos(this);
         }
 
         // Check params for Android app builder
         if(this.tasks.contains(cordovaTasks.BUILD_ANDROID)){
-            const cordovaAndroidStringsPath = path.join(this.cordovaPath, './platforms/android/res/values/strings.xml');
-            if(!fs.existsSync(cordovaAndroidStringsPath)){
-                throw new Error(`Android build error: file "${cordovaAndroidStringsPath}" doesn\'t exists`);
-            }
-            this.verifyAndroidSteps();
+            cordova.verifyAndroid(this);
         }
 
         // Check params for FTP build uploader
@@ -254,45 +250,6 @@ class Config {
         }
     }
 
-    verifyIosSteps(){
-        if(!this.iosBundleId){
-            throw new Error('iOS build error: missing "ios-bundle-id" value in config file');
-        }
-        if(!this.iosProvisioningProfile){
-            throw new Error('iOS build error: missing "ios-provisioning-profile" value in config file');
-        }
-        if(!this.buildsDir){
-            throw new Error('iOS build error: missing "builds-dir" value in config file');
-        }
-    }
-
-    verifyAndroidSteps(){
-        if(!this.androidBundleId){
-            throw new Error('Android build error: missing "android-bundle-id" value in config file');
-        }
-        if(!fs.existsSync(this.androidProjectPath)){
-            throw new Error(`Android build error: no Android project in "${this.androidProjectPath}" directory`);
-        }
-        if(!fs.existsSync(this.androidKeystorePath)){
-            throw new Error(`Android build error: missing file "${this.androidKeystorePath}"`);
-        }
-        if(!this.androidKeystoreAlias){
-            throw new Error('Android build error: missing "android-keystore-alias" value in config file');
-        }
-        if(!this.androidKeystorePassword){
-            throw new Error('Android build error: missing "android-keystore-password" value in config file');
-        }
-        if(!fs.existsSync(this.buildsDir)){
-            utils.createPath({workingPath:this.rootPath, path:this.buildsDir});
-        }
-        if(!commandExists('jarsigner')){
-            throw new Error('Android build error: command "jarsigner" not found, please add Android SDK tools in $PATH');
-        }
-        if(!commandExists('zipalign')){
-            throw new Error('Android build error: command "zipalign" not found, please add last Android SDK build-tools in $PATH');
-        }
-    }
-
     verifyUploadBuildsSteps(){
         if(!this.ftpBuildsHost){
             throw new Error('FTP build upload error: missing "ftp-builds-hosts" value in config file');
@@ -307,7 +264,7 @@ class Config {
             throw new Error('FTP build upload error: missing "ftp-builds-password" value in config file');
         }
         if(this.tasks.contains(cordovaTasks.BUILD_IOS) || this.tasks.contains(cordovaTasks.BUILD_ANDROID)){
-            this.verifyUpdateRepoSteps();
+            repo.verify(this);
         }
         if(this.tasks.contains(cordovaTasks.BUILD_IOS)){
             if(!this.ftpBuildsIOSDestinationPath){
@@ -321,27 +278,6 @@ class Config {
         }
     }
 
-    verifyUpdateRepoSteps(){
-        if(!this.ftpRepoHost){
-            throw new Error('Repo update error: missing "ftp-repo-hosts" value in config file');
-        }
-        if(!this.ftpRepoPort){
-            throw new Error('Repo update error: missing "ftp-repo-port" value in config file');
-        }
-        if(!this.ftpRepoUser){
-            throw new Error('Repo update error: missing "ftp-repo-user" value in config file');
-        }
-        if(!this.ftpRepoPassword){
-            throw new Error('Repo update error: missing "ftp-repo-password" value in config file');
-        }
-        if(!this.ftpRepoJsonPath){
-            throw new Error('Repo update error: missing "ftp-repo-working-dir" value in config file');
-        }
-        if(!this.repoHomepageUrl){
-            throw new Error('Repo update error: missing "repo-homepage-url" value in config file');
-        }
-    }
-
     verifyUploadSourcesSteps(){
         if(!this.ftpSourcesHost){
             throw new Error('FTP sources upload error: missing "ftp-sources-hosts" value in config file');
@@ -349,7 +285,7 @@ class Config {
         if(!this.ftpSourcesUser){
             throw new Error('FTP sources upload error: missing "ftp-sources-user" value in config file');
         }
-        if(!ftpSourcesPassword){
+        if(!this.ftpSourcesPassword){
             throw new Error('FTP sources upload error: missing "ftp-sources-password" value in config file');
         }
         if(!this.ftpSourcesDestinationPath){
@@ -358,23 +294,23 @@ class Config {
     }
 
     verifySendEmailSteps(){
-        if(!this.smtpServer){
-            throw new Error('Send email error: missing "smtp-server" value in config file');
+        if(!this.emailHost){
+            throw new Error('Send email error: missing "email-host" value in config file');
         }
-        if(!this.smtpPort){
-            throw new Error('Send email error: missing "smtp-port" value in config file');
+        if(!this.emailPort){
+            throw new Error('Send email error: missing "email-port" value in config file');
         }
-        if(!this.smtpUser){
-            throw new Error('Send email error: missing "smtp-user" value in config file');
+        if(!this.emailUser){
+            throw new Error('Send email error: missing "email-user" value in config file');
         }
-        if(!this.smtpPass){
-            throw new Error('Send email error: missing "smtp-pass" value in config file');
+        if(!this.emailPassword){
+            throw new Error('Send email error: missing "email-password" value in config file');
         }
-        if(!this.mailFrom){
-            throw new Error('Send email error: missing "mail-from" value in config file');
+        if(!this.emailFrom){
+            throw new Error('Send email error: missing "email-from" value in config file');
         }
-        if(!this.mailTo){
-            throw new Error('Send email error: missing "mail-to" value in config file');
+        if(!this.emailTo){
+            throw new Error('Send email error: missing "email-to" value in config file');
         }
     }
 

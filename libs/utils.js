@@ -8,19 +8,20 @@ const JSFtp = require("jsftp");
 const fs = require('fs');
 const path = require('path');
 const Promise = require('bluebird');
+const nodemailer = require('nodemailer');
 
 const Utils = {
 
     UPLOADING_BUILDS : Promise.resolve(),
 
-    UPDATING_REPO : Promise.resolve(),
+    SENDING_EMAIL : Promise.resolve(),
 
     isUploadingBuilds(){
         return (this.UPLOADING_BUILDS.isPending());
     },
 
-    isUpdatingRepo(){
-        return (this.UPDATING_REPO.isPending());
+    isSendingEmail(){
+        return (this.SENDING_EMAIL.isPending());
     },
 
     prompt(text){
@@ -95,58 +96,40 @@ const Utils = {
             });
         });
     },
+    
+    sendEmail({from, to, server, appName, appVersion, body}){
+        const logger = require('./logger');
+        logger.section(`Send email to working group`);
 
-    updateRepo({repoPath, server, version, hidden, changelog, androidBuildPath = null, iosBuildPath = null, rootPath}){
+        // create reusable transporter object using the default SMTP transport
+        let transporter = nodemailer.createTransport({
+            host: server.host,
+            port: server.port,
+            secure: false,
+            tls: { rejectUnauthorized: false },
+            auth: {
+                user: server.user,
+                pass: server.password
+            }
+        });
 
-        function update(){
-            Utils.UPDATING_REPO = new Promise((resolve, reject) => {
+        // setup email data with unicode symbols
+        let mailOptions = {
+            from: `Mobile App Distribution <${from}>`,
+            to: to,
+            subject: `${appName} v.${appVersion} is ready`,
+            html: body
+        };
 
-                Utils.downloadFile({file : repoPath, server}).then(
-                    data => {
-                        let jsonFile = JSON.parse(data);
-                        let build = _.remove(jsonFile.builds, b => {return b.version == version})[0];
-                        if(!build){
-                            build = {
-                                version,
-                                hidden
-                            }
-                        }
-                        build.changelog = changelog;
-                        build.date = moment().format('DD/MM/YYYY HH:mm:ss');
-                        if(androidBuildPath){
-                            build.androidBuildPath = androidBuildPath;
-                        }
-                        if(iosBuildPath){
-                            build.iosBuildPath;
-                        }
-                        jsonFile.builds.unshift(build);
-                        const tmpJsonFile = path.join(rootPath, `./.builds.json`);
-                        fs.writeFileSync(tmpJsonFile, JSON.stringify(jsonFile, null, 4), {encoding: 'utf-8', flag: 'w'});
-                        Utils.uploadFile({
-                            localFile : tmpJsonFile,
-                            remoteFile : repoPath,
-                            server
-                        }).then(
-                            () => {
-                                fs.unlinkSync(tmpJsonFile);
-                                resolve();
-                            }
-                        )
-                    },
-                    err => {
-                        logger.error(err);
-                    }
-                )                
-            });
-        }
-
-        // Wait previous update before run the new one
-        if(this.isUpdatingRepo()){
-            this.UPDATING_REPO.then(update);
-        }
-        else{
-            update();
-        }
+        // send mail with defined transport object
+        Utils.SENDING_EMAIL = new Promise((resolve, reject) => {
+            transporter.sendMail(mailOptions, (err, info) => {
+                if (err) {
+                    throw err;
+                }
+                resolve();
+            }); 
+        });
     },
 
     printQRCode(data){

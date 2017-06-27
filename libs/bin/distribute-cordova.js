@@ -8,7 +8,8 @@ const url = require('url');
 
 const config = require('../config');
 const utils = require('../utils');
-const cordova = require('../cordova').cordova;
+const repo = require('../repo');
+const cordova = require('../cordova').CORDOVA;
 const android = require('../android');
 const TASKS = require('../cordova').TASKS;
 
@@ -37,7 +38,7 @@ program
  * Print error and exit process
  * @param {Error} err 
  */
-const quit = err => {
+const endDistribute = err => {
     const logger = require('../logger');
 
     if(err){
@@ -46,22 +47,70 @@ const quit = err => {
         process.exit(1);
     }
 
-    const exit = url => {
-        logger.printEnd();
-        if(config.qrcode && url){
-            utils.printQRCode(url);
-        }
-        process.exit(0);
-    }
-
-    // Close process when uploading and updating repo tasks is completed
-    if(utils.isUploadingBuilds() || utils.isUpdatingRepo()){
+    // Close process when uploading and updating repo tasks are completed
+    if(utils.isUploadingBuilds() || repo.isUpdatingRepo()){
         Promise.all([utils.UPDATING_REPO, utils.UPLOADING_BUILDS]).then(() => {
-            exit(config.repoHomepageUrl);
+            exit();
         });
     }
     else{
-        exit(config.repoHomepageUrl);
+        exit();
+    }
+}
+
+/**
+ * Send email, print close message and close process
+ */
+const exit = () => {
+    const logger = require('../logger');
+
+    /**
+     * SEND EMAIL
+     */
+    if(config.tasks.contains(TASKS.SEND_EMAIL)){
+        let emailData = {
+            appName : config.appName,
+            appVersion : config.appVersion,
+            appLabel : config.applabel,
+            hidden : config.hidden,
+            repoHomepageUrl : config.repoHomepageUrl
+        }
+        if(config.tasks.contains(TASKS.BUILD_ANDROID)){
+            emailData.androidBuildPath = url.resolve(config.repoAndroidUrlPath, config.apkFileName);
+        }
+        if(config.tasks.contains(TASKS.BUILD_IOS)){
+            emailData.iosBuildPath = url.resolve(config.repoIOSUrlPath, config.apkFileName);;
+        }
+        const emailBody = cordova.composeEmail(emailData);
+        utils.sendEmail({
+            from : config.emailFrom,
+            to : config.emailTo,
+            server : {
+                host : config.emailHost,
+                port : config.emailPort,
+                user : config.emailUser,
+                password : config.emailPassword
+            },
+            appName : config.appName,
+            appVersion : config.appVersion,
+            body : emailBody
+        });
+        utils.SENDING_EMAIL.then(
+            () => {
+                logger.printEnd();
+                if(config.qrcode && config.repoHomepageUrl){
+                    utils.printQRCode(config.repoHomepageUrl);
+                }
+                process.exit(0);
+            }
+        )
+    }
+    else{
+        logger.printEnd();
+        if(config.qrcode && config.repoHomepageUrl){
+            utils.printQRCode(config.repoHomepageUrl);
+        }
+        process.exit(0);
     }
 }
 
@@ -75,60 +124,59 @@ const startDistribution = () => {
         /**
          * COMPILE SOURCES
          */
-        // if(config.tasks.contains(TASKS.COMPILE_SOURCES)){
-        //     cordova.compileSource({
-        //         sourcePath : config.sourcePath,
-        //         compileSourcesCmd : config.compileSourcesCmd,
+        if(config.tasks.contains(TASKS.COMPILE_SOURCES)){
+            cordova.compileSource({
+                sourcePath : config.sourcePath,
+                compileSourcesCmd : config.compileSourcesCmd,
 
-        //         verbose : config.verbose
-        //     });
-        // }
+                verbose : config.verbose
+            });
+        }
         /**
          * Set version and name in config.xml
          */
-        // cordova.setVersion({
-        //     cordovaPath : config.cordovaPath,
-        //     appVersion : config.appVersion
-        // });
+        cordova.setVersion({
+            cordovaPath : config.cordovaPath,
+            appVersion : config.appVersion
+        });
 
         /**
          * BUILD IOS PLATFORM
          */
-        // if(config.tasks.contains(TASKS.BUILD_IOS)){
-        // }
+        if(config.tasks.contains(TASKS.BUILD_IOS)){
+        }
 
         /**
          * BUILD ANDROID PLATFORM
          */
         if(config.tasks.contains(TASKS.BUILD_ANDROID)){
-            // cordova.distributeAndroid({
-            //     launcherName : config.appLabel,
-            //     id : config.androidBundleId,
-            //     versionCode : config.androidVersionCode,
+            cordova.distributeAndroid({
+                launcherName : config.appLabel,
+                id : config.androidBundleId,
+                versionCode : config.androidVersionCode,
 
-            //     cmdCordovaAndroid : config.cmdCordovaAndroid,
-            //     cordovaPath: config.cordovaPath,
-            //     apkFilePath : config.apkFilePath,
-            //     keystore : {
-            //         path: config.androidKeystorePath,
-            //         alias : config.androidKeystoreAlias,
-            //         password : config.androidKeystorePassword
-            //     },
+                cmdCordovaAndroid : config.cmdCordovaAndroid,
+                cordovaPath: config.cordovaPath,
+                apkFilePath : config.apkFilePath,
+                keystore : {
+                    path: config.androidKeystorePath,
+                    alias : config.androidKeystoreAlias,
+                    password : config.androidKeystorePassword
+                },
 
-            //     verbose : config.verbose
-            // });
+                verbose : config.verbose
+            });
             if(config.tasks.contains(TASKS.UPLOAD_BUILDS)){
-                // android.uploadAPK({
-                //     apkFilePath : config.apkFilePath,
-                //     server : {
-                //         host : config.ftpBuildsHost,
-                //         port : config.ftpBuildsPort,
-                //         user : config.ftpBuildsUser,
-                //         pass : config.ftpBuildsPassword
-                //     },
-                //     apkDestinationPath : config.ftpBuildsAndroidDestinationPath
-                // });
-                const androidBuildPath = url.resolve(config.repoAndroidUrlPath, config.apkFileName);
+                android.uploadAPK({
+                    apkFilePath : config.apkFilePath,
+                    server : {
+                        host : config.ftpBuildsHost,
+                        port : config.ftpBuildsPort,
+                        user : config.ftpBuildsUser,
+                        pass : config.ftpBuildsPassword
+                    },
+                    apkDestinationPath : config.ftpBuildsAndroidDestinationPath
+                });
                 android.updateRepository({
                     repoPath : config.ftpRepoJsonPath,
                     server : {
@@ -137,7 +185,7 @@ const startDistribution = () => {
                         user : config.ftpRepoUser,
                         pass : config.ftpRepoPassword
                     },
-                    androidBuildPath : androidBuildPath,
+                    androidBuildPath : url.resolve(config.repoAndroidUrlPath, config.apkFileName),
                     version : config.appVersionLabel,
                     changelog : config.changeLog,
                     hidden : config.hidden,
@@ -150,10 +198,10 @@ const startDistribution = () => {
          */
 
 
-        quit();
+        endDistribute();
     }
     catch(err){
-        quit(err);
+        endDistribute(err);
     }
 }
 
@@ -165,7 +213,7 @@ const initCordova = () => {
         config.printRecap().then(startDistribution);
     }
     catch(err){
-        quit(err);
+        endDistribute(err);
     }
 }
 
