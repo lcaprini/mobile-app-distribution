@@ -37,6 +37,7 @@ class Config {
         this.appSchema = '';
 
         // Souces
+        this.changeVersionHtmlPath = '';
         this.compileSourcesPath = '';
         this.compileSourcesCmd = '';
         this.sourcePath = '';
@@ -121,6 +122,7 @@ class Config {
                         config.rootPath = path.dirname(configPath);
                         // Calculate and set other dirs
                         config.sourcePath = path.isAbsolute(config.compileSourcesPath)? config.compileSourcesPath : path.join(config.rootPath, config.compileSourcesPath);
+                        config.versionHTMLPath = path.isAbsolute(config.changeVersionHtmlPath)? config.changeVersionHtmlPath : path.join(config.rootPath, config.changeVersionHtmlPath);
                         config.cordovaPath = path.isAbsolute(config.cordovaRootPath)? config.cordovaRootPath : path.join(config.rootPath, config.cordovaRootPath);
                         config.cordovaConfigPath = path.join(config.cordovaPath, './config.xml');
                         config.buildsDir = path.isAbsolute(config.buildsDir)? config.buildsDir : path.join(config.rootPath, config.buildsDir);
@@ -221,7 +223,12 @@ class Config {
 
         // Check params for sources compiler steps
         if(this.tasks.contains(cordovaTasks.COMPILE_SOURCES)){
-            cordova.verifyConfigs(this);
+            cordova.verifyCompileConfigs(this);
+        }
+
+        // Check params for sources compiler steps
+        if(this.tasks.contains(cordovaTasks.CHANGE_VERSION)){
+            cordova.verifyVersionConfigs(this);
         }
 
         // Check params for iOS app builder

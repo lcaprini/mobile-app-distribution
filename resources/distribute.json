@@ -3,6 +3,7 @@
     "app-label": "App Test",
     "app-schema": "apptest",
 
+    "change-version-html-path": "src/html/login.html",
     "compile-sources-path": "src",
     "compile-sources-cmd": "grunt build:production",
 

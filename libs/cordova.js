@@ -43,6 +43,22 @@ const Cordova = {
     },
 
     /**
+     * Set app label version in HTML
+     */
+    changeVersion({filePath, version}){
+        logger.section(`Set version ${version} in ${filePath} HTML`);
+        let versionFile = fs.readFileSync(filePath, 'utf-8');
+        try{
+            let newVersionFile = versionFile.replace(/<mad-app-version.*>([\s\S]*?)<\/mad-app-version>/ig, `<mad-app-version> ${version} </mad-app-version>`);
+            console.log(newVersionFile);
+            versionFile = newVersionFile;
+            fs.writeFileSync(filePath, versionFile, 'utf-8');
+        }catch(err){
+            logger.error(err);
+        }
+    },
+
+    /**
      * Set bundle id in config.xml using cordova-config module
      */
     setId({cordovaPath, id}){
@@ -213,7 +229,7 @@ const Cordova = {
      * Verify configuration for compile and config update steps
      * @param {Object} config 
      */
-    verifyConfigs(config){
+    verifyCompileConfigs(config){
         if(!config.compileSourcesCmd){
             throw new Error('Source compile error: missing "compile-sources-cmd" value in config file');
         }
@@ -228,6 +244,19 @@ const Cordova = {
         }
         if(!config.appVersion){
             throw new Error('Invalid build version format: please, see http://semver.org');
+        }
+    },
+
+    /**
+     * Verify configuration for change version steps
+     * @param {Object} config 
+     */
+    verifyVersionConfigs(config){
+        if(!config.versionHTMLPath){
+            throw new Error('Version change error: missing "change-version-html-path" value in config file');
+        }
+        if(!fs.existsSync(config.versionHTMLPath)){
+            throw new Error(`Version change error: file "change-version-html-path" doesn\'t exists at ${config.versionHTMLPath}`);
         }
     },
 

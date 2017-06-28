@@ -121,6 +121,7 @@ const startDistribution = () => {
     const logger = require('../logger');
 
     try{
+
         /**
          * COMPILE SOURCES
          */
@@ -132,6 +133,7 @@ const startDistribution = () => {
                 verbose : config.verbose
             });
         }
+
         /**
          * Set version and name in config.xml
          */
@@ -139,6 +141,16 @@ const startDistribution = () => {
             cordovaPath : config.cordovaPath,
             appVersion : config.appVersion
         });
+
+        /**
+         * CHANGE VERSION
+         */
+        if(config.tasks.contains(TASKS.CHANGE_VERSION)){
+            cordova.changeVersion({
+                filePath : config.versionHTMLPath,
+                version : config.appVersionLabel
+            });
+        }
 
         /**
          * BUILD IOS PLATFORM
