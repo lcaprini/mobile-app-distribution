@@ -1,16 +1,16 @@
 <template>
     <div class="details" :class="{visible : visible}">
-        <h2> {{ appName }} v.{{ version }} </h2>
+        <h3> {{ appName }} v.{{ version }} </h3>
         <div class="row">
-            <div class="bold changelogLabel col-xs-12 col-sm-2">Changelog</div>
+            <div class="changelogLabel col-xs-12 col-sm-2">Changelog</div>
             <div class="changelogText col-xs-12 col-sm-9 pull-right">
                 <ul>
-                    <li v-for="log in changelog"> {{ log }} </li>
+                    <li v-for="(log, index) in changelog" :key="index"> {{ log }} </li>
                 </ul>
             </div>
         </div>
         <div class="row">
-            <div class="bold changelogLabel col-xs-12 col-sm-3">Release date</div>
+            <div class="changelogLabel col-xs-12 col-sm-3">Release date</div>
             <div class="col-xs-8"> {{ date }} </div>
         </div>
         <div class="row downloaders">
@@ -118,26 +118,26 @@ export default {
         }
     }
     
-    h2 {
+    h3 {
         color: $mainColor;
-        font-weight: bold;
         text-align: center;
-        font-size: 16pt;
         margin: 20px;
+        font-size: 18px;
+
+        @media screen and (max-width: 768px) {
+            font-size: 16px;
+        }
     }
 
     .row {
         margin: 20px 0;
     }
 
-    .bold {
-        font-weight: bold;
-    }
-
     .changelogText {
         min-height: 130px;
         border: 1px solid #bdbdbd;
         padding: 5px 10px;
+        margin-right: 15px;
 
         ul {
             padding-left: 15px;
@@ -165,14 +165,12 @@ export default {
 
     .btn-ios {
         background: #3498db;
-        font-weight: bold;
         color: white;
         border-radius: 0px;
     }
 
     .btn-android {
         background: #9c0;
-        font-weight: bold;
         color: white;
         border-radius: 0px;
     }

@@ -72,7 +72,6 @@ export default {
         background-color: white;
         border: none;
         border-bottom: 1px solid $mainColor;
-        font-weight: bold;
         text-align: left;
         -webkit-transition: color 0.3s, background 0.3s;
         -moz-transition: color 0.3s, background 0.3s;
