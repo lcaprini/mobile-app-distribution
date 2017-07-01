@@ -102,11 +102,23 @@ export default {
 }
 </script>
 
-<style>
+<style lang="sass">
     html,
     body {
         height: 100%;
         overflow: hidden;
+
+        button.btn{
+            &:active,
+            &:focus,
+            &:hover,
+            &:active:hover,
+            &:active:focus {
+                background: none;
+                box-shadow: none;
+                outline: none;
+            }
+        }
     }
 </style>
 
