@@ -14,6 +14,7 @@
 
                         <form class="form-inline">
                             <input type="search" class="form-control search" v-model="search" placeholder="Search...">
+                            <button v-show="search != ''" type="button" class="cancel" @click="search = ''">x</button>
                         </form>
 
                         <ul class="version-list">
@@ -152,6 +153,21 @@ export default {
                 box-shadow: none;
                 padding: 0 20px;
                 width: 100%;
+            }
+
+            .cancel {
+                position: absolute;
+                right: 20px;
+                top: 7px;
+                border-radius: 50%;
+                border: 1px solid #a7a7a7;
+                background: #a7a7a7;
+                width: 20px;
+                height: 20px;
+                line-height: 10px;
+                color: white;
+                text-align: center;
+                font-size: 13px;
             }
 
             ul.version-list {
