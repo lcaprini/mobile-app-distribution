@@ -156,6 +156,16 @@ const startDistribution = () => {
          * BUILD IOS PLATFORM
          */
         if(config.tasks.contains(TASKS.BUILD_IOS)){
+            cordova.distributeIos({
+                displayName : config.appLabel,
+                id : config.iosBundleId,
+                bundleVersion : config.iosBundleVersion,
+
+                cmdCordovaIos : config.cmdCordovaIOS,
+                cordovaPath : config.cordovaPath,
+
+                verbose : config.verbose
+            });
         }
 
         /**

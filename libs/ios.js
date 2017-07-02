@@ -12,6 +12,9 @@ class Ios {
     }
 
     verify(config){
+        if(!fs.existsSync(config.iosProjectPath)){
+            throw new Error(`iOS build error: no iOS project in "${config.iosProjectPath}" directory`);
+        }
         if(!config.iosBundleId){
             throw new Error('iOS build error: missing "ios-bundle-id" value in config file');
         }

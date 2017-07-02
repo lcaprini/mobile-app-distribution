@@ -129,6 +129,25 @@ const Cordova = {
     },
 
     /**
+     * Set iOS version code in config.xml using cordova-config module
+     */
+    setIosBundleVersion({cordovaPath, bundleVersion}){
+        logger.section(`Set Ios bundle version in config.xml to ${bundleVersion}`);
+        const cordovaConfigPath = path.join(cordovaPath, './config.xml');
+        const config = new Config(cordovaConfigPath);
+        config.setIOSBundleVersion(bundleVersion);
+        config.writeSync();
+    },
+
+    /**
+     * Exec all task to prepare and build the iOS platform
+     */
+    distributeIos({displayName, id, bundleVersion, cmdCordovaIos = 'cordova build ios', cordovaPath, verbose = false}){
+        this.setId({cordovaPath, id});
+        this.setIosBundleVersion({cordovaPath, bundleVersion});
+    },
+
+    /**
      * Compose email for 
      */
     composeEmail({appName, appLabel, appVersion, hidden, repoHomepageUrl, androidBuildPath = null, iosBuildPath = null}){
