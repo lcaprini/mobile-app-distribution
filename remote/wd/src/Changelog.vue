@@ -1,7 +1,15 @@
 <template>
     <span id="changelog">
 
-        <Button type="ghost" @click="changelogModal = true"> Changelog </Button>
+        <Button 
+            type="ghost"
+            class="visible-xs"
+            shape="circle"
+            icon="clipboard"
+            @click="changelogModal = true"></Button>
+        
+        <Button type="ghost" class="hidden-xs" @click="changelogModal = true"> Changelog </Button>
+
         <Modal
             v-model="changelogModal"
             title="Changelog"
