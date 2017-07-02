@@ -1,33 +1,29 @@
 <template>
     <div class="details" :class="{visible : visible}">
         <h3> {{ appName }} v.{{ version }} </h3>
-        <div class="row">
-            <div class="changelogLabel col-xs-12 col-sm-2">Changelog</div>
-            <div class="changelogText col-xs-12 col-sm-9 pull-right">
-                <ul>
+
+        <Row>
+            <Col :xs="24" :sm="5"> Changelog </Col>
+            <Col class="changelogText" :xs="24" :sm="18">
+                <ul class="changelog">
                     <li v-for="(log, index) in changelog" :key="index"> {{ log }} </li>
                 </ul>
-            </div>
-        </div>
-        <div class="row">
-            <div class="changelogLabel col-xs-12 col-sm-3">Release date</div>
-            <div class="col-xs-8"> {{ date }} </div>
-        </div>
-        <div class="row downloaders">
-            
-            <a v-if="iosLink"
-                class="btn col-xs-12 col-sm-4 btn-ios"
-                :class="androidLink? 'col-sm-offset-1' : 'col-sm-offset-4'"
-                :href="'itms-services://?action=download-manifest&amp;url='+iosLink"
-                v-qr-code-tooltip data-toggle="tooltip" :title="`<img src='https://chart.googleapis.com/chart?cht=qr&chs=300x300&choe=UTF-8&chld=H|0&chl=${iosLink}'/>`"> Download IPA </a>
+            </Col>
+        </Row>
 
-            <a v-if="androidLink"
-                class="btn col-xs-12 col-sm-4 btn-android"
-                :class="iosLink? 'col-sm-offset-2' : 'col-sm-offset-4'"
-                :href="androidLink"
-                v-qr-code-tooltip data-toggle="tooltip" :title="`<img src='https://chart.googleapis.com/chart?cht=qr&chs=300x300&choe=UTF-8&chld=H|0&chl=${androidLink}'/>`"> Download APK </a>
-
-        </div>
+        <Row>
+            <Col :xs="8" :sm="5"> Release date </Col>
+            <Col :xs="16" :sm="19"> {{ date }} </Col>
+        </Row>
+        
+        <Row class="downloader" type="flex" justify="space-around">
+            <Col :xs="24" :sm="8" v-if="iosLink">
+                <Button class="ios" long @click="downloadIPA"> Download IPA </Button>
+            </Col>
+            <Col :xs="24" :sm="8" v-if="androidLink">
+                <Button class="android" long @click="downloadAPK"> Download APK </Button>
+            </Col>
+        </Row>
     </div>
 </template>
 <script>
@@ -67,16 +63,16 @@ export default {
             default: false
         }
     },
-    directives : {
-        qrCodeTooltip : {
-            // bind(el){
-            //     $(el).tooltip({
-            //         animated: 'fade',
-            //         placement: 'bottom',
-            //         html: true,
-            //         delay: { "hide": 250 }
-            //     });
-            // }
+    methods: {
+        downloadIPA(){
+            const link = `itms-services://?action=download-manifest&amp;url=${this.iosLink}`;
+            console.log('Download IPA', link);
+            window.open(link, '_self');
+        },
+        downloadAPK(){
+            const link = this.androidLink;
+            console.log('Download APK', link);
+            window.open(link, '_self');
         }
     }
 }
@@ -88,13 +84,15 @@ export default {
 .details {
     max-height: 0;
     overflow: auto;
-    padding: 0 2rem;
+    padding: 0 16px;
     -webkit-transition: max-height 0.5s, opacity 0.5s;
     -moz-transition: max-height 0.5s, opacity 0.5s;
     transition: max-height 0.5s, opacity 0.5s;
     z-index: -1;
+    border-left: 1px solid $main-color;
+    border-right: 1px solid $main-color;
 
-    @media screen and (min-width: 35rem) {
+    @media screen and (min-width: 560px) {
         max-height: none;
         height: 100%;
         position: absolute;
@@ -102,92 +100,42 @@ export default {
         top: 0;
         width: 70%;
         opacity: 0;
-        padding: 1rem 2rem;
-    }
-    &.visible {
-        max-height: 1000px;
-        z-index: 10;
+        padding-top: 16px;
+        padding-bottom: 16px;
+        border: none;
 
-        &.visible-xs {
-            border-bottom: 1px solid $mainColor;
-        }
-
-        @media screen and (min-width: 35rem) {
+        &.visible {
             max-height: none;
             opacity: 1;
         }
     }
+
+    &.visible {
+        max-height: 1000px;
+        z-index: 10;
+        padding: 16px;
+    }
     
     h3 {
-        color: $mainColor;
+        color: $main-color;
         text-align: center;
-        margin: 20px;
-        font-size: 18px;
-
-        @media screen and (max-width: 768px) {
-            font-size: 16px;
-        }
+        font-size: 16px;
     }
 
-    .row {
-        margin: 20px 0;
+    .ivu-row {
+        margin: 30px 0;
     }
 
-    .changelogText {
-        min-height: 130px;
-        border: 1px solid #bdbdbd;
-        padding: 5px 10px;
-        margin-right: 15px;
-
-        ul {
-            padding-left: 15px;
-        }
-    }
-
-    @media only screen and (max-width: 767px){
-        
-        .changelogText {
-            margin-top: 10px;
-            border: none;
-        }
-        .downloaders {
-            margin: 20px;
-
-            .tooltip-inner {
-                max-width: 1000px;
+    @media screen and (max-width: 767px) {
+        .downloader {
+            .ivu-col:not(:first-of-type){
+                margin-top: 10px;
             }
         }
     }
-
-    .btn {
-        margin-top: 10px;
-    }
-
-    .btn-ios {
-        background: #3498db;
-        color: white;
-        border-radius: 0px;
-    }
-
-    .btn-android {
-        background: #9c0;
-        color: white;
-        border-radius: 0px;
+    &.visible-xs.visible:last-of-type {
+        border-bottom: 1px solid $main-color;
     }
 }
 
-</style>
-<style lang="sass">
-    .downloaders {
-        .tooltip {
-
-            @media screen and (max-width: 35rem) {
-                display: none !important;
-            }
-
-            .tooltip-inner {
-                max-width: 1000px;
-            }
-        }
-    }
 </style>

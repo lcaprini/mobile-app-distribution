@@ -57,29 +57,35 @@ export default {
 </script>
 <style lang="sass" scoped>
 
-@import "assets/css/colors";
+@import "assets/css/main";
 
 .tab {
 
     .tab-toggle {
-        position: relative;
         outline: none;
         width: 100%;
-        display: inline-block;
-        color: $mainColor;
-        padding: 0.75rem 1rem 0.75rem 1.5rem;
-        margin: 0 auto;
+        color: $main-color;
+        padding: 12px 16px;
+        font-size: 13px;
+        font-weight: 500;
         background-color: white;
         border: none;
-        border-bottom: 1px solid $mainColor;
+        border-top-left-radius: 4px;
+        border-bottom-left-radius: 4px;
         text-align: left;
         -webkit-transition: color 0.3s, background 0.3s;
         -moz-transition: color 0.3s, background 0.3s;
         transition: color 0.3s, background 0.3s;
 
+        @media screen and (max-width: 560px) {
+            border: 1px solid $main-color;
+            border-bottom-width: 0;
+            border-radius: 0;
+        }
+
         &.active {
             color: white;
-            background-color: $mainColor;
+            background-color: $main-color;
             cursor: default;
         }
 
@@ -91,8 +97,10 @@ export default {
         }
     }
 
-    &:last-of-type button.tab-toggle {
-        border-bottom-width: 0;
+    &:nth-last-child(2) {
+        @media screen and (max-width: 560px) {
+            border-bottom: 1px solid $main-color;
+        }
     }
 }
 

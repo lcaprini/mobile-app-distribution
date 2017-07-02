@@ -102,75 +102,41 @@ export default {
 }
 </script>
 
-<style lang="sass">
-    html,
-    body {
-        height: 100%;
-        overflow: hidden;
-
-        button.btn{
-            &:active,
-            &:focus,
-            &:hover,
-            &:active:hover,
-            &:active:focus {
-                background: none;
-                box-shadow: none;
-                outline: none;
-            }
-        }
-    }
-</style>
+<style lang="sass"> @import "assets/css/main"; </style>
 
 <style lang="sass" scoped>
 
 @import "assets/css/colors";
 
-body * {
-    font-family: 'Roboto', sans-serif;
+#header {
+    position: relative;
+    
+    .title {
+        text-align: center;
+        margin: 10px auto;
+        color: $main-color;
+        font-size: 20px;
+        min-height: 22px;
+    }
 }
 
-.container {
+.tabs {
+    position: relative;
+    min-height: 0;
+    overflow: hidden;
     height: 100%;
-    -webkit-display : flex;
-    display: flex;
-    -webkit-flex-direction: column;
-    flex-direction: column;
+    margin-bottom: 40px;
+    -webkit-transition: all 0.5s;
+    -moz-transition: all 0.5s;
+    transition: all 0.5s;
 
-    #header {
-        position: relative;
-        
-        .title {
-            text-align: center;
-            margin-bottom: 20px;
-            color: $mainColor;
-            font-size: 20px;
-            min-height: 22px;
-
-            @media screen and (max-width: 768px) {
-                font-size: 18px;
-            }
-        }
-    }
-
-    .tabs {
-        position: relative;
-        min-height: 0;
-        overflow: hidden;
+    .versions {
         height: 100%;
-        margin-bottom: 40px;
-        -webkit-transition: all 0.5s;
-        -moz-transition: all 0.5s;
-        transition: all 0.5s;
-        border: 1px solid $mainColor;
+        overflow-y: auto;
 
-        .versions {
-            height: 100%;
-            overflow-y: auto;
-            @media screen and (min-width: 35rem) {
-                width: 30%;
-                border-right: 1px solid $mainColor;
-            }
+        @media screen and (min-width: 560px) {
+            width: 30%;
+            border-right: 1px solid $main-color;
         }
     }
 }

@@ -1,12 +1,14 @@
 import Vue from 'vue'
 import VueResource from 'vue-resource'
 import App from './App.vue'
-import 'bootstrap/dist/css/bootstrap.css'
 import $ from "jquery";
 window.jQuery = window.$ = $;
-require('bootstrap')
+import iView from 'iview';
 
 Vue.use(VueResource);
+Vue.use(iView);
+
+import 'iview/dist/styles/iview.css';
 
 new Vue({
     el: '#app',

@@ -1,0 +1,19 @@
+
+@import "colors";
+
+button.ivu-btn {
+    background: transparent;
+    color: $main-color;
+    border-color: $main-color;
+
+    &.ios {
+        font-weight: bold;
+        color: $ios-color;
+        border-color: $ios-color;
+    }
+    &.android {
+        font-weight: bold;
+        color: $android-color;
+        border-color: $android-color;
+    }
+}

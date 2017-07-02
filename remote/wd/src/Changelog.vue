@@ -1,45 +1,49 @@
 <template>
     <span id="changelog">
-        
-        <button class="btn btn-default changelog-button" data-toggle="modal" data-target="#changelogModal" >Changelog</button>
 
-        <div id="changelogModal" class="changelog-modal modal fade" tabindex="-1" role="dialog">
-            <div class="modal-dialog" role="document">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                        <h4 class="modal-title"> Changelog </h4>
-                    </div>
-                    <div class="modal-body">
+        <Button type="ghost" @click="changelogModal = true"> Changelog </Button>
+        <Modal
+            v-model="changelogModal"
+            title="Changelog"
+            class="no-footer body-no-padding"
+            :styles="{top: '20px'}">
+            
+            <form class="form-inline">
+                <Input type="text" class="search" v-model="search" placeholder="Search..."></Input>
+                <Button
+                    v-if="search != ''"
+                    type="ghost"
+                    shape="circle"
+                    size="small"
+                    icon="close-round"
+                    @click="search = ''"
+                    class="cancel"></Button>
+            </form>
 
-                        <form class="form-inline">
-                            <input type="search" class="form-control search" v-model="search" placeholder="Search...">
-                            <button v-show="search != ''" type="button" class="cancel" @click="search = ''">x</button>
-                        </form>
-
-                        <ul class="version-list">
-                            <transition-group name="version-list" tag="li">
-                            <li v-for="(build, iB) in filteredBuilds" :key="build.version" class="version">
-                                <p class="title" v-once>
-                                    <span class="platforms">
-                                        <img v-if="build.androidBuildPath" class="icon" :src="androidLogo">
-                                        <img v-if="build.iosBuildPath" class="icon" :src="iosLogo">
-                                    </span>
-                                    {{ build.version }}
-                                    <button class="btn btn-link select" @click="showVersion(build.version)"
-                                            data-toggle="modal"
-                                            data-target="#changelogModal"> Show ▶ </button>
-                                </p>
-                                <ul class="change-list">
-                                    <li v-for="(change, iC) in build.changelog" :key="iC" class="change" v-once> {{ change }} </li>
-                                </ul>
-                            </li>
-                            </transition-group>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-        </div>
+            <ul class="version-list">
+                <transition-group name="version-list" tag="li">
+                <li v-for="(build, iB) in filteredBuilds" :key="build.version" class="version">
+                    <p class="title">
+                        <span class="platforms">
+                            <img v-if="build.androidBuildPath" class="icon" :src="androidLogo">
+                            <img v-if="build.iosBuildPath" class="icon" :src="iosLogo">
+                        </span>
+                        {{ build.version }}
+                        <Button
+                            type="ghost"
+                            shape="circle"
+                            size="small"
+                            @click="showVersion(build.version)"
+                            class="select"> Show ▶ </Button>
+                    </p>
+                    <ul class="changelog">
+                        <li v-for="(change, iC) in build.changelog" :key="iC" v-once> {{ change }} </li>
+                    </ul>
+                </li>
+                </transition-group>
+            </ul>
+            
+        </Modal>
     </span>
 </template>
 
@@ -49,6 +53,7 @@ import iosLogo from 'images/iosLogo.png';
 export default {
     data(){
         return {
+            changelogModal: false,
             search: '',
             androidLogo :androidLogo,
             iosLogo :iosLogo
@@ -64,7 +69,8 @@ export default {
         filteredBuilds(){
             if(this.search){
                 const search = this.search;
-                let filter = _.filter(this.builds, build => {
+                let filtered = [];
+                _.each(this.builds, build => {
                     let found = false;
                     let changeCounter = 0;
                     while(!found && changeCounter < build.changelog.length){
@@ -73,20 +79,54 @@ export default {
                         }
                         changeCounter++;
                     }
-                    return found;
+                    if(found){
+                        filtered.push(build);
+                    }
                 });
-                return filter;
+                return filtered;
             }
             return this.builds;
         }
     },
     methods: {
         showVersion(version){
+            this.changelogModal = false;
             this.$emit('selected', version);
         }
     }
 }
 </script>
+
+<style lang="sass">
+
+@import 'assets/css/colors';
+
+.search .ivu-input{
+    border-radius: 0;
+    border: none;
+    border-bottom: 1px solid $border-color;
+    box-shadow: none;
+    padding: 0 20px;
+    width: 100%;
+    box-shadow: none !important;
+
+    &:hover,
+    &:focus {
+        border-color: $main-color;
+    }
+}
+.ivu-btn.cancel {
+    position: absolute;
+    top: 7px;
+    right: 15px;
+    color: $main-color !important;
+    border-color: $main-color !important;
+    background-color: transparent !important;
+    width: 20px !important;
+    height: 20px !important;
+    font-size: 13px !important;
+}
+</style>
 
 <style lang="sass" scoped>
 
@@ -99,133 +139,51 @@ export default {
     opacity: 0;
 }
 
-.changelog-modal {
-    overflow: hidden !important;
-
-    .modal-dialog {
-        max-height: 93%;
-        display: -webkit-box;
-        display: -moz-box;
-        display: -ms-flexbox;
-        display: -webkit-flex;
-        display: flex;
-        -webkit-flex-direction: column;
-        flex-direction: column;
-
-        .modal-content {
-            display: -webkit-box;
-            display: -moz-box;
-            display: -ms-flexbox;
-            display: -webkit-flex;
-            display: flex;
-            -webkit-flex-direction: column;
-            flex-direction: column;
-
-            .modal-body {
-                overflow-x: hidden;
-                overflow-y: auto;
-            }
-        }
-    }
-}
-
 #changelog {
     position: absolute;
     top: 10px;
     right: 0;
+}
 
-    .changelog-button {
-        border: 1px solid $mainColor;
-        border-radius: 0;
-    }
+form {
+    position: relative;
+}
 
-    .changelog-modal {
-        .modal-header {
-            text-align: center;
-        }
-        .modal-body {
-            padding: 0;
+ul.version-list {
+    list-style: none;
+    padding: 10px;
+    margin-bottom: 0;
 
-            .search{
-                border-radius: 0;
-                border: none;
-                border-bottom: 1px solid #e4e4e4;
-                box-shadow: none;
-                padding: 0 20px;
-                width: 100%;
-            }
+    li.version {
+        margin-bottom: 5px;
 
-            .cancel {
+        .title {
+            background: $border-color;
+            font-size: 14px;
+            padding: 5px;
+            position: relative;
+            padding-left: 50px;
+            margin-bottom: 5px;
+
+            .platforms {
                 position: absolute;
-                right: 20px;
-                top: 7px;
-                border-radius: 50%;
-                border: 1px solid #a7a7a7;
-                background: #a7a7a7;
-                width: 20px;
-                height: 20px;
-                line-height: 10px;
-                color: white;
-                text-align: center;
-                font-size: 13px;
+                left: 0;
+                padding-left: 5px;
+
+                .icon {
+                    width: 20px;
+                    position: relative;
+                    top: -2px;
+                }
             }
 
-            ul.version-list {
-                list-style: none;
-                padding: 10px;
-                margin-bottom: 0;
-
-                li.version {
-
-                    .title {
-                        background: #e4e4e4;
-                        font-size: 16px;
-                        padding: 5px;
-                        margin: 5px;
-                        position: relative;
-                        padding-left: 50px;
-
-                        .platforms {
-                            position: absolute;
-                            left: 0;
-                            padding-left: 5px;
-
-                            .icon {
-                                width: 20px;
-                                position: relative;
-                                top: -2px;
-                            }
-                        }
-
-                        .select {
-                            position: absolute;
-                            right: 0;
-                            top: 0;
-                            font-size: 14px;
-                            color: $mainColor;
-                        }
-                    }
-                    
-                    ul.change-list {
-                        list-style-type: none;
-                        padding-left: 30px;
-
-                        @media screen and (max-width: 768px) {
-                            padding-left: 20px;
-                        }
-
-                        li.change {
-                            position: relative;
-                            padding-left: 15px;
-
-                            &:before {
-                                content: '✓';
-                                position: absolute;
-                                left: 0px;
-                            }
-                        }
-                    }
-                }
+            .select {
+                position: absolute;
+                right: 0;
+                top: 3px;
+                font-size: 14px;
+                color: $main-color;
+                border: none;
             }
         }
     }

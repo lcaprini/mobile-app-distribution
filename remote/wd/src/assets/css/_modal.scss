@@ -1,0 +1,46 @@
+
+.ivu-modal-wrap {
+    overflow: hidden !important;
+
+    .ivu-modal {
+        max-height: 93%;
+        display: -webkit-box;
+        display: -moz-box;
+        display: -ms-flexbox;
+        display: -webkit-flex;
+        display: flex;
+        -webkit-flex-direction: column;
+        flex-direction: column;
+
+        .ivu-modal-content {
+            display: -webkit-box;
+            display: -moz-box;
+            display: -ms-flexbox;
+            display: -webkit-flex;
+            display: flex;
+            -webkit-flex-direction: column;
+            flex-direction: column;
+
+            .ivu-modal-header {
+                text-align: center;
+            }
+
+            .ivu-modal-body {
+                overflow-x: hidden;
+                overflow-y: auto;
+            }
+        }
+    }
+}
+
+.body-no-padding {
+    .ivu-modal .ivu-modal-body {
+        padding: 0;
+    }
+}
+
+.no-footer {
+    .ivu-modal .ivu-modal-footer {
+        display: none;
+    }
+}
