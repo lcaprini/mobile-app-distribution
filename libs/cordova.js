@@ -50,7 +50,6 @@ const Cordova = {
         let versionFile = fs.readFileSync(filePath, 'utf-8');
         try{
             let newVersionFile = versionFile.replace(/<mad-app-version.*>([\s\S]*?)<\/mad-app-version>/ig, `<mad-app-version> ${version} </mad-app-version>`);
-            console.log(newVersionFile);
             versionFile = newVersionFile;
             fs.writeFileSync(filePath, versionFile, 'utf-8');
         }catch(err){
@@ -101,10 +100,10 @@ const Cordova = {
     /**
      * Build Android Cordova Platform
      */
-    buildAndroid({cmdCordovaAndroid, cordovaPath, verbose}){
-        logger.section(`Build Android platform:\n$ ${cmdCordovaAndroid}`);
+    buildAndroid({buildAndroidCommand, cordovaPath, verbose}){
+        logger.section(`Build Android platform:\n$ ${buildAndroidCommand}`);
         process.chdir(cordovaPath);
-        let err = shell.exec(cmdCordovaAndroid, {silent: !verbose}).stderr;
+        let err = shell.exec(buildAndroidCommand, {silent: !verbose}).stderr;
         if(shell.error()){
             // shelljs has already printed error,
             // so I print it only if verbose mode is OFF
@@ -118,12 +117,12 @@ const Cordova = {
     /**
      * Exec all task to prepare and build the Android platform
      */
-    distributeAndroid({launcherName, id, versionCode, cordovaPath, cmdCordovaAndroid = 'cordova build --release android', apkFilePath, keystore, verbose = false}){
+    distributeAndroid({launcherName, id, versionCode, cordovaPath, buildAndroidCommand = 'cordova build --release android', apkFilePath, keystore, verbose = false}){
         this.setId({cordovaPath, id});
         this.setAndroidVersionCode({cordovaPath, versionCode});
         this.setLauncherName({cordovaPath, launcherName})
-        this.buildAndroid({cmdCordovaAndroid, cordovaPath, verbose});
-        config.androidProjectPath = path.join(cordovaPath, './platforms/android');
+        this.buildAndroid({buildAndroidCommand, cordovaPath, verbose});
+        const androidProjectPath = path.join(cordovaPath, './platforms/android');
         android.signAPK({androidProjectPath, keystore, verbose});
         android.alignAPK({androidProjectPath, apkFilePath, verbose});
     },
@@ -142,10 +141,10 @@ const Cordova = {
     /**
      * Build iOS Cordova Platform
      */
-    buildIos({cmdCordovaIos, cordovaPath, verbose}){
-        logger.section(`Build iOS platform:\n$ ${cmdCordovaIos}`);
+    buildIos({buildIosCommand, cordovaPath, verbose}){
+        logger.section(`Build iOS platform:\n$ ${buildIosCommand}`);
         process.chdir(cordovaPath);
-        let err = shell.exec(cmdCordovaIos, {silent: !verbose}).stderr;
+        let err = shell.exec(buildIosCommand, {silent: !verbose}).stderr;
         if(shell.error()){
             // shelljs has already printed error,
             // so I print it only if verbose mode is OFF
@@ -159,11 +158,11 @@ const Cordova = {
     /**
      * Exec all task to prepare and build the iOS platform
      */
-    distributeIos({appName, displayName, id, bundleVersion, cordovaPath, iosInfoPlistPath, cmdCordovaIos = 'cordova build ios', verbose = false}){
+    distributeIos({appName, displayName, id, bundleVersion, cordovaPath, infoPlistPath, buildIosCommand = 'cordova build ios', verbose = false}){
         this.setId({cordovaPath, id});
         this.setIosBundleVersion({cordovaPath, bundleVersion});
-        ios.setDisplayName({iosInfoPlistPath, displayName});
-        this.buildIos({cmdCordovaIos, cordovaPath, verbose});
+        ios.setDisplayName({infoPlistPath, displayName});
+        this.buildIos({buildIosCommand, cordovaPath, verbose});
         const iosProjectPath = path.join(cordovaPath, './platforms/ios');
         ios.cleanProject({iosProjectPath, verbose});
         ios.archiveProject({iosProjectPath, appName, verbose});
@@ -271,19 +270,19 @@ const Cordova = {
      * @param {Object} config 
      */
     verifyCompileConfigs(config){
-        if(!config.compileSourcesCmd){
-            throw new Error('Source compile error: missing "compile-sources-cmd" value in config file');
+        if(!config.sources.compileCommand){
+            throw new Error('Source compile error: missing "sources.compileCommand" value in config file');
         }
-        if(!fs.existsSync(config.sourcePath)){
-            throw new Error(`Source compile error: directory "compile-sources-path" doesn\'t exists at ${config.sourcePath}`);
+        if(!fs.existsSync(config.sources.compilePath)){
+            throw new Error(`Source compile error: directory "sources.compilePath" doesn\'t exists at ${config.sources.compilePath}`);
         }
-        if(!fs.existsSync(config.cordovaPath)){
-            throw new Error(`Source compile error: directory "cordova-root-path" doesn\'t exists at ${config.cordovaPath}`);
+        if(!fs.existsSync(config.cordova.path)){
+            throw new Error(`Source compile error: directory "cordova.rootPath" doesn\'t exists at ${config.cordova.path}`);
         }
-        if(!fs.existsSync(config.cordovaConfigPath)){
-            throw new Error(`Source compile error: config.xml file doesn\'t exists in ${config.cordovaPath}`);
+        if(!fs.existsSync(config.cordova.configPath)){
+            throw new Error(`Source compile error: config.xml file doesn\'t exists in ${config.cordova.path}`);
         }
-        if(!config.appVersion){
+        if(!config.app.version){
             throw new Error('Invalid build version format: please, see http://semver.org');
         }
     },
@@ -293,11 +292,11 @@ const Cordova = {
      * @param {Object} config 
      */
     verifyVersionConfigs(config){
-        if(!config.versionHTMLPath){
-            throw new Error('Version change error: missing "change-version-html-path" value in config file');
+        if(!config.sources.htmlVersionPath){
+            throw new Error('Version change error: missing "sources.htmlVersionPath" value in config file');
         }
-        if(!fs.existsSync(config.versionHTMLPath)){
-            throw new Error(`Version change error: file "change-version-html-path" doesn\'t exists at ${config.versionHTMLPath}`);
+        if(!fs.existsSync(config.sources.htmlVersionPath)){
+            throw new Error(`Version change error: file "sources.htmlVersionPath" doesn\'t exists at ${config.htmlVersionPath}`);
         }
     },
 
@@ -306,7 +305,7 @@ const Cordova = {
      * @param {Object} config 
      */
     verifyAndroid(config){
-        const cordovaAndroidStringsPath = path.join(config.cordovaPath, './platforms/android/res/values/strings.xml');
+        const cordovaAndroidStringsPath = path.join(config.cordova.path, './platforms/android/res/values/strings.xml');
         if(!fs.existsSync(cordovaAndroidStringsPath)){
             throw new Error(`Android build error: file "${cordovaAndroidStringsPath}" does not exists`);
         }

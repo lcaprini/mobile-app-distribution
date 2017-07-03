@@ -95,21 +95,21 @@ class Android {
     }
 
     verify(config){
-        if(!config.androidBundleId){
-            throw new Error('Android build error: missing "android-bundle-id" value in config file');
+        if(!config.android.bundleId){
+            throw new Error('Android build error: missing "android.bundleId" value in config file');
         }
-        const androidProjectPath = path.join(config.cordovaPath, './platforms/android');
+        const androidProjectPath = path.join(config.cordova.path, './platforms/android');
         if(!fs.existsSync(androidProjectPath)){
             throw new Error(`Android build error: no Android project in "${androidProjectPath}" directory`);
         }
-        if(!fs.existsSync(config.androidKeystorePath)){
-            throw new Error(`Android build error: missing file "${config.androidKeystorePath}"`);
+        if(!fs.existsSync(config.android.keystore.path)){
+            throw new Error(`Android build error: missing file "${config.android.keystore.path}"`);
         }
-        if(!config.androidKeystoreAlias){
-            throw new Error('Android build error: missing "android-keystore-alias" value in config file');
+        if(!config.android.keystore.alias){
+            throw new Error('Android build error: missing "android.keystore.alias" value in config file');
         }
-        if(!config.androidKeystorePassword){
-            throw new Error('Android build error: missing "android-keystore-password" value in config file');
+        if(!config.android.keystore.password){
+            throw new Error('Android build error: missing "android.keystore.password" value in config file');
         }
         if(!fs.existsSync(config.buildsDir)){
             utils.createPath({workingPath: config.rootPath, path: config.buildsDir});

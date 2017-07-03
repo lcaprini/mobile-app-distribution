@@ -51,6 +51,9 @@ const Repo = {
                             () => {
                                 fs.unlinkSync(tmpJsonFile);
                                 resolve();
+                            },
+                            err => {
+                                reject(err);
                             }
                         )
                     },
@@ -71,23 +74,23 @@ const Repo = {
     },
 
     verify(config){
-        if(!config.ftpRepoHost){
-            throw new Error('Repo update error: missing "ftp-repo-hosts" value in config file');
+        if(!config.remote.repo.host){
+            throw new Error('Repo update error: missing "remote.repo.hosts" value in config file');
         }
-        if(!config.ftpRepoPort){
-            throw new Error('Repo update error: missing "ftp-repo-port" value in config file');
+        if(!config.remote.repo.port){
+            throw new Error('Repo update error: missing "remote.repo.port" value in config file');
         }
-        if(!config.ftpRepoUser){
-            throw new Error('Repo update error: missing "ftp-repo-user" value in config file');
+        if(!config.remote.repo.user){
+            throw new Error('Repo update error: missing "remote.repo.user" value in config file');
         }
-        if(!config.ftpRepoPassword){
-            throw new Error('Repo update error: missing "ftp-repo-password" value in config file');
+        if(!config.remote.repo.password){
+            throw new Error('Repo update error: missing "remote.repo.password" value in config file');
         }
-        if(!config.ftpRepoJsonPath){
-            throw new Error('Repo update error: missing "ftp-repo-working-dir" value in config file');
+        if(!config.remote.repo.jsonPath){
+            throw new Error('Repo update error: missing "remote.repo.jsonPath" value in config file');
         }
-        if(!config.repoHomepageUrl){
-            throw new Error('Repo update error: missing "repo-homepage-url" value in config file');
+        if(!config.remote.repo.homepageUrl){
+            throw new Error('Repo update error: missing "remote.repo.homepageUrl" value in config file');
         }
     }
 }

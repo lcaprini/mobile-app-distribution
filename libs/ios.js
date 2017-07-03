@@ -15,12 +15,12 @@ class Ios {
         return `${versions[0]}.${versions[1]}.${versions[2]}`;
     }
 
-    setDisplayName({iosInfoPlistPath, displayName}){
-        logger.section(`Set '${displayName}' as iOS Bundle Display Name in ${iosInfoPlistPath}`);
-        let parsedPlist = plist.parse(fs.readFileSync(iosInfoPlistPath, 'utf8'));
+    setDisplayName({infoPlistPath, displayName}){
+        logger.section(`Set '${displayName}' as iOS Bundle Display Name in ${infoPlistPath}`);
+        let parsedPlist = plist.parse(fs.readFileSync(infoPlistPath, 'utf8'));
         parsedPlist.CFBundleDisplayName = displayName;
         let updatedPlist = plist.build(parsedPlist);
-        fs.writeFileSync(iosInfoPlistPath, updatedPlist);
+        fs.writeFileSync(infoPlistPath, updatedPlist);
     }
 
     cleanProject({iosProjectPath, verbose}){
@@ -56,35 +56,32 @@ class Ios {
     }
 
     verify(config){
-        const iosProjectPath = path.join(config.cordovaPath, './platforms/ios');
+        const iosProjectPath = path.join(config.cordova.path, './platforms/ios');
         if(!fs.existsSync(iosProjectPath)){
             throw new Error(`iOS build error: no iOS project in "${iosProjectPath}" directory`);
         }
-        if(config.iosInfoPlistPath){
-            if(!fs.existsSync(config.iosInfoPlistPath)){
-                throw new Error(`iOS build error: missing plist file in "${config.iosInfoPlistPath}"`);
+        if(config.ios.infoPlistPath){
+            if(!fs.existsSync(config.ios.infoPlistPath)){
+                throw new Error(`iOS build error: missing plist file in "${config.ios.infoPlistPath}"`);
             }
         }
         else{
-            const plistPath_1 = path.join(iosProjectPath, config.appName, './Info.plist');
+            const plistPath_1 = path.join(iosProjectPath, config.app.name, './Info.plist');
             if(!fs.existsSync(plistPath_1)){
-                let plistPath_2 = path.join(iosProjectPath, config.appName, `./${config.appName}-Info.plist`);
+                let plistPath_2 = path.join(iosProjectPath, config.app.name, `./${config.app.name}-Info.plist`);
                 if(!fs.existsSync(plistPath_2)){
                     throw new Error(`iOS build error: missing plist file at "${plistPath_1}" and "${plistPath_2}". Please specify with "ios-info-plist-path" in config file`);
                 }
             else{
-                config.iosInfoPlistPath = plistPath_2;
+                config.ios.infoPlistPath = plistPath_2;
             }
             }
             else{
-                config.iosInfoPlistPath = plistPath_1;
+                config.ios.infoPlistPath = plistPath_1;
             }
         }
-        if(!config.iosBundleId){
-            throw new Error('iOS build error: missing "ios-bundle-id" value in config file');
-        }
-        if(!config.iosProvisioningProfile){
-            throw new Error('iOS build error: missing "ios-provisioning-profile" value in config file');
+        if(!config.ios.bundleId){
+            throw new Error('iOS build error: missing "ios.bundleId" value in config file');
         }
         if(!config.buildsDir){
             throw new Error('iOS build error: missing "builds-dir" value in config file');

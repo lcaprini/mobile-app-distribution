@@ -42,14 +42,14 @@ const endDistribute = err => {
     const logger = require('../logger');
 
     if(err){
-        // logger.error(err);
-        logger.error(err.message);
+        logger.error(err);
+        // logger.error(err.message);
         process.exit(1);
     }
 
     // Close process when uploading and updating repo tasks are completed
     if(utils.isUploadingBuilds() || repo.isUpdatingRepo()){
-        Promise.all([utils.UPDATING_REPO, utils.UPLOADING_BUILDS]).then(() => {
+        Promise.all([utils.UPLOADING_BUILDS, repo.UPDATING]).then(() => {
             exit();
         });
     }
@@ -69,37 +69,37 @@ const exit = () => {
      */
     if(config.tasks.contains(TASKS.SEND_EMAIL)){
         let emailData = {
-            appName : config.appName,
-            appVersion : config.appVersion,
-            appLabel : config.applabel,
+            appName : config.app.name,
+            appVersion : config.app.version,
+            appLabel : config.app.label,
             hidden : config.hidden,
-            repoHomepageUrl : config.repoHomepageUrl
+            repoHomepageUrl : config.remote.repo.homepageUrl
         }
         if(config.tasks.contains(TASKS.BUILD_ANDROID)){
-            emailData.androidBuildPath = url.resolve(config.repoAndroidUrlPath, config.apkFileName);
+            emailData.androidBuildPath = url.resolve(config.remote.repo.androidUrlPath, config.android.apkFileName);
         }
         if(config.tasks.contains(TASKS.BUILD_IOS)){
-            emailData.iosBuildPath = url.resolve(config.repoIOSUrlPath, config.apkFileName);;
+            emailData.iosBuildPath = url.resolve(config.remote.repo.iosUrlPath, config.android.apkFileName);;
         }
         const emailBody = cordova.composeEmail(emailData);
         utils.sendEmail({
-            from : config.emailFrom,
-            to : config.emailTo,
+            from : config.email.from,
+            to : config.email.to,
             server : {
-                host : config.emailHost,
-                port : config.emailPort,
-                user : config.emailUser,
-                password : config.emailPassword
+                host : config.email.host,
+                port : config.email.port,
+                user : config.email.user,
+                password : config.email.password
             },
-            appName : config.appName,
-            appVersion : config.appVersion,
+            appName : config.app.name,
+            appVersion : config.app.version,
             body : emailBody
         });
         utils.SENDING_EMAIL.then(
             () => {
                 logger.printEnd();
-                if(config.qrcode && config.repoHomepageUrl){
-                    utils.printQRCode(config.repoHomepageUrl);
+                if(config.qrcode && config.remote.repo.homepageUrl){
+                    utils.printQRCode(config.remote.repo.homepageUrl);
                 }
                 process.exit(0);
             }
@@ -107,8 +107,8 @@ const exit = () => {
     }
     else{
         logger.printEnd();
-        if(config.qrcode && config.repoHomepageUrl){
-            utils.printQRCode(config.repoHomepageUrl);
+        if(config.qrcode && config.remote.repo.homepageUrl){
+            utils.printQRCode(config.remote.repo.homepageUrl);
         }
         process.exit(0);
     }
@@ -123,12 +123,22 @@ const startDistribution = () => {
     try{
 
         /**
+         * CHANGE VERSION
+         */
+        if(config.tasks.contains(TASKS.CHANGE_VERSION)){
+            cordova.changeVersion({
+                filePath : config.sources.htmlVersionPath,
+                version : config.app.versionLabel
+            });
+        }
+
+        /**
          * COMPILE SOURCES
          */
         if(config.tasks.contains(TASKS.COMPILE_SOURCES)){
             cordova.compileSource({
-                sourcePath : config.sourcePath,
-                compileSourcesCmd : config.compileSourcesCmd,
+                sourcePath : config.sources.compilePath,
+                compileSourcesCmd : config.sources.compileCommand,
 
                 verbose : config.verbose
             });
@@ -138,33 +148,23 @@ const startDistribution = () => {
          * Set version and name in config.xml
          */
         cordova.setVersion({
-            cordovaPath : config.cordovaPath,
-            appVersion : config.appVersion
+            cordovaPath : config.cordova.path,
+            appVersion : config.app.version
         });
-
-        /**
-         * CHANGE VERSION
-         */
-        if(config.tasks.contains(TASKS.CHANGE_VERSION)){
-            cordova.changeVersion({
-                filePath : config.versionHTMLPath,
-                version : config.appVersionLabel
-            });
-        }
 
         /**
          * BUILD IOS PLATFORM
          */
         if(config.tasks.contains(TASKS.BUILD_IOS)){
             cordova.distributeIos({
-                appName : config.appName,
-                displayName : config.appLabel,
-                id : config.iosBundleId,
-                bundleVersion : config.iosBundleVersion,
+                appName : config.app.name,
+                displayName : config.app.label,
+                id : config.ios.bundleId,
+                bundleVersion : config.ios.bundleVersion,
 
-                iosInfoPlistPath : config.iosInfoPlistPath,
-                cordovaPath : config.cordovaPath,
-                cmdCordovaIos : config.cmdCordovaIOS,
+                infoPlistPath : config.ios.infoPlistPath,
+                cordovaPath : config.cordova.path,
+                buildIosCommand : config.cordova.buildIosCommand,
 
                 verbose : config.verbose
             });
@@ -175,53 +175,49 @@ const startDistribution = () => {
          */
         if(config.tasks.contains(TASKS.BUILD_ANDROID)){
             cordova.distributeAndroid({
-                launcherName : config.appLabel,
-                id : config.androidBundleId,
-                versionCode : config.androidVersionCode,
+                launcherName : config.app.label,
+                id : config.android.bundleId,
+                versionCode : config.android.versionCode,
 
-                cordovaPath: config.cordovaPath,
-                cmdCordovaAndroid : config.cmdCordovaAndroid,
+                cordovaPath: config.cordova.path,
+                buildAndroidCommand : config.cordova.buildAndroidCommand,
                 
-                apkFilePath : config.apkFilePath,
+                apkFilePath : config.android.apkFilePath,
                 keystore : {
-                    path: config.androidKeystorePath,
-                    alias : config.androidKeystoreAlias,
-                    password : config.androidKeystorePassword
+                    path: config.android.keystore.path,
+                    alias : config.android.keystore.alias,
+                    password : config.android.keystore.password
                 },
 
                 verbose : config.verbose
             });
             if(config.tasks.contains(TASKS.UPLOAD_BUILDS)){
                 android.uploadAPK({
-                    apkFilePath : config.apkFilePath,
+                    apkFilePath : config.android.apkFilePath,
                     server : {
-                        host : config.ftpBuildsHost,
-                        port : config.ftpBuildsPort,
-                        user : config.ftpBuildsUser,
-                        pass : config.ftpBuildsPassword
+                        host : config.remote.builds.host,
+                        port : config.remote.builds.port,
+                        user : config.remote.builds.user,
+                        pass : config.remote.builds.password
                     },
-                    apkDestinationPath : config.ftpBuildsAndroidDestinationPath
+                    apkDestinationPath : config.remote.builds.androidDestinationPath
                 });
                 android.updateRepository({
-                    repoPath : config.ftpRepoJsonPath,
+                    repoPath : config.remote.repo.jsonPath,
                     server : {
-                        host : config.ftpRepoHost,
-                        port : config.ftpRepoPort,
-                        user : config.ftpRepoUser,
-                        pass : config.ftpRepoPassword
+                        host : config.remote.repo.host,
+                        port : config.remote.repo.port,
+                        user : config.remote.repo.user,
+                        pass : config.remote.repo.password
                     },
-                    androidBuildPath : url.resolve(config.repoAndroidUrlPath, config.apkFileName),
-                    version : config.appVersionLabel,
+                    androidBuildPath : url.resolve(config.remote.repo.androidUrlPath, config.android.apkFileName),
+                    version : config.app.versionLabel,
                     changelog : config.changeLog,
                     hidden : config.hidden,
                     rootPath : config.rootPath
                 })
             }
         }
-        /**
-         * BUILD IOS PLATFORM
-         */
-
 
         endDistribute();
     }

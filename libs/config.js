@@ -28,74 +28,85 @@ class Config {
         this.tasks = 'vciafjze';
 
         this.changeLog = 'No changelog';
-        
-        this.appVersion = '';
-        this.appVersionLabel = '';
-        this.appName = '';
-        this.appLabel = '';
-        this.appSchema = '';
 
-        // Souces
-        this.changeVersionHtmlPath = '';
-        this.compileSourcesPath = '';
-        this.compileSourcesCmd = '';
-        this.sourcePath = '';
-        this.cordovaPath = '';
-        this.cordovaConfigPath = '';
+        this.app = {
+            name : '',
+            label : '',
+            version : '',
+            versionLabel : ''
+        };
 
-        // Cordova
-        this.cordovaRootPath = '';
-        this.cmdCordovaIos = 'cordova build ios';
-        this.cmdCordovaAndroid = 'cordova build --release android';
+        this.sources = {
+            compilePath: '',
+            htmlVersionPath : '',
+            compileCommand : '',
+        };
+
+        this.cordova = {
+            path : '',
+            configPath : '',
+            rootPath : '',
+            buildIosCommand : 'cordova build ios',
+            buildAndroidCommand : 'cordova build --release android'
+        };
         
-        // Builds
         this.buildsDir = 'builds/';
 
-        // iOS
-        this.iosBundleVersion = '';
-        this.iosBundleId = '';
-        this.iosProvisioningProfile = '';
-        this.iosInfoPlistPath = '';
+        this.ios = {
+            bundleId : '',
+            bundleVersion : '',
+            infoPlistPath : ''
+        };
 
-        // Android
-        this.androidVersionCode = '';
-        this.androidBundleId = '';
-        this.androidKeystorePath = '';
-        this.androidKeystoreAlias = '';
-        this.androidKeystorePassword = '';
-        
-        // FTP Builds
-        this.ftpBuildsHost = '';
-        this.ftpBuildsPort = 21;
-        this.ftpBuildsUser = '';
-        this.ftpBuildsPassword = '';
-        this.ftpBuildsIOSDestinationPath = '';
-        this.ftpBuildsAndroidDestinationPath = '';
+        this.android = {
+            bundleId : '',
+            versionCode : '',
+            keystore : {
+                path : '',
+                alias : '',
+                password : ''
+            }
+        };
 
-        // FTP Repository
-        this.ftpRepoHost = '';
-        this.ftpRepoPort = 21;
-        this.ftpRepoUser = '';
-        this.ftpRepoPassword = '';
-        this.ftpRepoJsonPath = '';
-        this.repoIOSUrlPath = '';
-        this.repoAndroidUrlPath = '';
-        this.repoHomepageUrl = '';
+        this.remote = {
 
-        // FTP Sources
-        this.ftpSourcesHost = '';
-        this.ftpSourcesPort = 21;
-        this.ftpSourcesUser = '';
-        this.ftpSourcesPassword = '';
-        this.ftpSourcesDestinationPath = '';
+            builds : {
+                host : '',
+                port : 21,
+                user : '',
+                password : '',
+                iosDestinationPath : '',
+                androidDestinationPath : ''
+            },
 
-        // Email
-        this.emailHost = '';
-        this.emailPort = 25;
-        this.emailUser = '';
-        this.emailPassword = '';
-        this.emailFrom = '';
-        this.emailTo = [];
+            repo : {
+                host : '',
+                port : 21,
+                user : '',
+                password : '',
+                jsonPath : '',
+                iosUrlPath : '',
+                androidUrlPath : '',
+                homepageUrl : ''
+            },
+
+            sources : {
+                host : '',
+                port : 21,
+                user : '',
+                password : '',
+                destinationPath : '',
+            }
+        }
+
+        this.email = {
+            host : '',
+            port : 25,
+            user : '',
+            password : '',
+            from : '',
+            to : []
+        }
     }
 
     init({configPath, program}) {
@@ -112,29 +123,26 @@ class Config {
                         const configData = JSON.parse(fileData);
 
                         // Set all configurations from JSON
-                        _.each(configData, (value, key) => {
-                            var camelCasedKey = key.replace(/[-]([a-z])/g, g => { return g[1].toUpperCase(); });
-                            config[camelCasedKey] = value;
-                        });
+                        _.merge(config, configData);
 
                         // Set project root dir
                         config.rootPath = path.dirname(configPath);
                         // Calculate and set other dirs
-                        config.sourcePath = path.isAbsolute(config.compileSourcesPath)? config.compileSourcesPath : path.join(config.rootPath, config.compileSourcesPath);
-                        config.versionHTMLPath = path.isAbsolute(config.changeVersionHtmlPath)? config.changeVersionHtmlPath : path.join(config.rootPath, config.changeVersionHtmlPath);
-                        config.cordovaPath = path.isAbsolute(config.cordovaRootPath)? config.cordovaRootPath : path.join(config.rootPath, config.cordovaRootPath);
-                        config.cordovaConfigPath = path.join(config.cordovaPath, './config.xml');
+                        config.sources.compilePath = path.isAbsolute(config.sources.compilePath)? config.sources.compilePath : path.join(config.rootPath, config.sources.compilePath);
+                        config.sources.htmlVersionPath = path.isAbsolute(config.sources.htmlVersionPath)? config.sources.htmlVersionPath : path.join(config.rootPath, config.sources.htmlVersionPath);
+                        config.cordova.path = path.isAbsolute(config.cordova.rootPath)? config.cordova.rootPath : path.join(config.rootPath, config.cordova.rootPath);
+                        config.cordova.configPath = path.join(config.cordova.path, './config.xml');
                         config.buildsDir = path.isAbsolute(config.buildsDir)? config.buildsDir : path.join(config.rootPath, config.buildsDir);
                         
-                        config.androidKeystorePath = path.isAbsolute(config.androidKeystorePath)? config.androidKeystorePath : path.join(config.rootPath, config.androidKeystorePath);
-                        config.apkFileName = `${config.appLabel}_v.${config.appVersionLabel}.apk`.replace(/ /g, '_');
-                        config.apkFilePath = path.join(config.buildsDir, config.apkFileName);
+                        config.android.keystore.path = path.isAbsolute(config.android.keystore.path)? config.android.keystore.path : path.join(config.rootPath, config.android.keystore.path);
+                        config.android.apkFileName = `${config.app.label}_v.${config.app.versionLabel}.apk`.replace(/ /g, '_');
+                        config.android.apkFilePath = path.join(config.buildsDir, config.android.apkFileName);
                         
-                        if(config.iosInfoPlistPath){
-                            config.iosInfoPlistPath = path.isAbsolute(config.iosInfoPlistPath)? config.iosInfoPlistPath : path.join(config.rootPath, config.iosInfoPlistPath);
+                        if(config.ios.infoPlistPath){
+                            config.ios.infoPlistPath = path.isAbsolute(config.ios.infoPlistPath)? config.ios.infoPlistPath : path.join(config.rootPath, config.ios.infoPlistPath);
                         }
                         
-                        config.ftpRepoJsonPath = path.join(config.ftpRepoJsonPath, './builds.json');
+                        config.remote.repo.jsonPath = path.join(config.remote.repo.jsonPath, './builds.json');
 
                         logger.setFileLogger(config.rootPath);
 
@@ -187,23 +195,23 @@ class Config {
         }
 
         // Set app version
-        this.appVersion = version[0];
+        this.app.version = version[0];
 
         // Set app version label from program args
-        this.appVersionLabel = program.args[0];
+        this.app.versionLabel = program.args[0];
 
         // Set Android Version Code
-        this.androidVersionCode = (program.androidVersionCode) ? program.androidVersionCode : android.calculateVersionCode(this.appVersion);
+        this.android.versionCode = (program.androidVersionCode)? program.androidVersionCode : android.calculateVersionCode(this.app.version);
 
         // Set iOS Bundle Version
-        this.iosBundleVersion = ios.calculateBundleVersion(this.appVersion);
+        this.ios.bundleVersion = (program.iosBundleVersion)? program.iosBundleVersion : ios.calculateBundleVersion(this.app.version);
 
         // Set if builds are hidden on wireless distribution html page
         if(_.isBoolean(program.hidden))
             this.hidden = program.hidden
 
         if(this.hidden){
-            this.appVersionLabel += '-[DEV]';
+            this.app.versionLabel += '-[DEV]';
         }
     }
 
@@ -264,88 +272,87 @@ class Config {
     }
 
     verifyUploadBuildsSteps(){
-        if(!this.ftpBuildsHost){
-            throw new Error('FTP build upload error: missing "ftp-builds-hosts" value in config file');
+        if(!this.remote.builds.host){
+            throw new Error('FTP build upload error: missing "remote.builds.hosts" value in config file');
         }
-        if(!this.ftpBuildsPort){
-            throw new Error('FTP build upload error: missing "ftp-builds-port" value in config file');
+        if(!this.remote.builds.port){
+            throw new Error('FTP build upload error: missing "remote.builds.port" value in config file');
         }
-        if(!this.ftpBuildsUser){
-            throw new Error('FTP build upload error: missing "ftp-builds-user" value in config file');
+        if(!this.remote.builds.user){
+            throw new Error('FTP build upload error: missing "remote.builds.user" value in config file');
         }
-        if(!this.ftpBuildsPassword){
-            throw new Error('FTP build upload error: missing "ftp-builds-password" value in config file');
+        if(!this.remote.builds.password){
+            throw new Error('FTP build upload error: missing "remote.builds.password" value in config file');
         }
         if(this.tasks.contains(cordovaTasks.BUILD_IOS) || this.tasks.contains(cordovaTasks.BUILD_ANDROID)){
             repo.verify(this);
         }
         if(this.tasks.contains(cordovaTasks.BUILD_IOS)){
-            if(!this.ftpBuildsIOSDestinationPath){
-                throw new Error('FTP+iOS upload error: missing "ftp-builds-ios-working-dir" value in config file');
+            if(!this.remote.builds.iosDestinationPath){
+                throw new Error('FTP+iOS upload error: missing "remote.builds.iosDestinationPath" value in config file');
             }
         }
         if(this.tasks.contains(cordovaTasks.BUILD_ANDROID)){
-            if(!this.ftpBuildsAndroidDestinationPath){
-                throw new Error('FTP+Android upload error: missing "ftp-builds-android-working-dir" value in config file');
+            if(!this.remote.builds.androidDestinationPath){
+                throw new Error('FTP+Android upload error: missing "remote.builds.androidDestinationPath" value in config file');
             }
         }
     }
 
     verifyUploadSourcesSteps(){
-        if(!this.ftpSourcesHost){
-            throw new Error('FTP sources upload error: missing "ftp-sources-hosts" value in config file');
+        if(!this.remote.sources.host){
+            throw new Error('FTP sources upload error: missing "remote.sources.hosts" value in config file');
         }
-        if(!this.ftpSourcesUser){
-            throw new Error('FTP sources upload error: missing "ftp-sources-user" value in config file');
+        if(!this.remote.sources.user){
+            throw new Error('FTP sources upload error: missing "remote.sources.user" value in config file');
         }
-        if(!this.ftpSourcesPassword){
-            throw new Error('FTP sources upload error: missing "ftp-sources-password" value in config file');
+        if(!this.remote.sources.password){
+            throw new Error('FTP sources upload error: missing "remote.sources.password" value in config file');
         }
-        if(!this.ftpSourcesDestinationPath){
-            throw new Error('FTP sources upload error: missing "ftp-sources-working-dir" value in config file');
+        if(!this.remote.sources.destinationPath){
+            throw new Error('FTP sources upload error: missing "remote.sources.destinationPath" value in config file');
         }
     }
 
     verifySendEmailSteps(){
-        if(!this.emailHost){
-            throw new Error('Send email error: missing "email-host" value in config file');
+        if(!this.email.host){
+            throw new Error('Send email error: missing "email.host" value in config file');
         }
-        if(!this.emailPort){
-            throw new Error('Send email error: missing "email-port" value in config file');
+        if(!this.email.port){
+            throw new Error('Send email error: missing "email.port" value in config file');
         }
-        if(!this.emailUser){
-            throw new Error('Send email error: missing "email-user" value in config file');
+        if(!this.email.user){
+            throw new Error('Send email error: missing "email.user" value in config file');
         }
-        if(!this.emailPassword){
-            throw new Error('Send email error: missing "email-password" value in config file');
+        if(!this.email.password){
+            throw new Error('Send email error: missing "email.password" value in config file');
         }
-        if(!this.emailFrom){
-            throw new Error('Send email error: missing "email-from" value in config file');
+        if(!this.email.from){
+            throw new Error('Send email error: missing "email.from" value in config file');
         }
-        if(!this.emailTo){
-            throw new Error('Send email error: missing "email-to" value in config file');
+        if(!this.email.to){
+            throw new Error('Send email error: missing "email.to" value in config file');
         }
     }
 
     printRecap() {
         const config = this;
         return new Promise(resolve => {
-            asciimo.write('  '+config.appName, 'Ogre', art => {
+            asciimo.write('  '+config.app.name, 'Ogre', art => {
                 logger.info('\n#########################################################');
                 logger.info(art);
                 logger.info('#########################################################');
-                logger.info('  App name:\t\t\t',                   config.appName);
-                logger.info('  App label:\t\t\t',                  config.appLabel);
-                logger.info('  App version:\t\t\t',                config.appVersion);
-                logger.info('  App version label:\t\t',            config.appVersionLabel);
+                logger.info('  App name:\t\t\t',                   config.app.name);
+                logger.info('  App label:\t\t\t',                  config.app.label);
+                logger.info('  App version:\t\t\t',                config.app.version);
+                logger.info('  App version label:\t\t',            config.app.versionLabel);
                 if(config.tasks.contains(cordovaTasks.BUILD_IOS)){
-                    logger.info('  iOS bundle id:\t\t',            config.iosBundleId);
-                    logger.info('  iOS provisioning profile:\t',   config.iosProvisioningProfile);
-                    logger.info('  iOS bundle version:\t\t',       config.iosBundleVersion);
+                    logger.info('  iOS bundle id:\t\t',            config.ios.bundleId);
+                    logger.info('  iOS bundle version:\t\t',       config.ios.bundleVersion);
                 }
                 if(config.tasks.contains(cordovaTasks.BUILD_ANDROID)){
-                    logger.info('  Android bundle id:\t\t',        config.androidBundleId);
-                    logger.info('  Android version code:\t\t',     config.androidVersionCode);
+                    logger.info('  Android bundle id:\t\t',        config.android.bundleId);
+                    logger.info('  Android version code:\t\t',     config.android.versionCode);
                 }
                 logger.info('  Change log:\t\t\t',                 config.changeLog[0])
                 for(let i = 1; i < config.changeLog.length; i++){
