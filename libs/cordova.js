@@ -4,7 +4,7 @@ const shell = require('shelljs');
 const fs = require('fs');
 const et = require('elementtree');
 const path = require('path');
-const Config = require('cordova-config');
+const CordovaConfig = require('cordova-config');
 const logger = require('./logger');
 const utils = require('./utils');
 const android = require('./android');
@@ -35,9 +35,9 @@ const Cordova = {
      * Set app version in config.xml using cordova-config module
      */
     setVersion({cordovaPath, appVersion}){
-        logger.section(`Set version in config.xml to ${appVersion}`);
+        logger.section(`Set '${appVersion}' as version in config.xml`);
         const cordovaConfigPath = path.join(cordovaPath, './config.xml');
-        const config = new Config(cordovaConfigPath);
+        const config = new CordovaConfig(cordovaConfigPath);
         config.setVersion(appVersion);
         config.writeSync();
     },
@@ -46,7 +46,7 @@ const Cordova = {
      * Set app label version in HTML
      */
     changeVersion({filePath, version}){
-        logger.section(`Set version ${version} in ${filePath} HTML`);
+        logger.section(`Set '${version}' as version in ${filePath} HTML`);
         let versionFile = fs.readFileSync(filePath, 'utf-8');
         try{
             let newVersionFile = versionFile.replace(/<mad-app-version.*>([\s\S]*?)<\/mad-app-version>/ig, `<mad-app-version> ${version} </mad-app-version>`);
@@ -62,9 +62,9 @@ const Cordova = {
      * Set bundle id in config.xml using cordova-config module
      */
     setId({cordovaPath, id}){
-        logger.section(`Set id in config.xml to ${id}`);
+        logger.section(`Set '${id}' as bundle id in config.xml`);
         const cordovaConfigPath = path.join(cordovaPath, './config.xml');
-        const config = new Config(cordovaConfigPath);
+        const config = new CordovaConfig(cordovaConfigPath);
         config.setID(id);
         config.writeSync();
     },
@@ -73,9 +73,9 @@ const Cordova = {
      * Set Android version code in config.xml using cordova-config module
      */
     setAndroidVersionCode({cordovaPath, versionCode}){
-        logger.section(`Set Android version code in config.xml to ${versionCode}`);
+        logger.section(`Set '${versionCode}' as Android version code in config.xml`);
         const cordovaConfigPath = path.join(cordovaPath, './config.xml');
-        const config = new Config(cordovaConfigPath);
+        const config = new CordovaConfig(cordovaConfigPath);
         config.setAndroidVersionCode(versionCode);
         config.writeSync();
     },
@@ -84,7 +84,7 @@ const Cordova = {
      * Set Android app launcher name in strings.xml file using elementtre module
      */
     setLauncherName({cordovaPath, launcherName}){
-        logger.section(`Set Android launcher name in strings.xml to ${launcherName}`);
+        logger.section(`Set '${launcherName}' as Android launcher name in strings.xml`);
         try{
             const cordovaAndroidStringsPath = path.join(cordovaPath, './platforms/android/res/values/strings.xml');
             let strings = fs.readFileSync(cordovaAndroidStringsPath, 'utf-8');
@@ -118,12 +118,12 @@ const Cordova = {
     /**
      * Exec all task to prepare and build the Android platform
      */
-    distributeAndroid({launcherName, id, versionCode, cmdCordovaAndroid = 'cordova build --release android', cordovaPath, apkFilePath, keystore, verbose = false}){
+    distributeAndroid({launcherName, id, versionCode, cordovaPath, cmdCordovaAndroid = 'cordova build --release android', apkFilePath, keystore, verbose = false}){
         this.setId({cordovaPath, id});
         this.setAndroidVersionCode({cordovaPath, versionCode});
         this.setLauncherName({cordovaPath, launcherName})
         this.buildAndroid({cmdCordovaAndroid, cordovaPath, verbose});
-        const androidProjectPath = path.join(cordovaPath, './platforms/android');
+        config.androidProjectPath = path.join(cordovaPath, './platforms/android');
         android.signAPK({androidProjectPath, keystore, verbose});
         android.alignAPK({androidProjectPath, apkFilePath, verbose});
     },
@@ -132,19 +132,41 @@ const Cordova = {
      * Set iOS version code in config.xml using cordova-config module
      */
     setIosBundleVersion({cordovaPath, bundleVersion}){
-        logger.section(`Set Ios bundle version in config.xml to ${bundleVersion}`);
+        logger.section(`Set '${bundleVersion}' as iOS bundle version in config.xml`);
         const cordovaConfigPath = path.join(cordovaPath, './config.xml');
-        const config = new Config(cordovaConfigPath);
+        const config = new CordovaConfig(cordovaConfigPath);
         config.setIOSBundleVersion(bundleVersion);
         config.writeSync();
     },
 
     /**
+     * Build iOS Cordova Platform
+     */
+    buildIos({cmdCordovaIos, cordovaPath, verbose}){
+        logger.section(`Build iOS platform:\n$ ${cmdCordovaIos}`);
+        process.chdir(cordovaPath);
+        let err = shell.exec(cmdCordovaIos, {silent: !verbose}).stderr;
+        if(shell.error()){
+            // shelljs has already printed error,
+            // so I print it only if verbose mode is OFF
+            if(!verbose){
+                logger.error(err);
+            }
+            process.exit(1);
+        }
+    },
+
+    /**
      * Exec all task to prepare and build the iOS platform
      */
-    distributeIos({displayName, id, bundleVersion, cmdCordovaIos = 'cordova build ios', cordovaPath, verbose = false}){
+    distributeIos({appName, displayName, id, bundleVersion, cordovaPath, iosInfoPlistPath, cmdCordovaIos = 'cordova build ios', verbose = false}){
         this.setId({cordovaPath, id});
         this.setIosBundleVersion({cordovaPath, bundleVersion});
+        ios.setDisplayName({iosInfoPlistPath, displayName});
+        this.buildIos({cmdCordovaIos, cordovaPath, verbose});
+        const iosProjectPath = path.join(cordovaPath, './platforms/ios');
+        ios.cleanProject({iosProjectPath, verbose});
+        ios.archiveProject({iosProjectPath, appName, verbose});
     },
 
     /**

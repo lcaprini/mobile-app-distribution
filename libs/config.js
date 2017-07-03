@@ -6,7 +6,6 @@ const fs = Promise.promisifyAll(require('fs'));
 const _ = require('lodash');
 const path = require('path');
 const findVersions = require('find-versions');
-const shell = require('shelljs');
 
 const logger = require('./logger');
 const utils = require('./utils');
@@ -28,7 +27,7 @@ class Config {
         this.rootPath = '';
         this.tasks = 'vciafjze';
 
-        this.changeLog = ['No changelog'];
+        this.changeLog = 'No changelog';
         
         this.appVersion = '';
         this.appVersionLabel = '';
@@ -56,9 +55,9 @@ class Config {
         this.iosBundleVersion = '';
         this.iosBundleId = '';
         this.iosProvisioningProfile = '';
+        this.iosInfoPlistPath = '';
 
         // Android
-        this.androidProjectPath = '';
         this.androidVersionCode = '';
         this.androidBundleId = '';
         this.androidKeystorePath = '';
@@ -127,12 +126,13 @@ class Config {
                         config.cordovaConfigPath = path.join(config.cordovaPath, './config.xml');
                         config.buildsDir = path.isAbsolute(config.buildsDir)? config.buildsDir : path.join(config.rootPath, config.buildsDir);
                         
-                        config.androidProjectPath = path.join(config.cordovaPath, './platforms/android');
                         config.androidKeystorePath = path.isAbsolute(config.androidKeystorePath)? config.androidKeystorePath : path.join(config.rootPath, config.androidKeystorePath);
                         config.apkFileName = `${config.appLabel}_v.${config.appVersionLabel}.apk`.replace(/ /g, '_');
                         config.apkFilePath = path.join(config.buildsDir, config.apkFileName);
                         
-                        config.iosProjectPath = path.join(config.cordovaPath, './platforms/ios');
+                        if(config.iosInfoPlistPath){
+                            config.iosInfoPlistPath = path.isAbsolute(config.iosInfoPlistPath)? config.iosInfoPlistPath : path.join(config.rootPath, config.iosInfoPlistPath);
+                        }
                         
                         config.ftpRepoJsonPath = path.join(config.ftpRepoJsonPath, './builds.json');
 
@@ -150,17 +150,19 @@ class Config {
                         // Set qrcode print
                         config.qrcode = (_.isBoolean(program.qrCode)) ? program.qrCode : false;
 
-                        if(program.changeLog){
-                            config.readChangeLog(program.changeLog, (err, next) => {
-                                if(err){
-                                    reject(err);
-                                    return;
-                                }
-
+                        config.readChangeLog(program.changeLog, (err, next) => {
+                            if(err){
+                                reject(err);
+                                return;
+                            }
+                            try{
                                 config.verify();
                                 resolve();
-                            });
-                        }
+                            }
+                            catch(e){
+                                reject(e);
+                            }
+                        });
                     }
                     catch(e){
                         reject(e);

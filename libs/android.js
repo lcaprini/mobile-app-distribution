@@ -98,8 +98,9 @@ class Android {
         if(!config.androidBundleId){
             throw new Error('Android build error: missing "android-bundle-id" value in config file');
         }
-        if(!fs.existsSync(config.androidProjectPath)){
-            throw new Error(`Android build error: no Android project in "${config.androidProjectPath}" directory`);
+        const androidProjectPath = path.join(config.cordovaPath, './platforms/android');
+        if(!fs.existsSync(androidProjectPath)){
+            throw new Error(`Android build error: no Android project in "${androidProjectPath}" directory`);
         }
         if(!fs.existsSync(config.androidKeystorePath)){
             throw new Error(`Android build error: missing file "${config.androidKeystorePath}"`);

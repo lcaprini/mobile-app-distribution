@@ -3,7 +3,6 @@
 const _ = require('lodash');
 const moment = require('moment');
 const prompt = require('prompt');
-const shell = require('shelljs');
 const JSFtp = require("jsftp");
 const fs = require('fs');
 const path = require('path');

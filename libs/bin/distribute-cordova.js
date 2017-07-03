@@ -42,8 +42,8 @@ const endDistribute = err => {
     const logger = require('../logger');
 
     if(err){
-        logger.error(err);
-        // logger.error(err.message);
+        // logger.error(err);
+        logger.error(err.message);
         process.exit(1);
     }
 
@@ -157,12 +157,14 @@ const startDistribution = () => {
          */
         if(config.tasks.contains(TASKS.BUILD_IOS)){
             cordova.distributeIos({
+                appName : config.appName,
                 displayName : config.appLabel,
                 id : config.iosBundleId,
                 bundleVersion : config.iosBundleVersion,
 
-                cmdCordovaIos : config.cmdCordovaIOS,
+                iosInfoPlistPath : config.iosInfoPlistPath,
                 cordovaPath : config.cordovaPath,
+                cmdCordovaIos : config.cmdCordovaIOS,
 
                 verbose : config.verbose
             });
@@ -177,8 +179,9 @@ const startDistribution = () => {
                 id : config.androidBundleId,
                 versionCode : config.androidVersionCode,
 
-                cmdCordovaAndroid : config.cmdCordovaAndroid,
                 cordovaPath: config.cordovaPath,
+                cmdCordovaAndroid : config.cmdCordovaAndroid,
+                
                 apkFilePath : config.apkFilePath,
                 keystore : {
                     path: config.androidKeystorePath,
@@ -248,7 +251,7 @@ config.init({
 }).then(
     initCordova,
     err => {
-        // logger.error(err.message);
+        // console.error(err.message);
         console.error(err);
         program.help();
     }
