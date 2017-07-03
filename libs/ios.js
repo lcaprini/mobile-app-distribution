@@ -72,9 +72,9 @@ class Ios {
                 if(!fs.existsSync(plistPath_2)){
                     throw new Error(`iOS build error: missing plist file at "${plistPath_1}" and "${plistPath_2}". Please specify with "ios-info-plist-path" in config file`);
                 }
-            else{
-                config.ios.infoPlistPath = plistPath_2;
-            }
+                else{
+                    config.ios.infoPlistPath = plistPath_2;
+                }
             }
             else{
                 config.ios.infoPlistPath = plistPath_1;
