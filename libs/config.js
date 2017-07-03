@@ -55,7 +55,15 @@ class Config {
         this.ios = {
             bundleId : '',
             bundleVersion : '',
-            infoPlistPath : ''
+            infoPlistPath : '',
+            targetSchema : '',
+            exportOptionsPlist : {
+                method : 'enterprise',
+                teamID : '',
+                uploadSymbols : false,
+                uploadBitcode : false
+            },
+            exportOptionsPlistPath : ''
         };
 
         this.android = {
@@ -140,6 +148,9 @@ class Config {
                         
                         if(config.ios.infoPlistPath){
                             config.ios.infoPlistPath = path.isAbsolute(config.ios.infoPlistPath)? config.ios.infoPlistPath : path.join(config.rootPath, config.ios.infoPlistPath);
+                        }
+                        if(config.ios.exportOptionsPlistPath){
+                            config.ios.exportOptionsPlistPath = path.isAbsolute(config.ios.exportOptionsPlistPath)? config.ios.exportOptionsPlistPath : path.join(config.rootPath, config.ios.exportOptionsPlistPath);
                         }
                         
                         config.remote.repo.jsonPath = path.join(config.remote.repo.jsonPath, './builds.json');

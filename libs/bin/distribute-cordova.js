@@ -159,12 +159,16 @@ const startDistribution = () => {
             cordova.distributeIos({
                 appName : config.app.name,
                 displayName : config.app.label,
+                versionLabel : config.app.versionLabel,
                 id : config.ios.bundleId,
                 bundleVersion : config.ios.bundleVersion,
+                schema : config.ios.targetSchema,
 
                 infoPlistPath : config.ios.infoPlistPath,
                 cordovaPath : config.cordova.path,
                 buildIosCommand : config.cordova.buildIosCommand,
+                exportOptionsPlistPath : config.ios.exportOptionsPlistPath,
+                exportDir : config.buildsDir,
 
                 verbose : config.verbose
             });

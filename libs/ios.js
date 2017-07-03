@@ -23,9 +23,9 @@ class Ios {
         fs.writeFileSync(infoPlistPath, updatedPlist);
     }
 
-    cleanProject({iosProjectPath, verbose}){
-        logger.section(`Clean iOS Project in '${iosProjectPath}'`);
-        process.chdir(iosProjectPath);
+    cleanProject({projectPath, verbose}){
+        logger.section(`Clean iOS Project in '${projectPath}'`);
+        process.chdir(projectPath);
         const cmdXcodebuildClean = 'xcodebuild clean -configuration Release -alltargets';
         let err = shell.exec(cmdXcodebuildClean, {silent: !verbose}).stderr;
         if(shell.error()){
@@ -38,12 +38,12 @@ class Ios {
         }
     }
 
-    archiveProject({iosProjectPath, appName, verbose}){
-        const projectPath = path.join(iosProjectPath, `./${appName}.xcodeproj`);
-        const archivePath = path.join(iosProjectPath, `./${appName}.xarchive`);
-        logger.section(`Archive iOS Project into '${archivePath}'`);
-        process.chdir(iosProjectPath);
-        const cmdXcodebuildArchive = `xcodebuild archive -project '${projectPath}' -scheme '${appName}' -archivePath '${archivePath}'`;
+    archiveProject({projectPath, appName, schema, verbose}){
+        const xcodeprojFilePath = path.join(projectPath, `./${appName}.xcodeproj`);
+        const xcarchiveFilePath = path.join(projectPath, `./${appName}.xcarchive`);
+        logger.section(`Archive iOS Project into '${xcarchiveFilePath}'`);
+        process.chdir(projectPath);
+        const cmdXcodebuildArchive = `xcodebuild archive -project '${xcodeprojFilePath}' -scheme '${schema}' -archivePath '${xcarchiveFilePath}'`;
         let err = shell.exec(cmdXcodebuildArchive, {silent: !verbose}).stderr;
         if(shell.error()){
             // shelljs has already printed error,
@@ -53,6 +53,30 @@ class Ios {
             }
             process.exit(1);
         }
+    }
+
+    createExportOptionsPlist({exportOptionsPlistPath, exportOptionsPlist}){
+        logger.section(`Create/Update iOS exportOptionsPlist file in '${exportOptionsPlistPath}'`);
+        fs.writeFileSync(exportOptionsPlistPath, plist.build(exportOptionsPlist));
+    }
+
+    exportIpa({projectPath, appName, versionLabel, exportOptionsPlistPath, exportDir, verbose}){
+        const xcarchiveFilePath = path.join(projectPath, `./${appName}.xcarchive`);
+        logger.section(`Export IPA from '${xcarchiveFilePath}' into ${exportDir} directory`);
+        process.chdir(projectPath);
+        const cmdXcodebuildExport = `xcodebuild -exportArchive -archivePath '${xcarchiveFilePath}' -exportPath '${exportDir}' -exportOptionsPlist '${exportOptionsPlistPath}'`
+        let err = shell.exec(cmdXcodebuildExport, {silent: !verbose}).stderr;
+        if(shell.error()){
+            // shelljs has already printed error,
+            // so I print it only if verbose mode is OFF
+            if(!verbose){
+                logger.error(err);
+            }
+            process.exit(1);
+        }
+        const exportedIpaPath = path.join(exportDir, `./${appName}.ipa`);
+        const exportedIpaPathWithLabel = path.join(exportDir, `./${versionLabel}.ipa`);
+        fs.renameSync(exportedIpaPath, exportedIpaPathWithLabel);
     }
 
     verify(config){
@@ -79,6 +103,13 @@ class Ios {
             else{
                 config.ios.infoPlistPath = plistPath_1;
             }
+        }
+        if(!config.ios.exportOptionsPlistPath){
+            config.ios.exportOptionsPlistPath = path.join(config.cordova.path, './platforms/ios/exportOptionsPlist.plist');
+            this.createExportOptionsPlist({
+                exportOptionsPlistPath : config.ios.exportOptionsPlistPath,
+                exportOptionsPlist : config.ios.exportOptionsPlist
+            });
         }
         if(!config.ios.bundleId){
             throw new Error('iOS build error: missing "ios.bundleId" value in config file');
