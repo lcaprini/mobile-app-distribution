@@ -61,6 +61,7 @@ class Config {
                 method : 'enterprise',
                 teamID : '',
                 uploadSymbols : false,
+                compileBitcode : false,
                 uploadBitcode : false
             },
             exportOptionsPlistPath : ''
@@ -134,7 +135,7 @@ class Config {
                         _.merge(config, configData);
 
                         // Set project root dir
-                        config.rootPath = path.dirname(configPath);
+                        config.rootPath = (path.isAbsolute(configPath))? path.dirname(configPath) : process.cwd();
                         // Calculate and set other dirs
                         config.sources.compilePath = path.isAbsolute(config.sources.compilePath)? config.sources.compilePath : path.join(config.rootPath, config.sources.compilePath);
                         config.sources.htmlVersionPath = path.isAbsolute(config.sources.htmlVersionPath)? config.sources.htmlVersionPath : path.join(config.rootPath, config.sources.htmlVersionPath);
@@ -228,17 +229,44 @@ class Config {
 
     readChangeLog(changeLog, next){
         let config = this;
+        let changeLogPath = changeLog;
 
-        const changeLogPath = path.isAbsolute(changeLog)? changeLog : path.join(config.rootPath, changeLog);
-        return fs.readFileAsync(changeLogPath, 'utf8').then(
-            changeLogText => {
-                config.changeLog = changeLogText.split('\n');
-                next();
-            },
-            () => {
-                config.changeLog = changeLog.split('***');
-                next();
-            });
+        /**
+         * Read changelog from file
+         * @param {String} changelog 
+         */
+        const readFile = changelog => {
+            return fs.readFileAsync(changelog, 'utf8').then(
+                changeLogText => {
+                    config.changeLog = changeLogText.split('\n');
+                    next();
+                },
+                () => {
+                    readText(changelog);
+                });
+        }
+
+        /**
+         * Read changelog from string
+         * @param {String} changelog 
+         */
+        const readText = changelog => {
+            config.changeLog = changelog.split('***');
+            next();
+        }
+
+        if(!fs.existsSync(changeLogPath)){
+            changeLogPath = path.join(config.rootPath, changeLogPath);
+            if(!fs.existsSync(changeLogPath)){
+                readText(changeLog);
+            }
+            else {
+                readFile(changeLogPath);
+            }
+        }
+        else {
+            readFile(changeLogPath);
+        }
     }
 
     /**
