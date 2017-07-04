@@ -5,6 +5,7 @@ require('../protos');
 const program = require('commander');
 const Promise = require('bluebird');
 const url = require('url');
+const path = require('path');
 
 const config = require('../config');
 const utils = require('../utils');
@@ -76,10 +77,10 @@ const exit = () => {
             repoHomepageUrl : config.remote.repo.homepageUrl
         }
         if(config.tasks.contains(TASKS.BUILD_ANDROID)){
-            emailData.androidBuildPath = url.resolve(config.remote.repo.androidUrlPath, config.android.apkFileName);
+            emailData.androidBuildPath = config.remote.repo.androidUrlPath;
         }
         if(config.tasks.contains(TASKS.BUILD_IOS)){
-            emailData.iosBuildPath = url.resolve(config.remote.repo.iosUrlPath, config.android.apkFileName);;
+            emailData.iosBuildPath = config.remote.repo.iosManifestUrlPath;
         }
         const emailBody = cordova.composeEmail(emailData);
         utils.sendEmail({
@@ -161,6 +162,7 @@ const startDistribution = () => {
                 displayName : config.app.label,
                 ipaFileName : config.ios.ipaFileName,
                 id : config.ios.bundleId,
+                version : config.app.version,
                 bundleVersion : config.ios.bundleVersion,
                 schema : config.ios.targetSchema,
 
@@ -170,6 +172,9 @@ const startDistribution = () => {
                 exportOptionsPlist : config.ios.exportOptionsPlist,
                 exportOptionsPlistPath : config.ios.exportOptionsPlistPath,
                 exportDir : config.buildsDir,
+
+                ipaUrlPath : config.remote.repo.iosIpaUrlPath,
+                manifestPath : path.join(config.buildsDir, config.ios.manifestFileName),
 
                 verbose : config.verbose
             });
@@ -215,7 +220,7 @@ const startDistribution = () => {
                         user : config.remote.repo.user,
                         pass : config.remote.repo.password
                     },
-                    androidBuildPath : url.resolve(config.remote.repo.androidUrlPath, config.android.apkFileName),
+                    androidBuildPath : config.remote.repo.androidUrlPath,
                     version : config.app.versionLabel,
                     changelog : config.changeLog,
                     hidden : config.hidden,

@@ -2,6 +2,7 @@
 
 const asciimo = require('asciimo').Figlet;
 const Promise = require('bluebird');
+const url = require('url');
 const fs = Promise.promisifyAll(require('fs'));
 const _ = require('lodash');
 const path = require('path');
@@ -65,7 +66,8 @@ class Config {
                 compileBitcode : false,
                 uploadBitcode : false
             },
-            exportOptionsPlistPath : ''
+            exportOptionsPlistPath : '',
+            manifestFileName : ''
         };
 
         this.android = {
@@ -96,6 +98,8 @@ class Config {
                 password : '',
                 jsonPath : '',
                 iosUrlPath : '',
+                iosIpaUrlPath : '',
+                iosManifestUrlPath : '',
                 androidUrlPath : '',
                 homepageUrl : ''
             },
@@ -149,6 +153,7 @@ class Config {
                         config.android.apkFilePath = path.join(config.buildsDir, config.android.apkFileName);
                         
                         config.ios.ipaFileName = `${config.app.label}_v.${config.app.versionLabel}.ipa`.replace(/ /g, '_');
+                        config.ios.manifestFileName = `manifest_${config.app.label}_v.${config.app.versionLabel}.plist`.replace(/ /g, '_');
                         if(config.ios.infoPlistPath){
                             config.ios.infoPlistPath = path.isAbsolute(config.ios.infoPlistPath)? config.ios.infoPlistPath : path.join(config.rootPath, config.ios.infoPlistPath);
                         }
@@ -160,6 +165,9 @@ class Config {
                         }
                         
                         config.remote.repo.jsonPath = path.join(config.remote.repo.jsonPath, './builds.json');
+                        config.remote.repo.iosIpaUrlPath = url.resolve(config.remote.repo.iosUrlPath, config.ios.ipaFileName);
+                        config.remote.repo.iosManifestUrlPath = url.resolve(config.remote.repo.iosUrlPath, config.ios.manifestFileName);
+                        config.remote.repo.androidUrlPath = url.resolve(config.remote.repo.androidUrlPath, config.android.apkFileName);
 
                         logger.setFileLogger(config.rootPath);
 

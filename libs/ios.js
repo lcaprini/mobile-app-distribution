@@ -82,8 +82,31 @@ class Ios {
             process.exit(1);
         }
         const exportedIpaPath = path.join(exportDir, `./${appName}.ipa`);
-        const exportedIpaPathWithLabel = path.join(exportDir, `./${ipaFileName}.ipa`);
+        const exportedIpaPathWithLabel = path.join(exportDir, `./${ipaFileName}`);
         fs.renameSync(exportedIpaPath, exportedIpaPathWithLabel);
+    }
+
+    createManifest({id, version, ipaUrlPath, manifestPath, appName, schema, exportDir}){
+        logger.section(`Create iOS manifest for OTA install in '${exportDir}'`);
+        const manifest = {
+            items: [{
+                assets: [{
+                    kind: 'software-package',
+                    url: ipaUrlPath
+                }],
+                CFBundleURLTypes: [{
+                    CFBundleURLSchemes: [ schema ]
+                }],
+                metadata: {
+                    'bundle-identifier': id,
+                    'bundle-version': version,
+                    kind: 'software',
+                    title: appName
+                }
+            }]
+        }
+        let manifestPlist = plist.build(manifest);
+        fs.writeFileSync(manifestPath, manifestPlist);
     }
 
     verify(config){
