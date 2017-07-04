@@ -60,8 +60,15 @@ class Ios {
         fs.writeFileSync(exportOptionsPlistPath, plist.build(exportOptionsPlist));
     }
 
-    exportIpa({projectPath, appName, versionLabel, exportOptionsPlistPath, exportDir, verbose}){
+    exportIpa({projectPath, appName, ipaFileName, exportOptionsPlist, exportOptionsPlistPath, exportDir, verbose}){
         const xcarchiveFilePath = path.join(projectPath, `./${appName}.xcarchive`);
+        if(!exportOptionsPlistPath){
+            exportOptionsPlistPath = path.join(projectPath, './exportOptions.plist');
+            this.createExportOptionsPlist({
+                exportOptionsPlistPath : exportOptionsPlistPath,
+                exportOptionsPlist : exportOptionsPlist
+            });
+        }
         logger.section(`Export IPA from '${xcarchiveFilePath}' into ${exportDir} directory`);
         process.chdir(projectPath);
         const cmdXcodebuildExport = `xcodebuild -exportArchive -archivePath '${xcarchiveFilePath}' -exportPath '${exportDir}' -exportOptionsPlist '${exportOptionsPlistPath}'`
@@ -75,7 +82,7 @@ class Ios {
             process.exit(1);
         }
         const exportedIpaPath = path.join(exportDir, `./${appName}.ipa`);
-        const exportedIpaPathWithLabel = path.join(exportDir, `./${versionLabel}.ipa`);
+        const exportedIpaPathWithLabel = path.join(exportDir, `./${ipaFileName}.ipa`);
         fs.renameSync(exportedIpaPath, exportedIpaPathWithLabel);
     }
 
@@ -103,13 +110,6 @@ class Ios {
             else{
                 config.ios.infoPlistPath = plistPath_1;
             }
-        }
-        if(!config.ios.exportOptionsPlistPath){
-            config.ios.exportOptionsPlistPath = path.join(config.cordova.path, './platforms/ios/exportOptions.plist');
-            this.createExportOptionsPlist({
-                exportOptionsPlistPath : config.ios.exportOptionsPlistPath,
-                exportOptionsPlist : config.ios.exportOptionsPlist
-            });
         }
         if(!config.ios.bundleId){
             throw new Error('iOS build error: missing "ios.bundleId" value in config file');

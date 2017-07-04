@@ -159,7 +159,7 @@ const startDistribution = () => {
             cordova.distributeIos({
                 appName : config.app.name,
                 displayName : config.app.label,
-                versionLabel : config.app.versionLabel,
+                ipaFileName : config.ios.ipaFileName,
                 id : config.ios.bundleId,
                 bundleVersion : config.ios.bundleVersion,
                 schema : config.ios.targetSchema,
@@ -167,6 +167,7 @@ const startDistribution = () => {
                 infoPlistPath : config.ios.infoPlistPath,
                 cordovaPath : config.cordova.path,
                 buildIosCommand : config.cordova.buildIosCommand,
+                exportOptionsPlist : config.ios.exportOptionsPlist,
                 exportOptionsPlistPath : config.ios.exportOptionsPlistPath,
                 exportDir : config.buildsDir,
 

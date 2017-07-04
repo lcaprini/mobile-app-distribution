@@ -55,6 +55,7 @@ class Config {
         this.ios = {
             bundleId : '',
             bundleVersion : '',
+            ipaFileName : '',
             infoPlistPath : '',
             targetSchema : '',
             exportOptionsPlist : {
@@ -147,11 +148,15 @@ class Config {
                         config.android.apkFileName = `${config.app.label}_v.${config.app.versionLabel}.apk`.replace(/ /g, '_');
                         config.android.apkFilePath = path.join(config.buildsDir, config.android.apkFileName);
                         
+                        config.ios.ipaFileName = `${config.app.label}_v.${config.app.versionLabel}.ipa`.replace(/ /g, '_');
                         if(config.ios.infoPlistPath){
                             config.ios.infoPlistPath = path.isAbsolute(config.ios.infoPlistPath)? config.ios.infoPlistPath : path.join(config.rootPath, config.ios.infoPlistPath);
                         }
                         if(config.ios.exportOptionsPlistPath){
                             config.ios.exportOptionsPlistPath = path.isAbsolute(config.ios.exportOptionsPlistPath)? config.ios.exportOptionsPlistPath : path.join(config.rootPath, config.ios.exportOptionsPlistPath);
+                        }
+                        if(!config.ios.targetSchema){
+                            config.ios.targetSchema = config.app.name;
                         }
                         
                         config.remote.repo.jsonPath = path.join(config.remote.repo.jsonPath, './builds.json');

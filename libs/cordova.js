@@ -158,7 +158,7 @@ const Cordova = {
     /**
      * Exec all task to prepare and build the iOS platform
      */
-    distributeIos({appName, displayName, versionLabel, id, bundleVersion, schema, cordovaPath, infoPlistPath, buildIosCommand = 'cordova build ios', exportOptionsPlistPath, exportDir, verbose = false}){
+    distributeIos({appName, displayName, ipaFileName, id, bundleVersion, schema, cordovaPath, infoPlistPath, buildIosCommand = 'cordova build ios', exportOptionsPlist, exportOptionsPlistPath, exportDir, verbose = false}){
         this.setId({cordovaPath, id});
         this.setIosBundleVersion({cordovaPath, bundleVersion});
         ios.setDisplayName({infoPlistPath, displayName});
@@ -166,7 +166,7 @@ const Cordova = {
         const projectPath = path.join(cordovaPath, './platforms/ios');
         ios.cleanProject({projectPath, verbose});
         ios.archiveProject({projectPath, appName, schema, verbose});
-        ios.exportIpa({projectPath, appName, versionLabel, exportOptionsPlistPath, exportDir, verbose});
+        ios.exportIpa({projectPath, appName, ipaFileName, exportOptionsPlist, exportOptionsPlistPath, exportDir, verbose});
     },
 
     /**
@@ -225,7 +225,7 @@ const Cordova = {
                         <a href="${repoHomepageUrl}"><img class="qrcode" src="https://chart.googleapis.com/chart?cht=qr&chs=300x300&choe=UTF-8&chld=H|0&chl=${repoHomepageUrl}"/></a>
                     </div>
                     <br/>
-                    <p>You can also directly download the app by scanning the following QRCodes o by tapping on it</p>
+                    <p>You can also directly download the app by scanning the following QRCodes or tapping on it</p>
                     <table>
                         <tr>
         `
