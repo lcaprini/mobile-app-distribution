@@ -105,7 +105,7 @@ class Ios {
             }
         }
         if(!config.ios.exportOptionsPlistPath){
-            config.ios.exportOptionsPlistPath = path.join(config.cordova.path, './platforms/ios/exportOptionsPlist.plist');
+            config.ios.exportOptionsPlistPath = path.join(config.cordova.path, './platforms/ios/exportOptions.plist');
             this.createExportOptionsPlist({
                 exportOptionsPlistPath : config.ios.exportOptionsPlistPath,
                 exportOptionsPlist : config.ios.exportOptionsPlist
