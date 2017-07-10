@@ -82,7 +82,12 @@ export default {
                     this.builds = (showAll)? jsonFile.body.builds : _.remove(jsonFile.body.builds, {hidden : false});
 
                     if(this.builds.length > 0){
-                        this.active = this.builds[0].version;
+                        if(url.searchParams.get('v')){
+                            this.active = url.searchParams.get('v');
+                        }
+                        else{
+                            this.active = this.builds[0].version;
+                        }
                     }
 
                     document.title = this.appName;
