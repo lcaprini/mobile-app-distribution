@@ -74,7 +74,8 @@ export default {
         if(url.searchParams.get('all')){
             showAll = url.searchParams.get('all') === 'true';
         }
-        this.$http.get(`http://www.eol.unipg.it/builds.json?t=${new Date().getTime()}`).then(
+        const builds = (process.env.NODE_ENV === 'production')? './builds.json' : 'http://www.eol.unipg.it/builds.json';
+        this.$http.get(`${builds}?t=${new Date().getTime()}`).then(
             jsonFile => {
                 try{
                     this.appName = jsonFile.body.appName;
@@ -130,10 +131,13 @@ export default {
     min-height: 0;
     overflow: hidden;
     height: 100%;
-    margin-bottom: 40px;
     -webkit-transition: all 0.5s;
     -moz-transition: all 0.5s;
     transition: all 0.5s;
+
+    @media screen and (min-width: 560px) {
+        margin-bottom: 40px;
+    }
 
     .versions {
         height: 100%;

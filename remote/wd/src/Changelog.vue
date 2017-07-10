@@ -27,44 +27,42 @@
                     @click="search = ''"
                     class="cancel"></Button>
             </form>
-
-            <ul class="version-list">
-                <transition-group name="version-list" tag="li">
-                <li v-for="(build, iB) in filteredBuilds" :key="build.version" class="version">
-                    <p class="title">
-                        <span class="platforms">
-                            <img v-if="build.androidBuildPath" class="icon" :src="androidLogo">
-                            <img v-if="build.iosBuildPath" class="icon" :src="iosLogo">
-                        </span>
-                        {{ build.version }}
-                        <Button
-                            type="ghost"
-                            shape="circle"
-                            size="small"
-                            @click="showVersion(build.version)"
-                            class="select"> Show ▶ </Button>
-                    </p>
-                    <ul class="changelog">
-                        <li v-for="(change, iC) in build.changelog" :key="iC" v-once> {{ change }} </li>
-                    </ul>
-                </li>
-                </transition-group>
-            </ul>
+            <div class="version-list-container">
+                <ul class="version-list">
+                    <transition-group name="version-list" tag="li">
+                    <li v-for="(build, iB) in filteredBuilds" :key="build.version" class="version">
+                        <p class="title">
+                            <span class="platforms">
+                                <Icon v-if="build.iosBuildPath" type="social-apple"></Icon>
+                                <Icon v-if="build.androidBuildPath" type="social-android"></Icon>
+                            </span>
+                            {{ build.version }}
+                            <Button
+                                type="ghost"
+                                shape="circle"
+                                size="small"
+                                @click="showVersion(build.version)"
+                                class="select"> Show ▶ </Button>
+                        </p>
+                        <ul class="changelog">
+                            <li v-for="(change, iC) in build.changelog" :key="iC" v-once> {{ change }} </li>
+                        </ul>
+                    </li>
+                    </transition-group>
+                </ul>
+            </div>
             
         </Modal>
     </span>
 </template>
 
 <script>
-import androidLogo from 'images/androidLogo.png';
-import iosLogo from 'images/iosLogo.png';
+
 export default {
     data(){
         return {
             changelogModal: false,
-            search: '',
-            androidLogo :androidLogo,
-            iosLogo :iosLogo
+            search: ''
         }
     },
     props: {
@@ -157,41 +155,51 @@ form {
     position: relative;
 }
 
-ul.version-list {
-    list-style: none;
-    padding: 10px;
-    margin-bottom: 0;
+div.version-list-container{
+    overflow-x: hidden;
+    overflow-y: auto;
 
-    li.version {
-        margin-bottom: 5px;
+    ul.version-list {
+        list-style: none;
+        padding: 10px;
+        margin-bottom: 0;
 
-        .title {
-            background: $border-color;
-            font-size: 14px;
-            padding: 5px;
-            position: relative;
-            padding-left: 50px;
+        li.version {
             margin-bottom: 5px;
 
-            .platforms {
-                position: absolute;
-                left: 0;
-                padding-left: 5px;
-
-                .icon {
-                    width: 20px;
-                    position: relative;
-                    top: -2px;
-                }
-            }
-
-            .select {
-                position: absolute;
-                right: 0;
-                top: 3px;
+            .title {
+                background: $border-color;
                 font-size: 14px;
-                color: $main-color;
-                border: none;
+                padding: 5px;
+                position: relative;
+                padding-left: 50px;
+                margin-bottom: 5px;
+
+                .platforms {
+                    position: absolute;
+                    top: 2px;
+                    left: 7px;
+
+                    .ivu-icon {
+                        font-size: 25px;
+                    }
+
+                    .ivu-icon-social-apple {
+                        color: $ios-color;
+                    }
+                    .ivu-icon-social-android {
+                        color: $android-color;
+                    }
+                }
+
+                .select {
+                    position: absolute;
+                    right: 0;
+                    top: 3px;
+                    font-size: 14px;
+                    color: $main-color;
+                    border: none;
+                }
             }
         }
     }

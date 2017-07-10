@@ -2,15 +2,15 @@
     <div class="tab">
         <button class="tab-toggle" :class="{active : active}" @click="select">
             {{version}}
-            <img v-if="androidLink" class="icon" :src="androidLogo">
-            <img v-if="iosLink" class="icon" :src="iosLogo">
+            <div class="platforms">
+                <Icon v-if="iosLink" type="social-apple"></Icon>
+                <Icon v-if="androidLink" type="social-android"></Icon>
+            </div>
         </button>
     </div>
 </template>
 <script>
 
-import androidLogo from 'images/androidLogo.png';
-import iosLogo from 'images/iosLogo.png';
 import $ from 'jquery';
 import VersionDetails from './VersionDetails.vue';
 
@@ -44,10 +44,6 @@ export default {
             default: false
         }
     },
-    created() {
-        this.androidLogo = androidLogo;
-        this.iosLogo = iosLogo;
-    },
     methods:{
         select($event){
             this.$emit('selected', this.version);
@@ -62,6 +58,7 @@ export default {
 .tab {
 
     .tab-toggle {
+        position: relative;
         outline: none;
         width: 100%;
         color: $main-color;
@@ -87,13 +84,28 @@ export default {
             color: white;
             background-color: $main-color;
             cursor: default;
+
+            .platforms .ivu-icon {
+                color: white;
+            }
         }
 
-        .icon {
-            width: 20px;
-            height: auto;
-            float: right;
-            margin-left: 5px;
+        .platforms {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+
+            .ivu-icon {
+                font-size: 30px;
+                margin-left: 5px;
+            }
+
+            .ivu-icon-social-apple {
+                color: $ios-color;
+            }
+            .ivu-icon-social-android {
+                color: $android-color;
+            }
         }
     }
 

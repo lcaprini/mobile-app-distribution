@@ -26,8 +26,14 @@
             }
 
             .ivu-modal-body {
-                overflow-x: hidden;
-                overflow-y: auto;
+                overflow: hidden;
+                display: -webkit-box;
+                display: -moz-box;
+                display: -ms-flexbox;
+                display: -webkit-flex;
+                display: flex;
+                -webkit-flex-direction: column;
+                flex-direction: column;
             }
         }
     }
