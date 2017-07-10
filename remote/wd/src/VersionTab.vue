@@ -11,7 +11,6 @@
 </template>
 <script>
 
-import $ from 'jquery';
 import VersionDetails from './VersionDetails.vue';
 
 export default {
