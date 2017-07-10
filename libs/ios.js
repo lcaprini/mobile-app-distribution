@@ -5,6 +5,7 @@ const plist = require('plist');
 const shell = require('shelljs');
 
 const logger = require('./logger');
+const utils = require('./utils');
 
 class Ios {
 
@@ -107,6 +108,40 @@ class Ios {
         }
         let manifestPlist = plist.build(manifest);
         fs.writeFileSync(manifestPath, manifestPlist);
+    }
+
+    uploadManifest({manifestFilePath, server, destinationPath}){
+        const remoteFile = path.join(destinationPath, path.basename(manifestFilePath));
+        logger.section(`Upload iOS Manifest on ${remoteFile}`);
+        return utils.uploadFile({
+            localFile : manifestFilePath,
+            server : server,
+            remoteFile : remoteFile
+        });
+    }
+
+    uploadIPA({ipaFilePath, server, destinationPath}){
+        const remoteFile = path.join(destinationPath, path.basename(ipaFilePath));
+        logger.section(`Upload iOS IPA on ${remoteFile}`);
+        return utils.uploadFile({
+            localFile : ipaFilePath,
+            server : server,
+            remoteFile : remoteFile
+        });
+    }
+
+    uploadManifestAndIPA({ipaFilePath, manifestFilePath, server, destinationPath}){
+        return this.uploadIPA({
+            ipaFilePath,
+            server,
+            destinationPath
+        }).then(() => {
+            return this.uploadManifest({
+                manifestFilePath,
+                server,
+                destinationPath
+            });
+        });
     }
 
     verify(config){

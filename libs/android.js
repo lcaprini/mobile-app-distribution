@@ -5,7 +5,6 @@ const path = require('path');
 const shell = require('shelljs');
 const commandExists = require('command-exists').sync;
 
-const repo = require('./repo');
 const logger = require('./logger');
 const utils = require('./utils');
 
@@ -71,27 +70,14 @@ class Android {
         }
     }
 
-    uploadAPK({launcherName, apkFilePath, server, apkDestinationPath}){
-        logger.section(`Upload Android apk on ${apkDestinationPath}`);
-        const remoteFile = path.join(apkDestinationPath, path.basename(apkFilePath));
+    uploadAPK({apkFilePath, server, destinationPath}){
+        logger.section(`Upload Android apk on ${destinationPath}`);
+        const remoteFile = path.join(destinationPath, path.basename(apkFilePath));
         return utils.uploadFile({
             localFile : apkFilePath,
             server : server,
             remoteFile : remoteFile
         });
-    }
-
-    updateRepository({repoPath, server, androidBuildPath, version, changelog, hidden, rootPath}){
-        logger.section(`Update Android repository`);
-        repo.update({
-            repoPath,
-            server,
-            version,
-            hidden,
-            changelog,
-            androidBuildPath,
-            rootPath
-        })
     }
 
     verify(config){

@@ -57,6 +57,7 @@ class Config {
             bundleId : '',
             bundleVersion : '',
             ipaFileName : '',
+            ipaFilePath : '',
             infoPlistPath : '',
             targetSchema : '',
             exportOptionsPlist : {
@@ -67,7 +68,8 @@ class Config {
                 uploadBitcode : false
             },
             exportOptionsPlistPath : '',
-            manifestFileName : ''
+            manifestFileName : '',
+            manifestFilePath : ''
         };
 
         this.android = {
@@ -153,7 +155,9 @@ class Config {
                         config.android.apkFilePath = path.join(config.buildsDir, config.android.apkFileName);
                         
                         config.ios.ipaFileName = `${config.app.label}_v.${config.app.versionLabel}.ipa`.replace(/ /g, '_');
+                        config.ios.ipaFilePath = path.join(config.buildsDir, config.ios.ipaFileName);
                         config.ios.manifestFileName = `manifest_${config.app.label}_v.${config.app.versionLabel}.plist`.replace(/ /g, '_');
+                        config.ios.manifestFilePath = path.join(config.buildsDir, config.ios.manifestFileName);                        
                         if(config.ios.infoPlistPath){
                             config.ios.infoPlistPath = path.isAbsolute(config.ios.infoPlistPath)? config.ios.infoPlistPath : path.join(config.rootPath, config.ios.infoPlistPath);
                         }

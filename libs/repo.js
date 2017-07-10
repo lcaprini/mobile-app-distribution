@@ -9,6 +9,7 @@ const path = require('path');
 const Promise = require('bluebird');
 
 const utils = require('./utils');
+const logger = require('./logger');
 const Repo = {
 
     UPDATING : Promise.resolve(),
@@ -18,9 +19,10 @@ const Repo = {
     },
 
     update({repoPath, server, version, hidden, changelog, androidBuildPath = null, iosBuildPath = null, rootPath}){
+        logger.section(`Update repository`);
 
         function update(){
-            Repo.UPDATING = new Promise((resolve, reject) => {
+            return Repo.UPDATING = new Promise((resolve, reject) => {
 
                 utils.downloadFile({file : repoPath, server}).then(
                     data => {
@@ -38,7 +40,7 @@ const Repo = {
                             build.androidBuildPath = androidBuildPath;
                         }
                         if(iosBuildPath){
-                            build.iosBuildPath;
+                            build.iosBuildPath = iosBuildPath;
                         }
                         jsonFile.builds.unshift(build);
                         const tmpJsonFile = path.join(rootPath, `./.builds.json`);
@@ -66,10 +68,10 @@ const Repo = {
 
         // Wait previous update before run the new one
         if(this.isUpdatingRepo()){
-            this.UPDATING.then(update);
+            return this.UPDATING.then(update);
         }
         else{
-            update();
+            return update();
         }
     },
 

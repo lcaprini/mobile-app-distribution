@@ -12,7 +12,11 @@ const utils = require('../utils');
 const repo = require('../repo');
 const cordova = require('../cordova').CORDOVA;
 const android = require('../android');
+const ios = require('../ios');
 const TASKS = require('../cordova').TASKS;
+
+let iosBuildProcessCompleted;
+let androidBuildProcessCompleted;
 
 program
     .allowUnknownOption()
@@ -48,15 +52,18 @@ const endDistribute = err => {
         process.exit(1);
     }
 
-    // Close process when uploading and updating repo tasks are completed
-    if(utils.isUploadingBuilds() || repo.isUpdatingRepo()){
-        Promise.all([utils.UPLOADING_BUILDS, repo.UPDATING]).then(() => {
-            exit();
-        });
+    let processes = [];
+    if(config.tasks.contains(TASKS.BUILD_IOS)){
+        processes.push(iosBuildProcessCompleted);
     }
-    else{
+    if(config.tasks.contains(TASKS.BUILD_ANDROID)){
+        processes.push(androidBuildProcessCompleted);
+    }
+
+    // Close process when uploading and updating repo tasks are completed for all platforms
+    Promise.all(processes).then(() => {
         exit();
-    }
+    });
 }
 
 /**
@@ -71,7 +78,7 @@ const exit = () => {
     if(config.tasks.contains(TASKS.SEND_EMAIL)){
         let emailData = {
             appName : config.app.name,
-            appVersion : config.app.version,
+            appVersion : config.app.versionLabel,
             appLabel : config.app.label,
             hidden : config.hidden,
             repoHomepageUrl : config.remote.repo.homepageUrl
@@ -93,7 +100,7 @@ const exit = () => {
                 password : config.email.password
             },
             appName : config.app.name,
-            appVersion : config.app.version,
+            appVersion : config.app.versionLabel,
             body : emailBody
         });
         utils.SENDING_EMAIL.then(
@@ -178,6 +185,39 @@ const startDistribution = () => {
 
                 verbose : config.verbose
             });
+            iosBuildProcessCompleted = new Promise((resolve, reject) => {
+                if(config.tasks.contains(TASKS.UPLOAD_BUILDS)){
+                    ios.uploadManifestAndIPA({
+                        ipaFilePath : config.ios.ipaFilePath,
+                        manifestFilePath : config.ios.manifestFilePath,
+                        server : {
+                            host : config.remote.builds.host,
+                            port : config.remote.builds.port,
+                            user : config.remote.builds.user,
+                            pass : config.remote.builds.password
+                        },
+                        destinationPath : config.remote.builds.iosDestinationPath
+                    }).then(() => {
+                        repo.update({
+                            repoPath : config.remote.repo.jsonPath,
+                            server : {
+                                host : config.remote.repo.host,
+                                port : config.remote.repo.port,
+                                user : config.remote.repo.user,
+                                pass : config.remote.repo.password
+                            },
+                            iosBuildPath : 'itms-services://?action=download-manifest&amp;url=' + config.remote.repo.iosManifestUrlPath,
+                            version : config.app.versionLabel,
+                            changelog : config.changeLog,
+                            hidden : config.hidden,
+                            rootPath : config.rootPath
+                        }).then(resolve, reject);
+                    }, reject);
+                }
+                else{
+                    resolve();
+                }
+            });
         }
 
         /**
@@ -201,47 +241,41 @@ const startDistribution = () => {
 
                 verbose : config.verbose
             });
-            if(config.tasks.contains(TASKS.UPLOAD_BUILDS)){
-                android.uploadAPK({
-                    apkFilePath : config.android.apkFilePath,
-                    server : {
-                        host : config.remote.builds.host,
-                        port : config.remote.builds.port,
-                        user : config.remote.builds.user,
-                        pass : config.remote.builds.password
-                    },
-                    apkDestinationPath : config.remote.builds.androidDestinationPath
-                });
-                android.updateRepository({
-                    repoPath : config.remote.repo.jsonPath,
-                    server : {
-                        host : config.remote.repo.host,
-                        port : config.remote.repo.port,
-                        user : config.remote.repo.user,
-                        pass : config.remote.repo.password
-                    },
-                    androidBuildPath : config.remote.repo.androidUrlPath,
-                    version : config.app.versionLabel,
-                    changelog : config.changeLog,
-                    hidden : config.hidden,
-                    rootPath : config.rootPath
-                })
-            }
+            androidBuildProcessCompleted = new Promise((resolve, reject) => {
+                if(config.tasks.contains(TASKS.UPLOAD_BUILDS)){
+                    android.uploadAPK({
+                        apkFilePath : config.android.apkFilePath,
+                        server : {
+                            host : config.remote.builds.host,
+                            port : config.remote.builds.port,
+                            user : config.remote.builds.user,
+                            pass : config.remote.builds.password
+                        },
+                        destinationPath : config.remote.builds.androidDestinationPath
+                    }).then(() => {
+                        repo.update({
+                            repoPath : config.remote.repo.jsonPath,
+                            server : {
+                                host : config.remote.repo.host,
+                                port : config.remote.repo.port,
+                                user : config.remote.repo.user,
+                                pass : config.remote.repo.password
+                            },
+                            androidBuildPath : config.remote.repo.androidUrlPath,
+                            version : config.app.versionLabel,
+                            changelog : config.changeLog,
+                            hidden : config.hidden,
+                            rootPath : config.rootPath
+                        }).then(resolve, reject);
+                    }, reject);
+                }
+                else{
+                    resolve();
+                }
+            });
         }
 
         endDistribute();
-    }
-    catch(err){
-        endDistribute(err);
-    }
-}
-
-/**
- * Inizialize Cordova distribution process
- */
-const initCordova = () => {
-    try{
-        config.printRecap().then(startDistribution);
     }
     catch(err){
         endDistribute(err);
@@ -255,7 +289,14 @@ config.init({
     configPath: program.config,
     program: program
 }).then(
-    initCordova,
+    () => {
+        try{
+            config.printRecap().then(startDistribution);
+        }
+        catch(err){
+            endDistribute(err);
+        }
+    },
     err => {
         // console.error(err.message);
         console.error(err);
