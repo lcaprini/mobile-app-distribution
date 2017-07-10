@@ -57,6 +57,7 @@
 </template>
 
 <script>
+import each from 'lodash/each';
 
 export default {
     data(){
@@ -76,11 +77,11 @@ export default {
             if(this.search){
                 const search = this.search;
                 let filtered = [];
-                _.each(this.builds, build => {
+                each(this.builds, build => {
                     let found = false;
                     let changeCounter = 0;
                     while(!found && changeCounter < build.changelog.length){
-                        if(_.lowerCase(build.changelog[0]).indexOf(_.lowerCase(search)) > -1){
+                        if(build.changelog[0].toLowerCase().indexOf(search.toLowerCase()) > -1){
                             found = true;
                         }
                         changeCounter++;

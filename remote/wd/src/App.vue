@@ -49,8 +49,7 @@
 </template>
 
 <script>
-import $ from 'jquery';
-import _ from 'lodash';
+import remove from 'lodash/remove';
 import VersionTab from './VersionTab.vue';
 import VersionDetails from './VersionDetails.vue';
 import Changelog from './Changelog.vue';
@@ -80,7 +79,7 @@ export default {
                 try{
                     this.appName = jsonFile.body.appName;
 
-                    this.builds = (showAll)? jsonFile.body.builds : _.remove(jsonFile.body.builds, {hidden : false});
+                    this.builds = (showAll)? jsonFile.body.builds : remove(jsonFile.body.builds, {hidden : false});
 
                     if(this.builds.length > 0){
                         if(url.searchParams.get('v')){
