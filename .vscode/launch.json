@@ -10,17 +10,15 @@
             "name": "Cordova",
             "program": "${workspaceRoot}/libs/bin/distribute-cordova.js",
             "args": [
-                "1.6.1 patch01",
+                "1.8.5 patch06",
                 "--config",
                 "/Users/Masterplan/Development/iLinkConf/distribute.json",
                 "--android-version-code",
-                "10601",
+                "10805",
                 "--ios-bundle-version",
-                "161",
-                "--change-log",
-                "/Users/Masterplan/Desktop/last-changelog.txt",
+                "185",
                 "--tasks",
-                "vciauze",
+                "ciaue",
                 "--qr-code",
                 "-h",
                 "-v",
@@ -30,16 +28,16 @@
             "name": "Webpack",
             "type": "node",
             "request": "launch",
-            "program": "${workspaceRoot}/resources/wd/node_modules/.bin/webpack-dev-server",
+            "program": "${workspaceRoot}/remote/wd/node_modules/.bin/webpack-dev-server",
             "args": [
                 "--inline",
                 "--hot"
             ],
             "outFiles": [
-                "${workspaceRoot}/resources/wd/dist/*"
+                "${workspaceRoot}/remote/wd/dist/*"
             ],
             "stopOnEntry": false,
-            "cwd": "${workspaceRoot}/resources/wd/",
+            "cwd": "${workspaceRoot}/remote/wd/",
             "runtimeExecutable": null,
             "runtimeArgs": [],
             "env": {
