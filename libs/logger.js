@@ -18,11 +18,11 @@ const logger = new (winston.Logger)({
 });
 
 logger.section = (text, level = 'info') => {
-    logger[level]('\n#########################################################');
+    logger[level]('\n#');
     _.each(text.split('\n'), log => {
         logger[level](`#  ${log}`);
     });
-    logger[level]('#########################################################\n');
+    logger[level]('#\n');
 }
 
 logger.printEnd = () => {

@@ -9,6 +9,7 @@ const path = require('path');
 
 const config = require('../config');
 const utils = require('../utils');
+const email = require('../email');
 const repo = require('../repo');
 const cordova = require('../cordova').CORDOVA;
 const android = require('../android');
@@ -90,7 +91,7 @@ const exit = () => {
             emailData.iosBuildPath = config.remote.repo.iosManifestUrlPath;
         }
         const emailBody = cordova.composeEmail(emailData);
-        utils.sendEmail({
+        email.sendEmail({
             from : config.email.from,
             to : config.email.to,
             server : {
@@ -103,7 +104,7 @@ const exit = () => {
             appVersion : config.app.versionLabel,
             body : emailBody
         });
-        utils.SENDING_EMAIL.then(
+        email.SENDING_EMAIL.then(
             () => {
                 logger.printEnd();
                 if(config.qrcode && config.remote.repo.homepageUrl){
