@@ -5,7 +5,7 @@ const plist = require('plist');
 const shell = require('shelljs');
 
 const logger = require('./logger');
-const utils = require('./utils');
+const remote = require('./remote');
 
 class Ios {
 
@@ -113,7 +113,7 @@ class Ios {
     uploadManifest({manifestFilePath, server, destinationPath}){
         const remoteFile = path.join(destinationPath, path.basename(manifestFilePath));
         logger.section(`Upload iOS Manifest on ${remoteFile}`);
-        return utils.uploadFile({
+        return remote.uploadFile({
             localFile : manifestFilePath,
             server : server,
             remoteFile : remoteFile
@@ -123,7 +123,7 @@ class Ios {
     uploadIPA({ipaFilePath, server, destinationPath}){
         const remoteFile = path.join(destinationPath, path.basename(ipaFilePath));
         logger.section(`Upload iOS IPA on ${remoteFile}`);
-        return utils.uploadFile({
+        return remote.uploadFile({
             localFile : ipaFilePath,
             server : server,
             remoteFile : remoteFile

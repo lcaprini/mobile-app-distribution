@@ -7,6 +7,7 @@ const commandExists = require('command-exists').sync;
 
 const logger = require('./logger');
 const utils = require('./utils');
+const remote = require('./remote');
 
 class Android {
 
@@ -73,7 +74,7 @@ class Android {
     uploadAPK({apkFilePath, server, destinationPath}){
         logger.section(`Upload Android apk on ${destinationPath}`);
         const remoteFile = path.join(destinationPath, path.basename(apkFilePath));
-        return utils.uploadFile({
+        return remote.uploadFile({
             localFile : apkFilePath,
             server : server,
             remoteFile : remoteFile

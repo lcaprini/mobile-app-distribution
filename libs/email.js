@@ -40,6 +40,27 @@ const Email = {
                 resolve();
             }); 
         });
+    },
+
+    verify(config){
+        if(!config.email.host){
+            throw new Error('Send email error: missing "email.host" value in config file');
+        }
+        if(!config.email.port){
+            throw new Error('Send email error: missing "email.port" value in config file');
+        }
+        if(!config.email.user){
+            throw new Error('Send email error: missing "email.user" value in config file');
+        }
+        if(!config.email.password){
+            throw new Error('Send email error: missing "email.password" value in config file');
+        }
+        if(!config.email.from){
+            throw new Error('Send email error: missing "email.from" value in config file');
+        }
+        if(!config.email.to){
+            throw new Error('Send email error: missing "email.to" value in config file');
+        }
     }
 }
 

@@ -10,7 +10,7 @@ const path = require('path');
 const config = require('../config');
 const utils = require('../utils');
 const email = require('../email');
-const repo = require('../repo');
+const remote = require('../remote');
 const cordova = require('../cordova').CORDOVA;
 const android = require('../android');
 const ios = require('../ios');
@@ -62,9 +62,11 @@ const endDistribute = err => {
     }
 
     // Close process when uploading and updating repo tasks are completed for all platforms
-    Promise.all(processes).then(() => {
-        exit();
-    });
+    Promise.all(processes).then(
+        () => {
+            exit();
+        },
+        process.exit(1));
 }
 
 /**
@@ -199,7 +201,7 @@ const startDistribution = () => {
                         },
                         destinationPath : config.remote.builds.iosDestinationPath
                     }).then(() => {
-                        repo.update({
+                        remote.updateRepo({
                             repoPath : config.remote.repo.jsonPath,
                             server : {
                                 host : config.remote.repo.host,
@@ -254,7 +256,7 @@ const startDistribution = () => {
                         },
                         destinationPath : config.remote.builds.androidDestinationPath
                     }).then(() => {
-                        repo.update({
+                        remote.updateRepo({
                             repoPath : config.remote.repo.jsonPath,
                             server : {
                                 host : config.remote.repo.host,
