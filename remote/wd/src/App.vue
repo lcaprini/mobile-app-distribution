@@ -10,6 +10,7 @@
             <div class="versions">
                 <template v-for="(build, index) in builds">
                     <version-tab
+                        :id="build.version.replace(/ /g,'_')"
                         :app-name="appName"
                         :version="build.version"
                         :hidden="build.hidden"
@@ -73,13 +74,21 @@ export default {
         if(url.searchParams.get('all')){
             showAll = url.searchParams.get('all') === 'true';
         }
-        const builds = (process.env.NODE_ENV === 'production')? './builds.json' : 'http://www.eol.unipg.it/builds.json';
+        const builds = (process.env.NODE_ENV === 'production')? './builds.json' : 'http://fiatpvt-coll.engbms.it/FiatApp/ilcc/wd/builds.json';
         this.$http.get(`${builds}?t=${new Date().getTime()}`).then(
             jsonFile => {
                 try{
                     this.appName = jsonFile.body.appName;
 
-                    this.builds = (showAll)? jsonFile.body.builds : remove(jsonFile.body.builds, {hidden : false});
+                    if(showAll){
+                        this.builds = jsonFile.body.builds;
+                    }
+                    else{
+                        remove(jsonFile.body.builds, (b) => {
+                            return (typeof b.hidden === undefined)? false : b.hidden === true;
+                        });
+                        this.builds = jsonFile.body.builds;
+                    }
 
                     if(this.builds.length > 0){
                         if(url.searchParams.get('v')){
@@ -102,6 +111,9 @@ export default {
     methods : {
         selectedVersion(version){
             this.active = version;
+            const url = window.location.href;
+            location.href = "#" + version.replace(/ /g,"_");
+            window.history.replaceState(null, null, url);
         }
     }
 }

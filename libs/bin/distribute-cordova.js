@@ -27,8 +27,8 @@ program
     .option('-i, --ios-bundle-version <bundle version>', 'iOS bundle version')
     .option('-c, --change-log <change-log.txt or "First edit***Other edit...">', 'file path or list with "***" separator', config.changeLog)
     .option(`-t, --tasks <[${TASKS.CHANGE_VERSION},${TASKS.COMPILE_SOURCES},${TASKS.BUILD_IOS},${TASKS.BUILD_ANDROID},${TASKS.UPLOAD_BUILDS},${TASKS.UPLOAD_SOURCES},${TASKS.SEND_EMAIL}]>`, `
-      ${TASKS.COMPILE_SOURCES} : builds HTML, CSS, JAVASCRIPT files for Cordova projects
       ${TASKS.CHANGE_VERSION} : preprocess file setting app version
+      ${TASKS.COMPILE_SOURCES} : builds HTML, CSS, JAVASCRIPT files for Cordova projects
       ${TASKS.BUILD_IOS} : builds, archives ad exports iOS project
       ${TASKS.BUILD_ANDROID} : builds, archives ad exports Android project
       ${TASKS.UPLOAD_BUILDS} : uploads builds on remote FTP server
