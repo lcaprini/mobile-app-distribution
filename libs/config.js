@@ -14,7 +14,8 @@ const cordovaTasks = require('./cordova').TASKS;
 const cordova = require('./cordova').CORDOVA;
 const android = require('./android');
 const ios = require('./ios');
-const repo = require('./repo');
+const remote = require('./remote');
+const email = require('./email');
 
 class Config {
 
@@ -313,81 +314,17 @@ class Config {
 
         // Check params for FTP build uploader
         if(this.tasks.contains(cordovaTasks.UPLOAD_BUILDS)){
-            this.verifyUploadBuildsSteps();
+            remote.verifyUploadBuildsSteps(this);
         }
 
         // Check params for FTP sources upload
         if(this.tasks.contains(cordovaTasks.UPLOAD_SOURCES)){
-            this.verifyUploadSourcesSteps();
+            remote.verifyUploadSourcesSteps(this);
         }
 
         // Check params for FTP sources upload
         if(this.tasks.contains(cordovaTasks.SEND_EMAIL)){
-            this.verifySendEmailSteps();
-        }
-    }
-
-    verifyUploadBuildsSteps(){
-        if(!this.remote.builds.host){
-            throw new Error('FTP build upload error: missing "remote.builds.hosts" value in config file');
-        }
-        if(!this.remote.builds.port){
-            throw new Error('FTP build upload error: missing "remote.builds.port" value in config file');
-        }
-        if(!this.remote.builds.user){
-            throw new Error('FTP build upload error: missing "remote.builds.user" value in config file');
-        }
-        if(!this.remote.builds.password){
-            throw new Error('FTP build upload error: missing "remote.builds.password" value in config file');
-        }
-        if(this.tasks.contains(cordovaTasks.BUILD_IOS) || this.tasks.contains(cordovaTasks.BUILD_ANDROID)){
-            repo.verify(this);
-        }
-        if(this.tasks.contains(cordovaTasks.BUILD_IOS)){
-            if(!this.remote.builds.iosDestinationPath){
-                throw new Error('FTP+iOS upload error: missing "remote.builds.iosDestinationPath" value in config file');
-            }
-        }
-        if(this.tasks.contains(cordovaTasks.BUILD_ANDROID)){
-            if(!this.remote.builds.androidDestinationPath){
-                throw new Error('FTP+Android upload error: missing "remote.builds.androidDestinationPath" value in config file');
-            }
-        }
-    }
-
-    verifyUploadSourcesSteps(){
-        if(!this.remote.sources.host){
-            throw new Error('FTP sources upload error: missing "remote.sources.hosts" value in config file');
-        }
-        if(!this.remote.sources.user){
-            throw new Error('FTP sources upload error: missing "remote.sources.user" value in config file');
-        }
-        if(!this.remote.sources.password){
-            throw new Error('FTP sources upload error: missing "remote.sources.password" value in config file');
-        }
-        if(!this.remote.sources.destinationPath){
-            throw new Error('FTP sources upload error: missing "remote.sources.destinationPath" value in config file');
-        }
-    }
-
-    verifySendEmailSteps(){
-        if(!this.email.host){
-            throw new Error('Send email error: missing "email.host" value in config file');
-        }
-        if(!this.email.port){
-            throw new Error('Send email error: missing "email.port" value in config file');
-        }
-        if(!this.email.user){
-            throw new Error('Send email error: missing "email.user" value in config file');
-        }
-        if(!this.email.password){
-            throw new Error('Send email error: missing "email.password" value in config file');
-        }
-        if(!this.email.from){
-            throw new Error('Send email error: missing "email.from" value in config file');
-        }
-        if(!this.email.to){
-            throw new Error('Send email error: missing "email.to" value in config file');
+            email.verify(this);
         }
     }
 

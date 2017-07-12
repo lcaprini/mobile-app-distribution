@@ -9,7 +9,8 @@ const path = require('path');
 
 const config = require('../config');
 const utils = require('../utils');
-const repo = require('../repo');
+const email = require('../email');
+const remote = require('../remote');
 const cordova = require('../cordova').CORDOVA;
 const android = require('../android');
 const ios = require('../ios');
@@ -61,9 +62,11 @@ const endDistribute = err => {
     }
 
     // Close process when uploading and updating repo tasks are completed for all platforms
-    Promise.all(processes).then(() => {
-        exit();
-    });
+    Promise.all(processes).then(
+        () => {
+            exit();
+        },
+        process.exit(1));
 }
 
 /**
@@ -90,7 +93,7 @@ const exit = () => {
             emailData.iosBuildPath = config.remote.repo.iosManifestUrlPath;
         }
         const emailBody = cordova.composeEmail(emailData);
-        utils.sendEmail({
+        email.sendEmail({
             from : config.email.from,
             to : config.email.to,
             server : {
@@ -103,7 +106,7 @@ const exit = () => {
             appVersion : config.app.versionLabel,
             body : emailBody
         });
-        utils.SENDING_EMAIL.then(
+        email.SENDING_EMAIL.then(
             () => {
                 logger.printEnd();
                 if(config.qrcode && config.remote.repo.homepageUrl){
@@ -198,7 +201,7 @@ const startDistribution = () => {
                         },
                         destinationPath : config.remote.builds.iosDestinationPath
                     }).then(() => {
-                        repo.update({
+                        remote.updateRepo({
                             repoPath : config.remote.repo.jsonPath,
                             server : {
                                 host : config.remote.repo.host,
@@ -253,7 +256,7 @@ const startDistribution = () => {
                         },
                         destinationPath : config.remote.builds.androidDestinationPath
                     }).then(() => {
-                        repo.update({
+                        remote.updateRepo({
                             repoPath : config.remote.repo.jsonPath,
                             server : {
                                 host : config.remote.repo.host,
