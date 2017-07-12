@@ -5,6 +5,7 @@ const fs = require('fs');
 const et = require('elementtree');
 const path = require('path');
 const CordovaConfig = require('cordova-config');
+const inquirer = require("inquirer");
 const logger = require('./logger');
 const utils = require('./utils');
 const android = require('./android');
@@ -321,6 +322,42 @@ const Cordova = {
      */
     verifyIos(config){
         ios.verify(config);
+    },
+
+    /**
+     * Inizialize configuration for web app source compile
+     */
+    initializeSourceCompile(config){
+        return inquirer.prompt([{
+            type: 'input',
+            name: 'compileCommand',
+            message: 'Which command I must use to compile app sources?',
+            default: 'grunt build:production'
+        },{
+            type: 'input',
+            name: 'compilePath',
+            message: 'In which working directory I must execute the command (relative path or absolute one)?',
+            default: '.'
+        }]).then(({compileCommand, compilePath}) => {
+            config.sources.compileCommand = compileCommand;
+            config.sources.compilePath = compilePath;
+            return config;
+        });
+    },
+
+    /**
+     * Inizialize configuration for change version task
+     */
+    initializeChangeVersion(config){
+        return inquirer.prompt([{
+            type: 'input',
+            name: 'htmlVersionPath',
+            message: 'Which HTML file contains <mad-app-version> tag for app version updating?',
+            default: 'src/html/partials/login.html'
+        }]).then(({htmlVersionPath}) => {
+            config.sources.htmlVersionPath = htmlVersionPath;
+            return config;
+        });
     }
 }
 
