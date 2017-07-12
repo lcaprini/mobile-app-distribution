@@ -65,7 +65,7 @@ export default {
     },
     methods: {
         downloadIPA(){
-            const link = `itms-services://?action=download-manifest&amp;url=${this.iosLink}`;
+            const link = (this.iosLink.indexOf('itms-services') === -1)? `itms-services://?action=download-manifest&amp;url=${this.iosLink}` : this.iosLink;
             console.log('Download IPA', link);
             window.open(link, '_self');
         },
