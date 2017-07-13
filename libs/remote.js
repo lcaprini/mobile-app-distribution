@@ -13,18 +13,6 @@ const logger = require('./logger');
 
 const Remote = {
 
-    UPDATING_REPO : Promise.resolve(),
-
-    isUpdatingRepo(){
-        return (this.UPDATING_REPO.isPending());
-    },
-
-    UPLOADING_FILE : Promise.resolve(),
-
-    isUploadingFile(){
-        return (this.UPLOADING_FILE.isPending());
-    },
-
     downloadFile({file, server}){
         return new Promise((resolve, reject) => {
             let ftp = new JSFtp(server);
@@ -52,85 +40,64 @@ const Remote = {
     uploadFile({localFile, server, remoteFile}){
         const logger = require('./logger');
 
-        function upload(){
-            Remote.UPLOADING_FILE = new Promise((resolve, reject) => {
-                let ftp = new JSFtp(server);
-                ftp.put(localFile, remoteFile, err => {
-                    ftp.destroy();
-                    if(err){
-                        reject();
-                        throw new Error(err);
-                    }
-                    resolve();
-                });
+        return new Promise((resolve, reject) => {
+            let ftp = new JSFtp(server);
+            ftp.put(localFile, remoteFile, err => {
+                ftp.destroy();
+                if(err){
+                    reject();
+                    throw new Error(err);
+                }
+                resolve();
             });
-            return Remote.UPLOADING_FILE;
-        }
-
-        // Only one upload at time is allowed
-        if(this.isUploadingFile()){
-            return this.UPLOADING_FILE.then(upload);
-        }
-        else{
-            return upload();
-        }
+        });
     },
 
     updateRepo({repoPath, server, version, hidden, changelog, androidBuildPath = null, iosBuildPath = null, rootPath}){
         logger.section(`Update repository`);
 
-        function update(){
-            return Remote.UPDATING_REPO = new Promise((resolve, reject) => {
+        return new Promise((resolve, reject) => {
 
-                Remote.downloadFile({file : repoPath, server}).then(
-                    data => {
-                        let jsonFile = JSON.parse(data);
-                        let build = _.remove(jsonFile.builds, b => {return b.version == version})[0];
-                        if(!build){
-                            build = {
-                                version,
-                                hidden
-                            }
+            Remote.downloadFile({file : repoPath, server}).then(
+                data => {
+                    let jsonFile = JSON.parse(data);
+                    let build = _.remove(jsonFile.builds, b => {return b.version == version})[0];
+                    if(!build){
+                        build = {
+                            version,
+                            hidden
                         }
-                        build.changelog = changelog;
-                        build.date = moment().format('DD/MM/YYYY HH:mm:ss');
-                        if(androidBuildPath){
-                            build.androidBuildPath = androidBuildPath;
-                        }
-                        if(iosBuildPath){
-                            build.iosBuildPath = iosBuildPath;
-                        }
-                        jsonFile.builds.unshift(build);
-                        const tmpJsonFile = path.join(rootPath, `./.builds.json`);
-                        fs.writeFileSync(tmpJsonFile, JSON.stringify(jsonFile, null, 4), {encoding: 'utf-8', flag: 'w'});
-                        Remote.uploadFile({
-                            localFile : tmpJsonFile,
-                            remoteFile : repoPath,
-                            server
-                        }).then(
-                            () => {
-                                fs.unlinkSync(tmpJsonFile);
-                                resolve();
-                            },
-                            err => {
-                                reject(err);
-                            }
-                        )
-                    },
-                    err => {
-                        logger.error(err);
                     }
-                )                
-            });
-        }
-
-        // Wait previous update before run the new one
-        if(this.isUpdatingRepo()){
-            return this.UPDATING_REPO.then(update);
-        }
-        else{
-            return update();
-        }
+                    build.changelog = changelog;
+                    build.date = moment().format('DD/MM/YYYY HH:mm:ss');
+                    if(androidBuildPath){
+                        build.androidBuildPath = androidBuildPath;
+                    }
+                    if(iosBuildPath){
+                        build.iosBuildPath = iosBuildPath;
+                    }
+                    jsonFile.builds.unshift(build);
+                    const tmpJsonFile = path.join(rootPath, `./.builds.json`);
+                    fs.writeFileSync(tmpJsonFile, JSON.stringify(jsonFile, null, 4), {encoding: 'utf-8', flag: 'w'});
+                    Remote.uploadFile({
+                        localFile : tmpJsonFile,
+                        remoteFile : repoPath,
+                        server
+                    }).then(
+                        () => {
+                            fs.unlinkSync(tmpJsonFile);
+                            resolve();
+                        },
+                        err => {
+                            reject(err);
+                        }
+                    )
+                },
+                err => {
+                    logger.error(err);
+                }
+            )                
+        });
     },
 
     verifyUploadBuildsSteps(config){

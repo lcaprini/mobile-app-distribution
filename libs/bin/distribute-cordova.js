@@ -66,7 +66,9 @@ const endDistribute = err => {
         () => {
             exit();
         },
-        process.exit(1));
+        () => {
+            process.exit(1);
+        });
 }
 
 /**
@@ -244,38 +246,47 @@ const startDistribution = () => {
 
                 verbose : config.verbose
             });
-            androidBuildProcessCompleted = new Promise((resolve, reject) => {
-                if(config.tasks.contains(TASKS.UPLOAD_BUILDS)){
-                    android.uploadAPK({
-                        apkFilePath : config.android.apkFilePath,
-                        server : {
-                            host : config.remote.builds.host,
-                            port : config.remote.builds.port,
-                            user : config.remote.builds.user,
-                            pass : config.remote.builds.password
-                        },
-                        destinationPath : config.remote.builds.androidDestinationPath
-                    }).then(() => {
-                        remote.updateRepo({
-                            repoPath : config.remote.repo.jsonPath,
+
+            const androidUpdate = () => {
+                return new Promise((resolve, reject) => {
+                    if(config.tasks.contains(TASKS.UPLOAD_BUILDS)){
+                        android.uploadAPK({
+                            apkFilePath : config.android.apkFilePath,
                             server : {
-                                host : config.remote.repo.host,
-                                port : config.remote.repo.port,
-                                user : config.remote.repo.user,
-                                pass : config.remote.repo.password
+                                host : config.remote.builds.host,
+                                port : config.remote.builds.port,
+                                user : config.remote.builds.user,
+                                pass : config.remote.builds.password
                             },
-                            androidBuildPath : config.remote.repo.androidUrlPath,
-                            version : config.app.versionLabel,
-                            changelog : config.changeLog,
-                            hidden : config.hidden,
-                            rootPath : config.rootPath
-                        }).then(resolve, reject);
-                    }, reject);
-                }
-                else{
-                    resolve();
-                }
-            });
+                            destinationPath : config.remote.builds.androidDestinationPath
+                        }).then(() => {
+                            remote.updateRepo({
+                                repoPath : config.remote.repo.jsonPath,
+                                server : {
+                                    host : config.remote.repo.host,
+                                    port : config.remote.repo.port,
+                                    user : config.remote.repo.user,
+                                    pass : config.remote.repo.password
+                                },
+                                androidBuildPath : config.remote.repo.androidUrlPath,
+                                version : config.app.versionLabel,
+                                changelog : config.changeLog,
+                                hidden : config.hidden,
+                                rootPath : config.rootPath
+                            }).then(resolve, reject);
+                        }, reject);
+                    }
+                    else{
+                        resolve();
+                    }
+                });
+            }
+            if(config.tasks.contains(TASKS.BUILD_IOS)){
+                iosBuildProcessCompleted.then(androidUpdate);
+            }
+            else{
+                androidUpdate();
+            }
         }
 
         endDistribute();
