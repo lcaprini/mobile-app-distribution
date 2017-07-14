@@ -48,8 +48,8 @@ const endDistribute = err => {
     const logger = require('../logger');
 
     if(err){
-        logger.error(err);
-        // logger.error(err.message);
+        // logger.error(err);
+        logger.error(err.message);
         process.exit(1);
     }
 
@@ -77,6 +77,11 @@ const endDistribute = err => {
 const exit = () => {
     const logger = require('../logger');
 
+    let finalRepoHomepageUrl = `${config.remote.repo.homepageUrl}?v=${config.app.versionLabel}`;
+    if(config.hidden){
+        finalRepoHomepageUrl += '&all=true';
+    }
+
     /**
      * SEND EMAIL
      */
@@ -85,8 +90,7 @@ const exit = () => {
             appName : config.app.name,
             appVersion : config.app.versionLabel,
             appLabel : config.app.label,
-            hidden : config.hidden,
-            repoHomepageUrl : config.remote.repo.homepageUrl
+            repoHomepageUrl : finalRepoHomepageUrl
         }
         if(config.tasks.contains(TASKS.BUILD_ANDROID)){
             emailData.androidBuildPath = config.remote.repo.androidUrlPath;
@@ -112,7 +116,7 @@ const exit = () => {
             () => {
                 logger.printEnd();
                 if(config.qrcode && config.remote.repo.homepageUrl){
-                    utils.printQRCode(config.remote.repo.homepageUrl);
+                    utils.printQRCode(finalRepoHomepageUrl);
                 }
                 process.exit(0);
             }
@@ -121,7 +125,7 @@ const exit = () => {
     else{
         logger.printEnd();
         if(config.qrcode && config.remote.repo.homepageUrl){
-            utils.printQRCode(config.remote.repo.homepageUrl);
+            utils.printQRCode(finalRepoHomepageUrl);
         }
         process.exit(0);
     }
@@ -314,8 +318,8 @@ config.init({
         }
     },
     err => {
-        // console.error(err.message);
-        console.error(err);
+        console.error(err.message);
+        // console.error(err);
         program.help();
     }
 );

@@ -174,11 +174,7 @@ const Cordova = {
     /**
      * Compose email for 
      */
-    composeEmail({appName, appLabel, appVersion, hidden, repoHomepageUrl, androidBuildPath = null, iosBuildPath = null}){
-        repoHomepageUrl += `?v=${appVersion}`;
-        if(hidden){
-            repoHomepageUrl += '&all=true';
-        }
+    composeEmail({appName, appLabel, appVersion, repoHomepageUrl, androidBuildPath = null, iosBuildPath = null}){
         let bodyEmail = `
         <!DOCTYPE html>
             <head>
