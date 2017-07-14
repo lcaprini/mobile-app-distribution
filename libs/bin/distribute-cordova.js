@@ -282,10 +282,12 @@ const startDistribution = () => {
                 });
             }
             if(config.tasks.contains(TASKS.BUILD_IOS)){
-                iosBuildProcessCompleted.then(androidUpdate);
+                androidBuildProcessCompleted = new Promise((resolve, reject) => {
+                    iosBuildProcessCompleted.then(androidUpdate).then(resolve, reject);
+                });
             }
             else{
-                androidUpdate();
+                androidBuildProcessCompleted = androidUpdate();
             }
         }
 
