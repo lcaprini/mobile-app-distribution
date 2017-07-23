@@ -48,8 +48,8 @@ const endDistribute = err => {
     const logger = require('../logger');
 
     if(err){
-        logger.error(err);
-        // logger.error(err.message);
+        // logger.error(err);
+        logger.error(err.message);
         process.exit(1);
     }
 
@@ -66,7 +66,9 @@ const endDistribute = err => {
         () => {
             exit();
         },
-        process.exit(1));
+        () => {
+            process.exit(1);
+        });
 }
 
 /**
@@ -74,6 +76,11 @@ const endDistribute = err => {
  */
 const exit = () => {
     const logger = require('../logger');
+
+    let finalRepoHomepageUrl = `${config.remote.repo.homepageUrl}?v=${config.app.versionLabel}`;
+    if(config.hidden){
+        finalRepoHomepageUrl += '&all=true';
+    }
 
     /**
      * SEND EMAIL
@@ -83,8 +90,7 @@ const exit = () => {
             appName : config.app.name,
             appVersion : config.app.versionLabel,
             appLabel : config.app.label,
-            hidden : config.hidden,
-            repoHomepageUrl : config.remote.repo.homepageUrl
+            repoHomepageUrl : finalRepoHomepageUrl
         }
         if(config.tasks.contains(TASKS.BUILD_ANDROID)){
             emailData.androidBuildPath = config.remote.repo.androidUrlPath;
@@ -110,7 +116,7 @@ const exit = () => {
             () => {
                 logger.printEnd();
                 if(config.qrcode && config.remote.repo.homepageUrl){
-                    utils.printQRCode(config.remote.repo.homepageUrl);
+                    utils.printQRCode(finalRepoHomepageUrl);
                 }
                 process.exit(0);
             }
@@ -119,7 +125,7 @@ const exit = () => {
     else{
         logger.printEnd();
         if(config.qrcode && config.remote.repo.homepageUrl){
-            utils.printQRCode(config.remote.repo.homepageUrl);
+            utils.printQRCode(finalRepoHomepageUrl);
         }
         process.exit(0);
     }
@@ -244,38 +250,49 @@ const startDistribution = () => {
 
                 verbose : config.verbose
             });
-            androidBuildProcessCompleted = new Promise((resolve, reject) => {
-                if(config.tasks.contains(TASKS.UPLOAD_BUILDS)){
-                    android.uploadAPK({
-                        apkFilePath : config.android.apkFilePath,
-                        server : {
-                            host : config.remote.builds.host,
-                            port : config.remote.builds.port,
-                            user : config.remote.builds.user,
-                            pass : config.remote.builds.password
-                        },
-                        destinationPath : config.remote.builds.androidDestinationPath
-                    }).then(() => {
-                        remote.updateRepo({
-                            repoPath : config.remote.repo.jsonPath,
+
+            const androidUpdate = () => {
+                return new Promise((resolve, reject) => {
+                    if(config.tasks.contains(TASKS.UPLOAD_BUILDS)){
+                        android.uploadAPK({
+                            apkFilePath : config.android.apkFilePath,
                             server : {
-                                host : config.remote.repo.host,
-                                port : config.remote.repo.port,
-                                user : config.remote.repo.user,
-                                pass : config.remote.repo.password
+                                host : config.remote.builds.host,
+                                port : config.remote.builds.port,
+                                user : config.remote.builds.user,
+                                pass : config.remote.builds.password
                             },
-                            androidBuildPath : config.remote.repo.androidUrlPath,
-                            version : config.app.versionLabel,
-                            changelog : config.changeLog,
-                            hidden : config.hidden,
-                            rootPath : config.rootPath
-                        }).then(resolve, reject);
-                    }, reject);
-                }
-                else{
-                    resolve();
-                }
-            });
+                            destinationPath : config.remote.builds.androidDestinationPath
+                        }).then(() => {
+                            remote.updateRepo({
+                                repoPath : config.remote.repo.jsonPath,
+                                server : {
+                                    host : config.remote.repo.host,
+                                    port : config.remote.repo.port,
+                                    user : config.remote.repo.user,
+                                    pass : config.remote.repo.password
+                                },
+                                androidBuildPath : config.remote.repo.androidUrlPath,
+                                version : config.app.versionLabel,
+                                changelog : config.changeLog,
+                                hidden : config.hidden,
+                                rootPath : config.rootPath
+                            }).then(resolve, reject);
+                        }, reject);
+                    }
+                    else{
+                        resolve();
+                    }
+                });
+            }
+            if(config.tasks.contains(TASKS.BUILD_IOS)){
+                androidBuildProcessCompleted = new Promise((resolve, reject) => {
+                    iosBuildProcessCompleted.then(androidUpdate).then(resolve, reject);
+                });
+            }
+            else{
+                androidBuildProcessCompleted = androidUpdate();
+            }
         }
 
         endDistribute();
@@ -301,8 +318,8 @@ config.init({
         }
     },
     err => {
-        // console.error(err.message);
-        console.error(err);
+        console.error(err.message);
+        // console.error(err);
         program.help();
     }
 );
