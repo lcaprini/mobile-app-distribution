@@ -68,11 +68,11 @@ export default {
             active : null
         }
     },
-    beforeCreate() {
-        const url = new URL(window.location.href);
+    created() {
+        const url = window.location.href;
         let showAll = false;
-        if(url.searchParams.get('all')){
-            showAll = url.searchParams.get('all') === 'true';
+        if(this.getParameterByName(url, 'all')){
+            showAll = this.getParameterByName(url, 'all') === 'true';
         }
         const builds = (process.env.NODE_ENV === 'production')? './builds.json' : 'http://fiatpvt-coll.engbms.it/FiatApp/ilcc/wd/builds.json';
         this.$http.get(`${builds}?t=${new Date().getTime()}`).then(
@@ -91,8 +91,8 @@ export default {
                     }
 
                     if(this.builds.length > 0){
-                        if(url.searchParams.get('v')){
-                            this.active = url.searchParams.get('v');
+                        if(this.getParameterByName(url, 'v')){
+                            this.active = this.getParameterByName(url, 'v');
                         }
                         else{
                             this.active = this.builds[0].version;
@@ -114,6 +114,15 @@ export default {
             const url = window.location.href;
             location.href = "#" + version.replace(/ /g,"_");
             window.history.replaceState(null, null, url);
+        },
+        getParameterByName(url, name) {
+            if (!url) url = window.location.href;
+            name = name.replace(/[\[\]]/g, "\\$&");
+            var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
+                results = regex.exec(url);
+            if (!results) return null;
+            if (!results[2]) return '';
+            return decodeURIComponent(results[2].replace(/\+/g, " "));
         }
     }
 }
