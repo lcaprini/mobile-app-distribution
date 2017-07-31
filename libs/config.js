@@ -225,7 +225,7 @@ class Config {
         }
 
         // Set app version
-        this.app.version = version[0];
+        this.app.version = version[0].split('-')[0];
 
         // Set app version label from program args
         this.app.versionLabel = program.args[0];
