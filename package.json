@@ -21,6 +21,10 @@
   ],
   "author": "Luca Caprini",
   "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lcaprini/mobile-app-distribution.git"
+  },
   "dependencies": {
     "asciimo": "git+https://github.com/crazyguitar/asciimo.git",
     "bluebird": "^3.5.0",

@@ -10,7 +10,7 @@
             "name": "Cordova",
             "program": "${workspaceRoot}/libs/bin/distribute-cordova.js",
             "args": [
-                "1.8.5 patch06",
+                "1.8.5-patch6",
                 "--config",
                 "/Users/Lucacaprini/Development/FIAT/iLinkQuotation/distribute.json",
                 "--android-version-code",
