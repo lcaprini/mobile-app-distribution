@@ -3,9 +3,11 @@
 
 require('../protos');
 const program = require('commander');
+const fs = require('fs');
+const packageJson = JSON.parse(fs.readFileSync('./package.json'));
 
 program
-  .version('1.0.0')
+  .version(packageJson.version)
   .command('init', 'initialize distribution')
   .command('cordova <version>', 'build new version of a Cordova app')
   .parse(process.argv);
