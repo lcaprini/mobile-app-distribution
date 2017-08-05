@@ -29,7 +29,6 @@
             </form>
             <div class="version-list-container">
                 <ul class="version-list">
-                    <transition-group name="version-list" tag="li">
                     <li v-for="(build, iB) in filteredBuilds" :key="build.version" class="version">
                         <p class="title">
                             <span class="platforms">
@@ -44,11 +43,8 @@
                                 @click="showVersion(build.version)"
                                 class="select"> Show ▶ </Button>
                         </p>
-                        <ul class="changelog">
-                            <li v-for="(change, iC) in build.changelog" :key="iC" v-once> {{ change }} </li>
-                        </ul>
+                        <p class="changelog" v-html="build.changelogString"></p>
                     </li>
-                    </transition-group>
                 </ul>
             </div>
             
@@ -75,18 +71,10 @@ export default {
     computed: {
         filteredBuilds(){
             if(this.search){
-                const search = this.search;
+                const search = this.search.toLowerCase();
                 let filtered = [];
                 each(this.builds, build => {
-                    let found = false;
-                    let changeCounter = 0;
-                    while(!found && changeCounter < build.changelog.length){
-                        if(build.changelog[0].toLowerCase().indexOf(search.toLowerCase()) > -1){
-                            found = true;
-                        }
-                        changeCounter++;
-                    }
-                    if(found){
+                    if(build.changelogString.toLowerCase().indexOf(search) > -1){
                         filtered.push(build);
                     }
                 });
@@ -138,13 +126,6 @@ export default {
 <style lang="sass" scoped>
 
 @import 'assets/css/colors';
-
-.version-list-enter-active, .version-list-leave-active {
-    transition: all 0.25s;
-}
-.version-list-enter, .version-list-leave-to /* .version-list-leave-active for <2.1.8 */ {
-    opacity: 0;
-}
 
 #changelog {
     position: absolute;

@@ -1,13 +1,16 @@
 <template>
+<div>
     <div class="tab">
         <button class="tab-toggle" :class="{active : active}" @click="select">
             {{version}}
             <div class="platforms">
-                <Icon v-if="iosLink" type="social-apple"></Icon>
-                <Icon v-if="androidLink" type="social-android"></Icon>
+                <i class="ivu-icon ivu-icon-social-apple" v-if="iosLink"></i>
+                <i class="ivu-icon ivu-icon-social-android" v-if="androidLink"></i>
             </div>
         </button>
     </div>
+    <div class="details visible-xs" :class="{visible : active}"> </div>
+</div>
 </template>
 <script>
 
@@ -21,6 +24,9 @@ export default {
         appName: {
             type: String,
             required: true
+        },
+        index: {
+            type: Number
         },
         version: {
             type: String,
@@ -45,7 +51,7 @@ export default {
     },
     methods:{
         select($event){
-            this.$emit('selected', this.version);
+            this.$emit('selected', this.index);
         }
     }
 }
@@ -69,11 +75,8 @@ export default {
         border-top-left-radius: 4px;
         border-bottom-left-radius: 4px;
         text-align: left;
-        -webkit-transition: color 0.3s, background 0.3s;
-        -moz-transition: color 0.3s, background 0.3s;
-        transition: color 0.3s, background 0.3s;
 
-        @media screen and (max-width: 560px) {
+        @media screen and (max-width: 559px) {
             border: 1px solid $main-color;
             border-bottom-width: 0;
             border-radius: 0;
@@ -105,12 +108,6 @@ export default {
             .ivu-icon-social-android {
                 color: $android-color;
             }
-        }
-    }
-
-    &:nth-last-child(2) {
-        @media screen and (max-width: 560px) {
-            border-bottom: 1px solid $main-color;
         }
     }
 }

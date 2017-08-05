@@ -2,7 +2,6 @@
 @import 'colors';
 @import 'button';
 @import 'modal';
-@import 'changelog';
 
 html,
 body {
@@ -25,7 +24,7 @@ body {
 .visible-lg, .visible-md, .visible-sm, .visible-xs {
     display: none!important;
 }
-@media (max-width: 767px){
+@media (max-width: 560px){
     .hidden-xs {
         display: none!important;
     }

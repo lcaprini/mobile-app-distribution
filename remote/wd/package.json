@@ -8,6 +8,7 @@
     "build": "cross-env NODE_ENV=production webpack --progress --hide-modules"
   },
   "dependencies": {
+    "fastclick": "^1.0.6",
     "iview": "^2.0.0-rc.13",
     "lodash": "^4.17.4",
     "vue": "^2.0.1",
