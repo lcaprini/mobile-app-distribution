@@ -67,7 +67,7 @@ export default {
         if(this.getParameterByName(url, 'all')){
             showAll = this.getParameterByName(url, 'all') === 'true';
         }
-        const builds = (process.env.NODE_ENV === 'development')? './builds.json' : 'http://fiatpvt-coll.engbms.it/FiatApp/ilcc/wd/builds.json';
+        const builds = (process.env.NODE_ENV === 'production')? './builds.json' : 'http://fiatpvt-coll.engbms.it/FiatApp/ilcc/wd/builds.json';
         this.$http.get(`${builds}?t=${new Date().getTime()}`).then(
             jsonFile => {
                 try{
