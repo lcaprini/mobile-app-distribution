@@ -8,15 +8,13 @@ const logger = require('./logger');
 const remote = require('./remote');
 
 class Ios {
-
     calculateBundleVersion(appVersion) {
-        let version = [];
-        let versions = appVersion.split(".");
+        let versions = appVersion.split('.');
 
         return `${versions[0]}.${versions[1]}.${versions[2]}`;
     }
 
-    setDisplayName({infoPlistPath, displayName}){
+    setDisplayName({infoPlistPath, displayName}) {
         logger.section(`Set '${displayName}' as iOS Bundle Display Name in ${infoPlistPath}`);
         let parsedPlist = plist.parse(fs.readFileSync(infoPlistPath, 'utf8'));
         parsedPlist.CFBundleDisplayName = displayName;
@@ -24,60 +22,60 @@ class Ios {
         fs.writeFileSync(infoPlistPath, updatedPlist);
     }
 
-    cleanProject({projectPath, verbose}){
+    cleanProject({projectPath, verbose}) {
         logger.section(`Clean iOS Project in '${projectPath}'`);
         process.chdir(projectPath);
         const cmdXcodebuildClean = 'xcodebuild clean -configuration Release -alltargets';
-        let err = shell.exec(cmdXcodebuildClean, {silent: !verbose}).stderr;
-        if(shell.error()){
+        let err = shell.exec(cmdXcodebuildClean, {silent : !verbose}).stderr;
+        if (shell.error()) {
             // shelljs has already printed error,
             // so I print it only if verbose mode is OFF
-            if(!verbose){
+            if (!verbose) {
                 logger.error(err);
             }
             process.exit(1);
         }
     }
 
-    archiveProject({projectPath, appName, schema, verbose}){
+    archiveProject({projectPath, appName, schema, verbose}) {
         const xcodeprojFilePath = path.join(projectPath, `./${appName}.xcodeproj`);
         const xcarchiveFilePath = path.join(projectPath, `./${appName}.xcarchive`);
         logger.section(`Archive iOS Project into '${xcarchiveFilePath}'`);
         process.chdir(projectPath);
         const cmdXcodebuildArchive = `xcodebuild archive -project '${xcodeprojFilePath}' -scheme '${schema}' -archivePath '${xcarchiveFilePath}'`;
-        let err = shell.exec(cmdXcodebuildArchive, {silent: !verbose}).stderr;
-        if(shell.error()){
+        let err = shell.exec(cmdXcodebuildArchive, {silent : !verbose}).stderr;
+        if (shell.error()) {
             // shelljs has already printed error,
             // so I print it only if verbose mode is OFF
-            if(!verbose){
+            if (!verbose) {
                 logger.error(err);
             }
             process.exit(1);
         }
     }
 
-    createExportOptionsPlist({exportOptionsPlistPath, exportOptionsPlist}){
+    createExportOptionsPlist({exportOptionsPlistPath, exportOptionsPlist}) {
         logger.section(`Create/Update iOS exportOptionsPlist file in '${exportOptionsPlistPath}'`);
         fs.writeFileSync(exportOptionsPlistPath, plist.build(exportOptionsPlist));
     }
 
-    exportIpa({projectPath, appName, ipaFileName, exportOptionsPlist, exportOptionsPlistPath, exportDir, verbose}){
+    exportIpa({projectPath, appName, ipaFileName, exportOptionsPlist, exportOptionsPlistPath, exportDir, verbose}) {
         const xcarchiveFilePath = path.join(projectPath, `./${appName}.xcarchive`);
-        if(!exportOptionsPlistPath){
+        if (!exportOptionsPlistPath) {
             exportOptionsPlistPath = path.join(projectPath, './exportOptions.plist');
             this.createExportOptionsPlist({
                 exportOptionsPlistPath : exportOptionsPlistPath,
-                exportOptionsPlist : exportOptionsPlist
+                exportOptionsPlist     : exportOptionsPlist
             });
         }
         logger.section(`Export IPA from '${xcarchiveFilePath}' into ${exportDir} directory`);
         process.chdir(projectPath);
-        const cmdXcodebuildExport = `xcodebuild -exportArchive -archivePath '${xcarchiveFilePath}' -exportPath '${exportDir}' -exportOptionsPlist '${exportOptionsPlistPath}'`
-        let err = shell.exec(cmdXcodebuildExport, {silent: !verbose}).stderr;
-        if(shell.error()){
+        const cmdXcodebuildExport = `xcodebuild -exportArchive -archivePath '${xcarchiveFilePath}' -exportPath '${exportDir}' -exportOptionsPlist '${exportOptionsPlistPath}'`;
+        let err = shell.exec(cmdXcodebuildExport, {silent : !verbose}).stderr;
+        if (shell.error()) {
             // shelljs has already printed error,
             // so I print it only if verbose mode is OFF
-            if(!verbose){
+            if (!verbose) {
                 logger.error(err);
             }
             process.exit(1);
@@ -87,50 +85,50 @@ class Ios {
         fs.renameSync(exportedIpaPath, exportedIpaPathWithLabel);
     }
 
-    createManifest({id, version, ipaUrlPath, manifestPath, appName, schema, exportDir}){
+    createManifest({id, version, ipaUrlPath, manifestPath, appName, schema, exportDir}) {
         logger.section(`Create iOS manifest for OTA install in '${exportDir}'`);
         const manifest = {
-            items: [{
-                assets: [{
-                    kind: 'software-package',
-                    url: ipaUrlPath
+            items : [{
+                assets : [{
+                    kind : 'software-package',
+                    url  : ipaUrlPath
                 }],
-                CFBundleURLTypes: [{
-                    CFBundleURLSchemes: [ schema ]
+                CFBundleURLTypes : [{
+                    CFBundleURLSchemes : [ schema ]
                 }],
-                metadata: {
-                    'bundle-identifier': id,
-                    'bundle-version': version,
-                    kind: 'software',
-                    title: appName
+                metadata : {
+                    'bundle-identifier' : id,
+                    'bundle-version'    : version,
+                    kind                : 'software',
+                    title               : appName
                 }
             }]
-        }
+        };
         let manifestPlist = plist.build(manifest);
         fs.writeFileSync(manifestPath, manifestPlist);
     }
 
-    uploadManifest({manifestFilePath, server, destinationPath}){
+    uploadManifest({manifestFilePath, server, destinationPath}) {
         const remoteFile = path.join(destinationPath, path.basename(manifestFilePath));
         logger.section(`Upload iOS Manifest on ${remoteFile}`);
         return remote.uploadFile({
-            localFile : manifestFilePath,
-            server : server,
+            localFile  : manifestFilePath,
+            server     : server,
             remoteFile : remoteFile
         });
     }
 
-    uploadIPA({ipaFilePath, server, destinationPath}){
+    uploadIPA({ipaFilePath, server, destinationPath}) {
         const remoteFile = path.join(destinationPath, path.basename(ipaFilePath));
         logger.section(`Upload iOS IPA on ${remoteFile}`);
         return remote.uploadFile({
-            localFile : ipaFilePath,
-            server : server,
+            localFile  : ipaFilePath,
+            server     : server,
             remoteFile : remoteFile
         });
     }
 
-    uploadManifestAndIPA({ipaFilePath, manifestFilePath, server, destinationPath}){
+    uploadManifestAndIPA({ipaFilePath, manifestFilePath, server, destinationPath}) {
         return this.uploadIPA({
             ipaFilePath,
             server,
@@ -144,35 +142,35 @@ class Ios {
         });
     }
 
-    verify(config){
+    verify(config) {
         const iosProjectPath = path.join(config.cordova.path, './platforms/ios');
-        if(!fs.existsSync(iosProjectPath)){
+        if (!fs.existsSync(iosProjectPath)) {
             throw new Error(`iOS build error: no iOS project in "${iosProjectPath}" directory`);
         }
-        if(config.ios.infoPlistPath){
-            if(!fs.existsSync(config.ios.infoPlistPath)){
+        if (config.ios.infoPlistPath) {
+            if (!fs.existsSync(config.ios.infoPlistPath)) {
                 throw new Error(`iOS build error: missing plist file in "${config.ios.infoPlistPath}"`);
             }
         }
-        else{
-            const plistPath_1 = path.join(iosProjectPath, config.app.name, './Info.plist');
-            if(!fs.existsSync(plistPath_1)){
-                let plistPath_2 = path.join(iosProjectPath, config.app.name, `./${config.app.name}-Info.plist`);
-                if(!fs.existsSync(plistPath_2)){
-                    throw new Error(`iOS build error: missing plist file at "${plistPath_1}" and "${plistPath_2}". Please specify with "ios-info-plist-path" in config file`);
+        else {
+            const plistPath1 = path.join(iosProjectPath, config.app.name, './Info.plist');
+            if (!fs.existsSync(plistPath1)) {
+                let plistPath2 = path.join(iosProjectPath, config.app.name, `./${config.app.name}-Info.plist`);
+                if (!fs.existsSync(plistPath2)) {
+                    throw new Error(`iOS build error: missing plist file at "${plistPath1}" and "${plistPath2}". Please specify with "ios-info-plist-path" in config file`);
                 }
-                else{
-                    config.ios.infoPlistPath = plistPath_2;
+                else {
+                    config.ios.infoPlistPath = plistPath2;
                 }
             }
-            else{
-                config.ios.infoPlistPath = plistPath_1;
+            else {
+                config.ios.infoPlistPath = plistPath1;
             }
         }
-        if(!config.ios.bundleId){
+        if (!config.ios.bundleId) {
             throw new Error('iOS build error: missing "ios.bundleId" value in config file');
         }
-        if(!config.buildsDir){
+        if (!config.buildsDir) {
             throw new Error('iOS build error: missing "builds-dir" value in config file');
         }
     }

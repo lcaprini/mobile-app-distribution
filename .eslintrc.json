@@ -1,0 +1,29 @@
+{
+    "extends": "standard",
+    "plugins": [
+        "standard",
+        "promise",
+        "vue"
+    ],
+    "rules": {
+        "vue/jsx-uses-vars": 2,
+        "indent": ["error", 4],
+        "space-before-function-paren": ["error", "never"],
+        "key-spacing": ["error", {
+            "beforeColon": true,
+            "afterColon": true,
+            "mode": "minimum",
+            "align": {
+                "beforeColon": true,
+                "afterColon": true,
+                "on": "colon"
+            }
+        }],
+        "semi": ["error", "always"],
+        "keyword-spacing": ["error", {
+            "before": true,
+            "after": true
+        }],
+        "brace-style": ["error", "stroustrup"]
+    }
+}

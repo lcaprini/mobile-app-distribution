@@ -7,7 +7,8 @@ const fs = require('fs');
 const packageJson = JSON.parse(fs.readFileSync('./package.json'));
 
 program
-  .version(packageJson.version)
-  .command('init', 'initialize distribution')
-  .command('cordova <version>', 'build new version of a Cordova app')
-  .parse(process.argv);
+    .version(packageJson.version)
+    .command('init', 'initialize distribution')
+    .command('wd', 'create wireless distribution folder')
+    .command('cordova <version>', 'build new version of a Cordova app')
+    .parse(process.argv);
