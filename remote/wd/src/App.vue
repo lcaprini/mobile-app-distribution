@@ -111,9 +111,11 @@ export default {
     methods : {
         selectedVersion(version){
             this.active = version;
-            const url = window.location.href;
-            location.href = "#" + version.replace(/ /g,"_");
-            window.history.replaceState(null, null, url);
+            if(window.innerWidth < 560){
+                const url = window.location.href;
+                location.href = "#" + version.replace(/ /g,"_");
+                window.history.replaceState(null, null, url);
+            }
         },
         getParameterByName(url, name) {
             if (!url) url = window.location.href;
