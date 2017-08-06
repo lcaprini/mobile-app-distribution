@@ -13,7 +13,7 @@ const Utils = {
                 if (err) {
                     reject(new Error(err));
                 }
-                resolve(result[text].toLowerCase());
+                resolve(result[text]);
             });
         });
     },

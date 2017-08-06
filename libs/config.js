@@ -38,9 +38,9 @@ class Config {
         };
 
         this.sources = {
+            compileCommand  : '',
             compilePath     : '',
-            htmlVersionPath : '',
-            compileCommand  : ''
+            htmlVersionPath : ''
         };
 
         this.cordova = {
@@ -104,14 +104,6 @@ class Config {
                 iosManifestUrlPath : '',
                 androidUrlPath     : '',
                 homepageUrl        : ''
-            },
-
-            sources : {
-                host            : '',
-                port            : 21,
-                user            : '',
-                password        : '',
-                destinationPath : ''
             }
         };
 
@@ -317,11 +309,6 @@ class Config {
         }
 
         // Check params for FTP sources upload
-        if (this.tasks.contains(cordovaTasks.UPLOAD_SOURCES)) {
-            remote.verifyUploadSourcesSteps(this);
-        }
-
-        // Check params for FTP sources upload
         if (this.tasks.contains(cordovaTasks.SEND_EMAIL)) {
             email.verify(this);
         }
@@ -355,10 +342,10 @@ class Config {
                 const validateRecap = resolve => {
                     utils.prompt('Press \'y\' to continue the build process, \'n\' to stop it').then(
                         result => {
-                            if (result === 'y') {
+                            if (result.toLowerCase() === 'y') {
                                 resolve();
                             }
-                            else if (result === 'n') {
+                            else if (result.toLowerCase() === 'n') {
                                 logger.info('\n\nExit process...\n\n');
                                 process.exit(0);
                             }

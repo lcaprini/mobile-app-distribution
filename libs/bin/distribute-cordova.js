@@ -20,22 +20,21 @@ let androidBuildProcessCompleted;
 
 program
     .allowUnknownOption()
-    .usage(`<app version> -t <[${TASKS.COMPILE_SOURCES},${TASKS.CHANGE_VERSION},${TASKS.BUILD_IOS},${TASKS.BUILD_ANDROID},${TASKS.UPLOAD_BUILDS},${TASKS.UPLOAD_SOURCES},${TASKS.SEND_EMAIL}]> [options]`)
-    .option('-p, --config <config>', 'config file for app distribution', config.path)
-    .option('-a, --android-version-code <version code>', 'Android version code')
-    .option('-i, --ios-bundle-version <bundle version>', 'iOS bundle version')
+    .usage(`<app-version> -t <[${TASKS.COMPILE_SOURCES},${TASKS.CHANGE_VERSION},${TASKS.BUILD_IOS},${TASKS.BUILD_ANDROID},${TASKS.UPLOAD_BUILDS},${TASKS.SEND_EMAIL}]> [options]`)
+    .option('-p, --config <config-path>', 'config file for app distribution', config.path)
+    .option('-a, --android-version-code <version-code>', 'Android version code')
+    .option('-i, --ios-bundle-version <bundle-version>', 'iOS bundle version')
     .option('-c, --change-log <change-log.txt or "First edit***Other edit...">', 'file path or list with "***" separator', config.changeLog)
-    .option(`-t, --tasks <[${TASKS.CHANGE_VERSION},${TASKS.COMPILE_SOURCES},${TASKS.BUILD_IOS},${TASKS.BUILD_ANDROID},${TASKS.UPLOAD_BUILDS},${TASKS.UPLOAD_SOURCES},${TASKS.SEND_EMAIL}]>`, `
-      ${TASKS.CHANGE_VERSION} : preprocess file setting app version
-      ${TASKS.COMPILE_SOURCES} : builds HTML, CSS, JAVASCRIPT files for Cordova projects
-      ${TASKS.BUILD_IOS} : builds, archives ad exports iOS project
-      ${TASKS.BUILD_ANDROID} : builds, archives ad exports Android project
+    .option(`-t, --tasks <[${TASKS.CHANGE_VERSION},${TASKS.COMPILE_SOURCES},${TASKS.BUILD_IOS},${TASKS.BUILD_ANDROID},${TASKS.UPLOAD_BUILDS},${TASKS.SEND_EMAIL}]>`, `
+      ${TASKS.CHANGE_VERSION} : changes app version editing the config.xml of Cordova project
+      ${TASKS.COMPILE_SOURCES} : compiles HTML, Javascript, CSS files into www folder
+      ${TASKS.BUILD_IOS} : builds, exports and signs iOS platform into ipa file
+      ${TASKS.BUILD_ANDROID} : builds, exports and signs Android platform into apk file
       ${TASKS.UPLOAD_BUILDS} : uploads builds on remote FTP server
-      ${TASKS.UPLOAD_SOURCES} : archives www sources with NodeJS server to test and view
-      ${TASKS.SEND_EMAIL}:  send email when finish with URL and QRCode for download`, config.tasks)
-    .option('-q, --qr-code', 'print QRCode of repository homepage', config.qrcode)
-    .option('-v, --verbose', 'prints all log in console', config.verbose)
-    .option('-f, --force', 'force with yes all questions', config.force)
+      ${TASKS.SEND_EMAIL}:  sends email when finished with URL and QRCode for download`, config.tasks)
+    .option('-q, --qr-code', 'prints QRCode of repository homepage', config.qrcode)
+    .option('-v, --verbose', 'prints all logs in console', config.verbose)
+    .option('-f, --force', 'forces with yes all questions', config.force)
     .option('-h, --hidden', 'hides build in HTML download page', config.hidden)
     .parse(process.argv);
 

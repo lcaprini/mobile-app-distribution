@@ -16,7 +16,6 @@ const TASKS = {
     BUILD_IOS       : 'i',
     BUILD_ANDROID   : 'a',
     UPLOAD_BUILDS   : 'u',
-    UPLOAD_SOURCES  : 'z',
     SEND_EMAIL      : 'e'
 };
 

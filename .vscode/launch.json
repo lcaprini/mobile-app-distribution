@@ -25,6 +25,12 @@
                 "-f"
             ]
         },{
+            "type": "node",
+            "request": "launch",
+            "name": "Wd",
+            "program": "${workspaceRoot}/libs/bin/distribute-wd.js",
+            "args": []
+        },{
             "name": "Webpack",
             "type": "node",
             "request": "launch",

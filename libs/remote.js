@@ -129,21 +129,6 @@ const Remote = {
         }
     },
 
-    verifyUploadSourcesSteps(config) {
-        if (!config.remote.sources.host) {
-            throw new Error('FTP sources upload error: missing "remote.sources.hosts" value in config file');
-        }
-        if (!config.remote.sources.user) {
-            throw new Error('FTP sources upload error: missing "remote.sources.user" value in config file');
-        }
-        if (!config.remote.sources.password) {
-            throw new Error('FTP sources upload error: missing "remote.sources.password" value in config file');
-        }
-        if (!config.remote.sources.destinationPath) {
-            throw new Error('FTP sources upload error: missing "remote.sources.destinationPath" value in config file');
-        }
-    },
-
     verifyRepoUpdate(config) {
         if (!config.remote.repo.host) {
             throw new Error('Repo update error: missing "remote.repo.hosts" value in config file');
