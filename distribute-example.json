@@ -17,7 +17,11 @@
     "buildsDir": "builds/",
 
     "ios" : {
-        "bundleId" : "it.lcaprini.test"
+        "bundleId" : "it.lcaprini.test",
+        "exportOptionsPlist" : {
+            "method"         : "enterprise",
+            "teamID"         : "ABC123EF"
+        }
     },
 
     "android" : {
@@ -52,7 +56,6 @@
 
     "email" : {
         "host": "mail.gmail.com",
-        "port": 25,
         "user": "lcaprini-user",
         "password": "lcaprini-passwd",
         "from": "luca.caprini@gmail.com",
