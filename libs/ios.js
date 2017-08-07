@@ -3,6 +3,7 @@ const fs = require('fs');
 const path = require('path');
 const plist = require('plist');
 const shell = require('shelljs');
+const inquirer = require('inquirer');
 
 const logger = require('./logger');
 const remote = require('./remote');
@@ -173,6 +174,50 @@ class Ios {
         if (!config.buildsDir) {
             throw new Error('iOS build error: missing "builds-dir" value in config file');
         }
+    }
+
+    initializeBuild(config) {
+        return inquirer.prompt([{
+            type    : 'input',
+            name    : 'bundleId',
+            message : 'ios.bundleId',
+            default : 'it.lcaprini.test',
+            validate(input) {
+                const pattern = /^[a-z][a-z0-9_]*(\.[a-z0-9_]+)+[0-9a-z_]$/i;
+                return pattern.test(input);
+            }
+        }, {
+            type    : 'input',
+            name    : 'exportOptionsPlistMethod',
+            message : 'ios.exportOptionsPlist.method',
+            default : 'enterprise',
+            validate(input) {
+                const methodsAllowed = [
+                    'app-store',
+                    'package',
+                    'ad-hoc',
+                    'enterprise',
+                    'development',
+                    'developer-id'];
+
+                return methodsAllowed.contains(input);
+            }
+        }, {
+            type    : 'input',
+            name    : 'exportOptionsPlistTeamID',
+            message : 'ios.exportOptionsPlist.teamID',
+            default : 'ABC123DEF'
+        }]).then(({bundleId, exportOptionsPlistMethod, exportOptionsPlistTeamID}) => {
+            if (!config.ios) {
+                config.ios = {};
+            }
+            config.ios.bundleId = bundleId;
+            config.ios.exportOptionsPlist = {
+                method : exportOptionsPlistMethod,
+                teamID : exportOptionsPlistTeamID
+            };
+            return config;
+        });
     }
 }
 

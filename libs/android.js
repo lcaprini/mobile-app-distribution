@@ -4,6 +4,7 @@ const fs = require('fs');
 const path = require('path');
 const shell = require('shelljs');
 const commandExists = require('command-exists').sync;
+const inquirer = require('inquirer');
 
 const logger = require('./logger');
 const utils = require('./utils');
@@ -105,6 +106,45 @@ class Android {
         if (!commandExists('zipalign')) {
             throw new Error('Android build error: command "zipalign" not found, please add last Android SDK build-tools in $PATH');
         }
+    }
+
+    initializeBuild(config) {
+        return inquirer.prompt([{
+            type    : 'input',
+            name    : 'bundleId',
+            message : 'android.bundleId',
+            default : 'it.lcaprini.test',
+            validate(input) {
+                const pattern = /^[a-z][a-z0-9_]*(\.[a-z0-9_]+)+[0-9a-z_]$/i;
+                return pattern.test(input);
+            }
+        }, {
+            type    : 'input',
+            name    : 'path',
+            message : 'android.keystore.path',
+            default : 'resources/android/lcaprini.keystore'
+        }, {
+            type    : 'input',
+            name    : 'alias',
+            message : 'android.keystore.alias',
+            default : 'lcaprini-alias'
+        }, {
+            type    : 'input',
+            name    : 'password',
+            message : 'android.keystore.password',
+            default : 'lcaprini-password'
+        }]).then(({bundleId, path, alias, password}) => {
+            if (!config.android) {
+                config.android = {};
+            }
+            config.android.bundleId = bundleId;
+            config.android.keystore = {
+                path     : path,
+                alias    : alias,
+                password : password
+            };
+            return config;
+        });
     }
 }
 
