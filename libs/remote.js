@@ -6,6 +6,7 @@ const JSFtp = require('jsftp');
 const fs = require('fs');
 const path = require('path');
 const Promise = require('bluebird');
+const inquirer = require('inquirer');
 
 const logger = require('./logger');
 
@@ -148,6 +149,126 @@ const Remote = {
         if (!config.remote.repo.homepageUrl) {
             throw new Error('Repo update error: missing "remote.repo.homepageUrl" value in config file');
         }
+    },
+
+    initializeBuildUpload(config) {
+        return inquirer.prompt([{
+            type    : 'input',
+            name    : 'host',
+            message : 'remote.builds.host',
+            default : 'lcapriniftp'
+        }, {
+            type    : 'input',
+            name    : 'user',
+            message : 'remote.builds.user',
+            default : 'lcaprini-user'
+        }, {
+            type    : 'input',
+            name    : 'password',
+            message : 'remote.builds.password',
+            default : 'lcaprini-password'
+        }]).then(({host, user, password}) => {
+            if (!config.remote) {
+                config.remote = {};
+            }
+            if (!config.remote.builds) {
+                config.remote.builds = {};
+            }
+            config.remote.builds.host = host;
+            config.remote.builds.user = user;
+            config.remote.builds.password = password;
+            return config;
+        });
+    },
+
+    initializeIosBuildUpload(config) {
+        return inquirer.prompt([{
+            type    : 'input',
+            name    : 'iosDestinationPath',
+            message : 'remote.builds.iosDestinationPath',
+            default : 'lcapriniftp'
+        }]).then(({iosDestinationPath}) => {
+            config.remote.builds.iosDestinationPath = iosDestinationPath;
+            return config;
+        });
+    },
+
+    initializeAndroidBuildUpload(config) {
+        return inquirer.prompt([{
+            type    : 'input',
+            name    : 'androidDestinationPath',
+            message : 'remote.builds.androidDestinationPath',
+            default : 'lcapriniftp'
+        }]).then(({androidDestinationPath}) => {
+            config.remote.builds.androidDestinationPath = androidDestinationPath;
+            return config;
+        });
+    },
+
+    initializeRepoUpdate(config) {
+        return inquirer.prompt([{
+            type    : 'input',
+            name    : 'host',
+            message : 'remote.repo.host',
+            default : 'lcapriniftp'
+        }, {
+            type    : 'input',
+            name    : 'user',
+            message : 'remote.repo.user',
+            default : 'lcaprini-user'
+        }, {
+            type    : 'input',
+            name    : 'password',
+            message : 'remote.repo.password',
+            default : 'lcaprini-password'
+        }, {
+            type    : 'input',
+            name    : 'jsonPath',
+            message : 'remote.repo.jsonPath',
+            default : '/var/www/html/test/wd'
+        }, {
+            type    : 'input',
+            name    : 'homepageUrl',
+            message : 'remote.repo.homepageUrl',
+            default : 'https://lcaprini.com/test/wd'
+        }]).then(({host, user, password, jsonPath, homepageUrl}) => {
+            if (!config.remote) {
+                config.remote = {};
+            }
+            if (!config.remote.repo) {
+                config.remote.repo = {};
+            }
+            config.remote.repo.host = host;
+            config.remote.repo.user = user;
+            config.remote.repo.password = password;
+            config.remote.repo.jsonPath = jsonPath;
+            config.remote.repo.homepageUrl = homepageUrl;
+            return config;
+        });
+    },
+
+    initializeIosRepoUpdate(config) {
+        return inquirer.prompt([{
+            type    : 'input',
+            name    : 'iosUrlPath',
+            message : 'remote.builds.iosUrlPath',
+            default : 'lcapriniftp'
+        }]).then(({iosUrlPath}) => {
+            config.remote.repo.iosUrlPath = iosUrlPath;
+            return config;
+        });
+    },
+
+    initializeAndroidRepoUpdate(config) {
+        return inquirer.prompt([{
+            type    : 'input',
+            name    : 'androidUrlPath',
+            message : 'remote.builds.androidUrlPath',
+            default : 'lcapriniftp'
+        }]).then(({androidUrlPath}) => {
+            config.remote.repo.androidUrlPath = androidUrlPath;
+            return config;
+        });
     }
 };
 

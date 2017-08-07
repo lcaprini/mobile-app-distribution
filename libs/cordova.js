@@ -9,6 +9,9 @@ const inquirer = require('inquirer');
 const logger = require('./logger');
 const android = require('./android');
 const ios = require('./ios');
+const remote = require('./remote');
+const email = require('./email');
+const utils = require('./utils');
 
 const TASKS = {
     CHANGE_VERSION  : 'v',
@@ -326,14 +329,17 @@ const Cordova = {
         return inquirer.prompt([{
             type    : 'input',
             name    : 'compileCommand',
-            message : 'Which command I must use to compile app sources?',
+            message : 'sources.compileCommand',
             default : 'grunt build:production'
         }, {
             type    : 'input',
             name    : 'compilePath',
-            message : 'In which working directory I must execute the command (relative path or absolute one)?',
-            default : '.'
+            message : 'sources.compilePath',
+            default : 'src'
         }]).then(({compileCommand, compilePath}) => {
+            if (!config.sources) {
+                config.sources = {};
+            }
             config.sources.compileCommand = compileCommand;
             config.sources.compilePath = compilePath;
             return config;
@@ -347,12 +353,124 @@ const Cordova = {
         return inquirer.prompt([{
             type    : 'input',
             name    : 'htmlVersionPath',
-            message : 'Which HTML file contains <mad-app-version> tag for app version updating?',
+            message : 'sources.htmlVersionPath',
             default : 'src/html/partials/login.html'
         }]).then(({htmlVersionPath}) => {
+            if (!config.sources) {
+                config.sources = {};
+            }
             config.sources.htmlVersionPath = htmlVersionPath;
             return config;
         });
+    },
+
+    /**
+     * Inizialize general configuration for Cordova build
+     */
+    initializeGeneral(config) {
+        return inquirer.prompt([{
+            type    : 'input',
+            name    : 'rootPath',
+            message : 'cordova.rootPath',
+            default : 'app'
+        }, {
+            type    : 'input',
+            name    : 'buildsDir',
+            message : 'buildsDir',
+            default : 'builds/'
+        }]).then(({rootPath, buildsDir}) => {
+            if (!config.cordova) {
+                config.cordova = {};
+            }
+            config.cordova.rootPath = rootPath;
+            config.buildsDir = buildsDir;
+            return config;
+        });
+    },
+
+    /**
+     * Inizialize ditribute.json for Cordova project
+     * @param {*} config
+     */
+    init(config) {
+        let cordova = this;
+
+        const TASKS = {
+            CHANGE_VERSION  : 'Change app version in HTML',
+            COMPILE_SOURCES : 'Compile web app sources',
+            BUILD_IOS       : 'Build Cordova iOS platform',
+            BUILD_ANDROID   : 'Build Cordova Android platform',
+            UPLOAD_BUILDS   : 'Upload builds',
+            SEND_EMAIL      : 'Send email to working group'
+        };
+
+        return inquirer.prompt([{
+            type    : 'checkbox',
+            message : 'Which tasks you want configure?',
+            name    : 'tasks',
+            choices : [
+                { name : TASKS.CHANGE_VERSION },
+                { name : TASKS.COMPILE_SOURCES },
+                { name : TASKS.BUILD_IOS },
+                { name : TASKS.BUILD_ANDROID },
+                { name : TASKS.UPLOAD_BUILDS },
+                { name : TASKS.SEND_EMAIL }
+            ]}]).then(({tasks}) => {
+                let questions = [];
+
+                if (tasks.contains(TASKS.COMPILE_SOURCES)) {
+                    questions.push(cordova.initializeSourceCompile);
+                }
+
+                if (tasks.contains(TASKS.CHANGE_VERSION)) {
+                    questions.push(cordova.initializeChangeVersion);
+                }
+
+                questions.push(cordova.initializeGeneral);
+
+                if (tasks.contains(TASKS.BUILD_IOS)) {
+                    questions.push(ios.initializeBuild);
+                }
+
+                if (tasks.contains(TASKS.BUILD_ANDROID)) {
+                    questions.push(android.initializeBuild);
+                }
+
+                if (tasks.contains(TASKS.UPLOAD_BUILDS)) {
+                    questions.push(remote.initializeBuildUpload);
+
+                    if (tasks.contains(TASKS.BUILD_IOS)) {
+                        questions.push(remote.initializeIosBuildUpload);
+                    }
+
+                    if (tasks.contains(TASKS.BUILD_ANDROID)) {
+                        questions.push(remote.initializeAndroidBuildUpload);
+                    }
+
+                    questions.push(remote.initializeRepoUpdate);
+
+                    if (tasks.contains(TASKS.BUILD_IOS)) {
+                        questions.push(remote.initializeIosRepoUpdate);
+                    }
+
+                    if (tasks.contains(TASKS.BUILD_ANDROID)) {
+                        questions.push(remote.initializeAndroidRepoUpdate);
+                    }
+                }
+
+                if (tasks.contains(TASKS.SEND_EMAIL)) {
+                    questions.push(email.initializeSend);
+                }
+
+                return utils.askQuestions(questions, config).then(
+                    config => {
+                        return config;
+                    },
+                    err => {
+                        logger.error(err);
+                        process.exit(1);
+                    });
+            });
     }
 };
 

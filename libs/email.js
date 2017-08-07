@@ -2,6 +2,7 @@
 
 const Promise = require('bluebird');
 const nodemailer = require('nodemailer');
+const inquirer = require('inquirer');
 
 const Email = {
 
@@ -61,6 +62,45 @@ const Email = {
         if (!config.email.to) {
             throw new Error('Send email error: missing "email.to" value in config file');
         }
+    },
+
+    initializeSend(config) {
+        return inquirer.prompt([{
+            type    : 'input',
+            name    : 'host',
+            message : 'email.host',
+            default : 'mail.gmail.com'
+        }, {
+            type    : 'input',
+            name    : 'user',
+            message : 'email.user',
+            default : 'lcaprini-user'
+        }, {
+            type    : 'input',
+            name    : 'password',
+            message : 'email.password',
+            default : 'lcaprini-password'
+        }, {
+            type    : 'input',
+            name    : 'from',
+            message : 'email.from',
+            default : 'luca.caprini@gmail.com'
+        }, {
+            type    : 'input',
+            name    : 'to',
+            message : 'email.to',
+            default : 'lcap@gmail.com, capr_l@gmail.com'
+        }]).then(({host, user, password, from, to}) => {
+            if (!config.email) {
+                config.email = {};
+            }
+            config.email.host = host;
+            config.email.user = user;
+            config.email.password = password;
+            config.email.from = from;
+            config.email.to = to.replace(/ /g, '').split(',');
+            return config;
+        });
     }
 };
 

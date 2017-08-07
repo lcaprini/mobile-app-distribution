@@ -27,9 +27,9 @@
     "android" : {
         "bundleId" : "it.lcaprini.test",
         "keystore" : {
-            "path" : "android-resources/lcaprini.keystore",
+            "path" : "resources/android/lcaprini.keystore",
             "alias" : "lcaprini-alias",
-            "password" : "lcaprini-passwd"
+            "password" : "lcaprini-password"
         }
     },
 
@@ -38,7 +38,7 @@
         "builds" : {
             "host": "lcapriniftp",
             "user": "lcaprini-user",
-            "password": "lcaprini-passwd",
+            "password": "lcaprini-password",
             "iosDestinationPath": "/var/www/html/test/iOS",
             "androidDestinationPath": "/var/www/html/test/Android"
         },
@@ -46,7 +46,7 @@
         "repo" : {
             "host": "lcapriniftp",
             "user": "lcaprini-user",
-            "password": "lcaprini-passwd",
+            "password": "lcaprini-password",
             "jsonPath": "/var/www/html/test/wd",
             "iosUrlPath": "https://lcaprini.com/test/iOS",
             "androidUrlPath": "https://lcaprini.com/test/Android",
@@ -57,7 +57,7 @@
     "email" : {
         "host": "mail.gmail.com",
         "user": "lcaprini-user",
-        "password": "lcaprini-passwd",
+        "password": "lcaprini-password",
         "from": "luca.caprini@gmail.com",
         "to": ["luca.caprini@gmail.com"]
     }
