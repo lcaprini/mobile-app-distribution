@@ -9,7 +9,7 @@ const path = require('path');
 const logger = require('../logger');
 const utils = require('../utils');
 const cordova = require('../cordova').CORDOVA;
-const workingDir = path.join(process.cwd(), './wd');
+const workingDir = path.join(process.cwd());
 
 console.log('This utility will walk you through creating a distribute.json file.');
 console.log('It only covers the most common items, and tries to guess sensible defaults\n');
