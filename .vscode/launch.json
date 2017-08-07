@@ -7,6 +7,15 @@
         {
             "type": "node",
             "request": "launch",
+            "name": "Distribute Version",
+            "program": "${workspaceRoot}/libs/bin/distribute.js",
+            "args": [
+                "--version"
+            ]
+        },
+        {
+            "type": "node",
+            "request": "launch",
             "name": "Cordova",
             "program": "${workspaceRoot}/libs/bin/distribute-cordova.js",
             "args": [

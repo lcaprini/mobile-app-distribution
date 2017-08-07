@@ -4,7 +4,8 @@
 require('../protos');
 const program = require('commander');
 const fs = require('fs');
-const packageJson = JSON.parse(fs.readFileSync('./package.json'));
+const path = require('path');
+const packageJson = JSON.parse(fs.readFileSync(path.join(__dirname, '../../package.json')));
 
 program
     .version(packageJson.version)
