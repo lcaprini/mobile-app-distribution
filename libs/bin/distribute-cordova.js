@@ -4,7 +4,6 @@
 require('../protos');
 const program = require('commander');
 const Promise = require('bluebird');
-const url = require('url');
 const path = require('path');
 
 const config = require('../config');
@@ -21,43 +20,42 @@ let androidBuildProcessCompleted;
 
 program
     .allowUnknownOption()
-    .usage(`<app version> -t <[${TASKS.COMPILE_SOURCES},${TASKS.CHANGE_VERSION},${TASKS.BUILD_IOS},${TASKS.BUILD_ANDROID},${TASKS.UPLOAD_BUILDS},${TASKS.UPLOAD_SOURCES},${TASKS.SEND_EMAIL}]> [options]`)
-    .option('-p, --config <config>', 'config file for app distribution', config.path)
-    .option('-a, --android-version-code <version code>', 'Android version code')
-    .option('-i, --ios-bundle-version <bundle version>', 'iOS bundle version')
+    .usage(`<app-version> -t <[${TASKS.COMPILE_SOURCES},${TASKS.CHANGE_VERSION},${TASKS.BUILD_IOS},${TASKS.BUILD_ANDROID},${TASKS.UPLOAD_BUILDS},${TASKS.SEND_EMAIL}]> [options]`)
+    .option('-p, --config <config-path>', 'config file for app distribution', config.path)
+    .option('-a, --android-version-code <version-code>', 'Android version code')
+    .option('-i, --ios-bundle-version <bundle-version>', 'iOS bundle version')
     .option('-c, --change-log <change-log.txt or "First edit***Other edit...">', 'file path or list with "***" separator', config.changeLog)
-    .option(`-t, --tasks <[${TASKS.CHANGE_VERSION},${TASKS.COMPILE_SOURCES},${TASKS.BUILD_IOS},${TASKS.BUILD_ANDROID},${TASKS.UPLOAD_BUILDS},${TASKS.UPLOAD_SOURCES},${TASKS.SEND_EMAIL}]>`, `
-      ${TASKS.CHANGE_VERSION} : preprocess file setting app version
-      ${TASKS.COMPILE_SOURCES} : builds HTML, CSS, JAVASCRIPT files for Cordova projects
-      ${TASKS.BUILD_IOS} : builds, archives ad exports iOS project
-      ${TASKS.BUILD_ANDROID} : builds, archives ad exports Android project
+    .option(`-t, --tasks <[${TASKS.CHANGE_VERSION},${TASKS.COMPILE_SOURCES},${TASKS.BUILD_IOS},${TASKS.BUILD_ANDROID},${TASKS.UPLOAD_BUILDS},${TASKS.SEND_EMAIL}]>`, `
+      ${TASKS.CHANGE_VERSION} : changes app version editing the config.xml of Cordova project
+      ${TASKS.COMPILE_SOURCES} : compiles HTML, Javascript, CSS files into www folder
+      ${TASKS.BUILD_IOS} : builds, exports and signs iOS platform into ipa file
+      ${TASKS.BUILD_ANDROID} : builds, exports and signs Android platform into apk file
       ${TASKS.UPLOAD_BUILDS} : uploads builds on remote FTP server
-      ${TASKS.UPLOAD_SOURCES} : archives www sources with NodeJS server to test and view
-      ${TASKS.SEND_EMAIL}:  send email when finish with URL and QRCode for download`, config.tasks)
-    .option('-q, --qr-code', 'print QRCode of repository homepage', config.qrcode)
-    .option('-v, --verbose', 'prints all log in console', config.verbose)
-    .option('-f, --force', 'force with yes all questions', config.force)
+      ${TASKS.SEND_EMAIL}:  sends email when finished with URL and QRCode for download`, config.tasks)
+    .option('-q, --qr-code', 'prints QRCode of repository homepage', config.qrcode)
+    .option('-v, --verbose', 'prints all logs in console', config.verbose)
+    .option('-f, --force', 'forces with yes all questions', config.force)
     .option('-h, --hidden', 'hides build in HTML download page', config.hidden)
     .parse(process.argv);
 
 /**
  * Print error and exit process
- * @param {Error} err 
+ * @param {Error} err
  */
 const endDistribute = err => {
     const logger = require('../logger');
 
-    if(err){
+    if (err) {
         // logger.error(err);
         logger.error(err.message);
         process.exit(1);
     }
 
     let processes = [];
-    if(config.tasks.contains(TASKS.BUILD_IOS)){
+    if (config.tasks.contains(TASKS.BUILD_IOS)) {
         processes.push(iosBuildProcessCompleted);
     }
-    if(config.tasks.contains(TASKS.BUILD_ANDROID)){
+    if (config.tasks.contains(TASKS.BUILD_ANDROID)) {
         processes.push(androidBuildProcessCompleted);
     }
 
@@ -69,7 +67,7 @@ const endDistribute = err => {
         () => {
             process.exit(1);
         });
-}
+};
 
 /**
  * Send email, print close message and close process
@@ -78,83 +76,80 @@ const exit = () => {
     const logger = require('../logger');
 
     let finalRepoHomepageUrl = `${config.remote.repo.homepageUrl}?v=${config.app.versionLabel}`;
-    if(config.hidden){
+    if (config.hidden) {
         finalRepoHomepageUrl += '&all=true';
     }
 
     /**
      * SEND EMAIL
      */
-    if(config.tasks.contains(TASKS.SEND_EMAIL)){
+    if (config.tasks.contains(TASKS.SEND_EMAIL)) {
         let emailData = {
-            appName : config.app.name,
-            appVersion : config.app.versionLabel,
-            appLabel : config.app.label,
+            appName         : config.app.name,
+            appVersion      : config.app.versionLabel,
+            appLabel        : config.app.label,
             repoHomepageUrl : finalRepoHomepageUrl
-        }
-        if(config.tasks.contains(TASKS.BUILD_ANDROID)){
+        };
+        if (config.tasks.contains(TASKS.BUILD_ANDROID)) {
             emailData.androidBuildPath = config.remote.repo.androidUrlPath;
         }
-        if(config.tasks.contains(TASKS.BUILD_IOS)){
+        if (config.tasks.contains(TASKS.BUILD_IOS)) {
             emailData.iosBuildPath = config.remote.repo.iosManifestUrlPath;
         }
         const emailBody = cordova.composeEmail(emailData);
         email.sendEmail({
-            from : config.email.from,
-            to : config.email.to,
+            from   : config.email.from,
+            to     : config.email.to,
             server : {
-                host : config.email.host,
-                port : config.email.port,
-                user : config.email.user,
+                host     : config.email.host,
+                port     : config.email.port,
+                user     : config.email.user,
                 password : config.email.password
             },
-            appName : config.app.name,
+            appName    : config.app.name,
             appVersion : config.app.versionLabel,
-            body : emailBody
+            body       : emailBody
         });
         email.SENDING_EMAIL.then(
             () => {
                 logger.printEnd();
-                if(config.qrcode && config.remote.repo.homepageUrl){
+                if (config.qrcode && config.remote.repo.homepageUrl) {
                     utils.printQRCode(finalRepoHomepageUrl);
                 }
                 process.exit(0);
             }
-        )
+        );
     }
-    else{
+    else {
         logger.printEnd();
-        if(config.qrcode && config.remote.repo.homepageUrl){
+        if (config.qrcode && config.remote.repo.homepageUrl) {
             utils.printQRCode(finalRepoHomepageUrl);
         }
         process.exit(0);
     }
-}
+};
 
 /**
  * Start Cordova distribution process
  */
 const startDistribution = () => {
-    const logger = require('../logger');
-
-    try{
-
+    try {
         /**
          * CHANGE VERSION
          */
-        if(config.tasks.contains(TASKS.CHANGE_VERSION)){
+        if (config.tasks.contains(TASKS.CHANGE_VERSION)) {
             cordova.changeVersion({
                 filePath : config.sources.htmlVersionPath,
-                version : config.app.versionLabel
+                version  : config.app.versionLabel
             });
         }
 
         /**
          * COMPILE SOURCES
          */
-        if(config.tasks.contains(TASKS.COMPILE_SOURCES)){
+        if (config.tasks.contains(TASKS.COMPILE_SOURCES)) {
             cordova.compileSource({
-                sourcePath : config.sources.compilePath,
+                sourcePath        : config.sources.compilePath,
                 compileSourcesCmd : config.sources.compileCommand,
 
                 verbose : config.verbose
@@ -166,40 +161,40 @@ const startDistribution = () => {
          */
         cordova.setVersion({
             cordovaPath : config.cordova.path,
-            appVersion : config.app.version
+            appVersion  : config.app.version
         });
 
         /**
          * BUILD IOS PLATFORM
          */
-        if(config.tasks.contains(TASKS.BUILD_IOS)){
+        if (config.tasks.contains(TASKS.BUILD_IOS)) {
             cordova.distributeIos({
-                appName : config.app.name,
-                displayName : config.app.label,
-                ipaFileName : config.ios.ipaFileName,
-                id : config.ios.bundleId,
-                version : config.app.version,
+                appName       : config.app.name,
+                displayName   : config.app.label,
+                ipaFileName   : config.ios.ipaFileName,
+                id            : config.ios.bundleId,
+                version       : config.app.version,
                 bundleVersion : config.ios.bundleVersion,
-                schema : config.ios.targetSchema,
+                schema        : config.ios.targetSchema,
 
-                infoPlistPath : config.ios.infoPlistPath,
-                cordovaPath : config.cordova.path,
-                buildIosCommand : config.cordova.buildIosCommand,
-                exportOptionsPlist : config.ios.exportOptionsPlist,
+                infoPlistPath          : config.ios.infoPlistPath,
+                cordovaPath            : config.cordova.path,
+                buildIosCommand        : config.cordova.buildIosCommand,
+                exportOptionsPlist     : config.ios.exportOptionsPlist,
                 exportOptionsPlistPath : config.ios.exportOptionsPlistPath,
-                exportDir : config.buildsDir,
+                exportDir              : config.buildsDir,
 
-                ipaUrlPath : config.remote.repo.iosIpaUrlPath,
+                ipaUrlPath   : config.remote.repo.iosIpaUrlPath,
                 manifestPath : path.join(config.buildsDir, config.ios.manifestFileName),
 
                 verbose : config.verbose
             });
             iosBuildProcessCompleted = new Promise((resolve, reject) => {
-                if(config.tasks.contains(TASKS.UPLOAD_BUILDS)){
+                if (config.tasks.contains(TASKS.UPLOAD_BUILDS)) {
                     ios.uploadManifestAndIPA({
-                        ipaFilePath : config.ios.ipaFilePath,
+                        ipaFilePath      : config.ios.ipaFilePath,
                         manifestFilePath : config.ios.manifestFilePath,
-                        server : {
+                        server           : {
                             host : config.remote.builds.host,
                             port : config.remote.builds.port,
                             user : config.remote.builds.user,
@@ -209,21 +204,21 @@ const startDistribution = () => {
                     }).then(() => {
                         remote.updateRepo({
                             repoPath : config.remote.repo.jsonPath,
-                            server : {
+                            server   : {
                                 host : config.remote.repo.host,
                                 port : config.remote.repo.port,
                                 user : config.remote.repo.user,
                                 pass : config.remote.repo.password
                             },
                             iosBuildPath : 'itms-services://?action=download-manifest&amp;url=' + config.remote.repo.iosManifestUrlPath,
-                            version : config.app.versionLabel,
-                            changelog : config.changeLog,
-                            hidden : config.hidden,
-                            rootPath : config.rootPath
+                            version      : config.app.versionLabel,
+                            changelog    : config.changeLog,
+                            hidden       : config.hidden,
+                            rootPath     : config.rootPath
                         }).then(resolve, reject);
                     }, reject);
                 }
-                else{
+                else {
                     resolve();
                 }
             });
@@ -232,19 +227,19 @@ const startDistribution = () => {
         /**
          * BUILD ANDROID PLATFORM
          */
-        if(config.tasks.contains(TASKS.BUILD_ANDROID)){
+        if (config.tasks.contains(TASKS.BUILD_ANDROID)) {
             cordova.distributeAndroid({
                 launcherName : config.app.label,
-                id : config.android.bundleId,
-                versionCode : config.android.versionCode,
+                id           : config.android.bundleId,
+                versionCode  : config.android.versionCode,
 
-                cordovaPath: config.cordova.path,
+                cordovaPath         : config.cordova.path,
                 buildAndroidCommand : config.cordova.buildAndroidCommand,
-                
+
                 apkFilePath : config.android.apkFilePath,
-                keystore : {
-                    path: config.android.keystore.path,
-                    alias : config.android.keystore.alias,
+                keystore    : {
+                    path     : config.android.keystore.path,
+                    alias    : config.android.keystore.alias,
                     password : config.android.keystore.password
                 },
 
@@ -253,10 +248,10 @@ const startDistribution = () => {
 
             const androidUpdate = () => {
                 return new Promise((resolve, reject) => {
-                    if(config.tasks.contains(TASKS.UPLOAD_BUILDS)){
+                    if (config.tasks.contains(TASKS.UPLOAD_BUILDS)) {
                         android.uploadAPK({
                             apkFilePath : config.android.apkFilePath,
-                            server : {
+                            server      : {
                                 host : config.remote.builds.host,
                                 port : config.remote.builds.port,
                                 user : config.remote.builds.user,
@@ -266,54 +261,54 @@ const startDistribution = () => {
                         }).then(() => {
                             remote.updateRepo({
                                 repoPath : config.remote.repo.jsonPath,
-                                server : {
+                                server   : {
                                     host : config.remote.repo.host,
                                     port : config.remote.repo.port,
                                     user : config.remote.repo.user,
                                     pass : config.remote.repo.password
                                 },
                                 androidBuildPath : config.remote.repo.androidUrlPath,
-                                version : config.app.versionLabel,
-                                changelog : config.changeLog,
-                                hidden : config.hidden,
-                                rootPath : config.rootPath
+                                version          : config.app.versionLabel,
+                                changelog        : config.changeLog,
+                                hidden           : config.hidden,
+                                rootPath         : config.rootPath
                             }).then(resolve, reject);
                         }, reject);
                     }
-                    else{
+                    else {
                         resolve();
                     }
                 });
-            }
-            if(config.tasks.contains(TASKS.BUILD_IOS)){
+            };
+            if (config.tasks.contains(TASKS.BUILD_IOS)) {
                 androidBuildProcessCompleted = new Promise((resolve, reject) => {
                     iosBuildProcessCompleted.then(androidUpdate).then(resolve, reject);
                 });
             }
-            else{
+            else {
                 androidBuildProcessCompleted = androidUpdate();
             }
         }
 
         endDistribute();
     }
-    catch(err){
+    catch (err) {
         endDistribute(err);
     }
-}
+};
 
 /**
  * Read config file and initialize all distribution process
  */
 config.init({
-    configPath: program.config,
-    program: program
+    configPath : program.config,
+    program    : program
 }).then(
     () => {
-        try{
+        try {
             config.printRecap().then(startDistribution);
         }
-        catch(err){
+        catch (err) {
             endDistribute(err);
         }
     },

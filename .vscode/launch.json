@@ -7,10 +7,19 @@
         {
             "type": "node",
             "request": "launch",
+            "name": "Distribute Version",
+            "program": "${workspaceRoot}/libs/bin/distribute.js",
+            "args": [
+                "--version"
+            ]
+        },
+        {
+            "type": "node",
+            "request": "launch",
             "name": "Cordova",
             "program": "${workspaceRoot}/libs/bin/distribute-cordova.js",
             "args": [
-                "1.8.5 patch06",
+                "1.8.5-patch6",
                 "--config",
                 "/Users/Lucacaprini/Development/FIAT/iLinkQuotation/distribute.json",
                 "--android-version-code",
@@ -24,6 +33,12 @@
                 "-v",
                 "-f"
             ]
+        },{
+            "type": "node",
+            "request": "launch",
+            "name": "Wd",
+            "program": "${workspaceRoot}/libs/bin/distribute-wd.js",
+            "args": []
         },{
             "name": "Webpack",
             "type": "node",

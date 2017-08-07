@@ -2,130 +2,85 @@
 'use strict';
 
 require('../protos');
-const inquirer = require("inquirer");
+const inquirer = require('inquirer');
 const fs = require('fs');
 const path = require('path');
 
 const logger = require('../logger');
+const utils = require('../utils');
 const cordova = require('../cordova').CORDOVA;
-const email = require('../email');
+const workingDir = path.join(process.cwd());
 
-let config = {};
+console.log('This utility will walk you through creating a distribute.json file.');
+console.log('It only covers the most common items, and tries to guess sensible defaults\n');
 
-// Get default app name
-const packageJsonPath = path.join(process.cwd(), './package.json');
-let appName;
-if(fs.existsSync(packageJsonPath)){
-    let packageJson = JSON.parse(fs.readFileSync(packageJsonPath));
-    appName = packageJson.name;
-}
-if(!appName){
-    appName = path.basename(path.dirname(packageJsonPath));
-}
+console.log('See https://github.com/lcaprini/mobile-app-distribution for definitive documentation on these fields and exactly what they do.\n');
 
-const DISTRIBUTE = {
-    CORDOVA : 'Cordova',
-    IOS : 'iOS',
-    ANDROID : 'Android'
+console.log('Press ^C at any time to quit\n');
+
+const init = () => {
+    const DISTRIBUTE = {
+        CORDOVA : 'Cordova',
+        IOS     : 'iOS',
+        ANDROID : 'Android'
+    };
+
+    let appName = utils.findAppName();
+
+    inquirer.prompt([{
+        type    : 'input',
+        name    : 'name',
+        message : 'app.name',
+        default : appName
+    }, {
+        type    : 'input',
+        name    : 'label',
+        message : 'app.label',
+        default : appName
+    }, {
+        type    : 'list',
+        name    : 'distribute',
+        message : 'Which distribute system you want initilize?',
+        choices : [
+            DISTRIBUTE.CORDOVA,
+            DISTRIBUTE.IOS,
+            DISTRIBUTE.ANDROID
+        ]}
+    ]).then(({name, label, distribute}) => {
+        let config = {
+            app : {
+                name  : name,
+                label : label
+            }
+        };
+        if (distribute === DISTRIBUTE.CORDOVA) {
+            cordova.init(config).then(
+                config => {
+                    fs.writeFileSync(path.join(workingDir, './distribute.json'), JSON.stringify(config, null, 4));
+                    logger.section('distribute.json created');
+                    process.exit(0);
+                }
+            );
+        }
+        else {
+            logger.info('Coming soon...');
+            process.exit(0);
+        }
+    });
 };
 
-inquirer.prompt([{
-    type: 'list',
-    name: 'distribute',
-    message: 'Which distribute system you want initilize?',
-    choices: [
-        DISTRIBUTE.CORDOVA,
-        DISTRIBUTE.IOS,
-        DISTRIBUTE.ANDROID
-    ]
-}]).then(answers => {
-    
-    if(answers.distribute === DISTRIBUTE.CORDOVA){
-
-        inquirer.prompt([{
-            type: 'input',
-            name: 'appName',
-            message: 'App name?',
-            default: appName
-        },{
-            type: 'input',
-            name: 'appLabel',
-            message: 'App label?',
-            default: appName
-        }]).then(({appName, appLabel}) => {
-
-            config.app = {
-                name : appName,
-                label : appLabel
+if (fs.existsSync(path.join(workingDir, './distribute.json'))) {
+    utils.prompt('A distribute.json file already exists and this tool will overwrite it. Do you want to continue? (y/N)').then(
+        result => {
+            if (result.toLowerCase() === 'y') {
+                init();
             }
-
-            const TASKS = {
-                CHANGE_VERSION : 'Change app version in HTML',
-                COMPILE_SOURCES : 'Compile web app sources',
-                BUILD_IOS : 'Build Cordova iOS platform',
-                BUILD_ANDROID : 'Build Cordova Android platform',
-                UPLOAD_BUILDS : 'Upload builds',
-                UPLOAD_SOURCES : 'Upload sources',
-                SEND_EMAIL : 'Send email to working group'
-            };
-
-            inquirer.prompt([{
-                type: 'checkbox',
-                message: 'Which tasks you want configure?',
-                name: 'tasks',
-                choices: [
-                    { name: TASKS.CHANGE_VERSION },
-                    { name: TASKS.COMPILE_SOURCES },
-                    { name: TASKS.BUILD_IOS },
-                    { name: TASKS.BUILD_ANDROID },
-                    { name: TASKS.UPLOAD_BUILDS },
-                    { name: TASKS.UPLOAD_SOURCES },
-                    { name: TASKS.SEND_EMAIL }
-                ]}]).then(({tasks}) => {
-
-                    let questions = [];
-                    
-                    if(tasks.contains(TASKS.COMPILE_SOURCES)){
-                        config.sources = {};
-                        questions.push(cordova.initializeSourceCompile);
-                    }
-                    
-                    if(tasks.contains(TASKS.CHANGE_VERSION)){
-                        if(!config.sources)
-                            config.sources = {};
-                        questions.push(cordova.initializeChangeVersion);
-                    }
-
-                    const askQuestions = (questions, config) => {
-                        if(questions.length > 0){
-                            let question = questions.pop();
-                            return question(config).then(
-                                config => {
-                                    return askQuestions(questions, config);
-                                }
-                            );
-                        }
-                        else{
-                            return config;
-                        }
-                    };
-                    askQuestions(questions, config).then(
-                        config => {
-                            logger.info("END -> writing json file", config);
-                            process.exit();
-                        },
-                        () => {
-                            process.exit(1);
-                        }
-                    );
-
-            });
-
-        });
-    }
-    else{
-        logger.info('Coming soon...');
-        process.exit(0);
-    }
-
-});
+            else {
+                process.exit(0);
+            }
+        }
+    );
+}
+else {
+    init();
+}

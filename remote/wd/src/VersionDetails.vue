@@ -1,29 +1,28 @@
 <template>
-    <div class="details" :class="{visible : visible}">
+    <div class="details visible">
         <h3> {{ appName }} v.{{ version }} </h3>
 
-        <Row>
-            <Col :xs="24" :sm="5"> Changelog </Col>
-            <Col class="changelogText" :xs="24" :sm="18">
-                <ul class="changelog">
-                    <li v-for="(log, index) in changelog" :key="index"> {{ log }} </li>
-                </ul>
-            </Col>
-        </Row>
+        <div class="ivu-row">
+            <div class="ivu-col ivu-col-span-xs-24 ivu-col-span-sm-5"> Changelog </div>
+            <div class="ivu-col ivu-col-span-xs-24 ivu-col-span-sm-18 changelogText">
+                <p class="changelog" v-html="changelog"></p>
+            </div>
+        </div>
 
-        <Row>
-            <Col :xs="8" :sm="5"> Release date </Col>
-            <Col :xs="16" :sm="19"> {{ date }} </Col>
-        </Row>
+        <div class="ivu-row">
+            <div class="ivu-col ivu-col-span-xs-8 ivu-col-span-sm-5"> Release date </div>
+            <div class="ivu-col ivu-col-span-xs-16 ivu-col-span-sm-19"> {{ date }} </div>
+        </div>
         
-        <Row class="downloader" type="flex" justify="space-around">
-            <Col :xs="24" :sm="8" v-if="iosLink">
-                <Button class="ios" long @click="downloadIPA"> Download IPA </Button>
-            </Col>
-            <Col :xs="24" :sm="8" v-if="androidLink">
-                <Button class="android" long @click="downloadAPK"> Download APK </Button>
-            </Col>
-        </Row>
+        <div class="ivu-row ivu-row-flex ivu-row-flex-space-around downloader">
+            <div class="ivu-col ivu-col-span-xs-24" v-if="iosLink">
+                <button type="button" class="ivu-btn ivu-btn-long ios" @click="downloadIPA"> Download IPA </Button>
+            </div>
+            <div class="ivu-col ivu-col-span-xs-24" v-if="androidLink">
+                <button type="button" class="ivu-btn ivu-btn-long android" @click="downloadAPK"> Download APK </button>
+            </div>
+        </div>
+        
     </div>
 </template>
 <script>
@@ -32,19 +31,19 @@ export default {
     props: {
         appName: {
             type: String,
-            required: true
+            default: ''
         },
         version: {
             type: String,
-            required: true
+            default: ''
         },
         hidden: {
             type: Boolean,
             default: false
         },
         changelog: {
-            type: Array,
-            default: []
+            type: String,
+            default: ''
         },
         date: {
             type: String,
@@ -57,10 +56,6 @@ export default {
         iosLink: {
             type: String,
             default: null
-        },
-        visible : {
-            type: Boolean,
-            default: false
         }
     },
     methods: {
@@ -77,7 +72,7 @@ export default {
     }
 }
 </script>
-<style lang="sass" scoped>
+<style lang="sass">
 
 @import "assets/css/colors";
 
@@ -85,14 +80,11 @@ export default {
     max-height: 0;
     overflow: auto;
     padding: 0 16px;
-    -webkit-transition: max-height 0.5s, opacity 0.5s;
-    -moz-transition: max-height 0.5s, opacity 0.5s;
-    transition: max-height 0.5s, opacity 0.5s;
     z-index: -1;
     border-left: 1px solid $main-color;
     border-right: 1px solid $main-color;
 
-    @media screen and (min-width: 560px) {
+    @media screen and (min-width: 559px) {
         max-height: none;
         height: 100%;
         position: absolute;
@@ -127,14 +119,25 @@ export default {
     }
 
     @media screen and (max-width: 767px) {
+        .changelog {
+            padding-left: 10px;
+        }
+    }
+
+    @media screen and (max-width: 559px) {
         .downloader {
             .ivu-col:not(:first-of-type){
                 margin-top: 10px;
             }
         }
     }
-    &.visible-xs.visible:last-of-type {
-        border-bottom: 1px solid $main-color;
+
+    @media screen and (min-width: 560px) {
+        .downloader {
+            .ivu-col {
+                width: 33%
+            }
+        }
     }
 }
 

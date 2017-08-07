@@ -2,46 +2,35 @@
     <div id="app" class="container">
         <div id="header">
             <h2 class="title"> {{ appName }} </h2>
-            <app-changelog :builds="builds" @selected="selectedVersion"></app-changelog>
+            <app-changelog :builds="builds" @selected="showVersionDetails"></app-changelog>
         </div>
         
         <div class="tabs">
 
             <div class="versions">
-                <template v-for="(build, index) in builds">
-                    <version-tab
-                        :id="build.version.replace(/ /g,'_')"
-                        :app-name="appName"
-                        :version="build.version"
-                        :hidden="build.hidden"
-                        :androidLink="build.androidBuildPath"
-                        :iosLink="build.iosBuildPath"
-                        :active="active == build.version"
-                        @selected="selectedVersion"></version-tab>
-
-                        <version-details
-                            :app-name="appName"
-                            :version="build.version"
-                            :hidden="build.hidden"
-                            :changelog="build.changelog"
-                            :date="build.date"
-                            :androidLink="build.androidBuildPath"
-                            :iosLink="build.iosBuildPath"
-                            :visible="active == build.version"
-                            class="visible-xs"></version-details>
-                </template>
+                <version-tab
+                    v-for="(build, index) in builds"
+                    :key="build.version"
+                    :index="index"
+                    :id="`v_${index}`"
+                    :app-name="appName"
+                    :version="build.version"
+                    :hidden="build.hidden"
+                    :androidLink="build.androidBuildPath"
+                    :iosLink="build.iosBuildPath"
+                    :active="selectedVersion.version == build.version"
+                    @selected="showVersionDetails"></version-tab>
             </div>
 
             <version-details
-                v-for="(build, index) in builds" :key="build.version"
+                id="main-viewer"
                 :app-name="appName"
-                :version="build.version"
-                :hidden="build.hidden"
-                :changelog="build.changelog"
-                :date="build.date"
-                :androidLink="build.androidBuildPath"
-                :iosLink="build.iosBuildPath"
-                :visible="active == build.version"
+                :version="selectedVersion.version"
+                :hidden="selectedVersion.hidden"
+                :changelog="selectedVersion.changelogString"
+                :date="selectedVersion.date"
+                :androidLink="selectedVersion.androidBuildPath"
+                :iosLink="selectedVersion.iosBuildPath"
                 class="hidden-xs"></version-details>
 
         </div>
@@ -50,7 +39,10 @@
 </template>
 
 <script>
+import Vue from 'vue';
 import remove from 'lodash/remove';
+import each from 'lodash/each';
+import findIndex from 'lodash/findIndex';
 import VersionTab from './VersionTab.vue';
 import VersionDetails from './VersionDetails.vue';
 import Changelog from './Changelog.vue';
@@ -65,41 +57,49 @@ export default {
         return {
             appName : '',
             builds : [],
-            active : null
+            selectedVersion : {}
         }
     },
-    beforeCreate() {
-        const url = new URL(window.location.href);
+    created() {
+        let App = this;
+        const url = window.location.href;
         let showAll = false;
-        if(url.searchParams.get('all')){
-            showAll = url.searchParams.get('all') === 'true';
+        if(this.getParameterByName(url, 'all')){
+            showAll = this.getParameterByName(url, 'all') === 'true';
         }
         const builds = (process.env.NODE_ENV === 'production')? './builds.json' : 'http://fiatpvt-coll.engbms.it/FiatApp/ilcc/wd/builds.json';
         this.$http.get(`${builds}?t=${new Date().getTime()}`).then(
             jsonFile => {
                 try{
-                    this.appName = jsonFile.body.appName;
+                    App.appName = jsonFile.body.appName;
 
                     if(showAll){
-                        this.builds = jsonFile.body.builds;
+                        each(jsonFile.body.builds, b => {
+                            b.changelogString = `✓ ${b.changelog.join('<br/>✓ ')}`;
+                            App.builds.push(b);
+                        });
                     }
                     else{
-                        remove(jsonFile.body.builds, (b) => {
-                            return (typeof b.hidden === undefined)? false : b.hidden === true;
+                        each(jsonFile.body.builds, b => {
+                            if(typeof b.hidden === 'undefined' || b.hidden === false){
+                                b.changelogString = `✓ ${b.changelog.join('<br/>✓ ')}`;
+                                App.builds.push(b);    
+                            }
                         });
-                        this.builds = jsonFile.body.builds;
                     }
 
-                    if(this.builds.length > 0){
-                        if(url.searchParams.get('v')){
-                            this.active = url.searchParams.get('v');
+                    Vue.nextTick(function () {
+                        if(App.builds.length > 0){
+                            if(App.getParameterByName(url, 'v')){
+                                App.showVersionDetails(findIndex(App.builds, {version : App.getParameterByName(url, 'v')}));
+                            }
+                            else{
+                                App.showVersionDetails(0);
+                            }
                         }
-                        else{
-                            this.active = this.builds[0].version;
-                        }
-                    }
+                    })
 
-                    document.title = this.appName;
+                    document.title = App.appName;
                 }
                 catch(err){
                     alert(err);
@@ -109,11 +109,28 @@ export default {
         )
     },
     methods : {
-        selectedVersion(version){
-            this.active = version;
-            const url = window.location.href;
-            location.href = "#" + version.replace(/ /g,"_");
-            window.history.replaceState(null, null, url);
+        showVersionDetails(versionIndex){
+            if(!versionIndex || versionIndex === -1){
+                versionIndex = 0;
+            }
+            this.selectedVersion = this.builds[versionIndex];
+            setTimeout(() => {
+                document.querySelector(`#v_${versionIndex} .details`).innerHTML = document.querySelector('#main-viewer').innerHTML;
+                if(window.innerWidth < 560){
+                    const url = window.location.href;
+                    location.href = `#v_${versionIndex}`;
+                    window.history.replaceState(null, null, url);
+                }
+            }, 250);
+        },
+        getParameterByName(url, name) {
+            if (!url) url = window.location.href;
+            name = name.replace(/[\[\]]/g, "\\$&");
+            var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
+                results = regex.exec(url);
+            if (!results) return null;
+            if (!results[2]) return '';
+            return decodeURIComponent(results[2].replace(/\+/g, " "));
         }
     }
 }
@@ -142,9 +159,6 @@ export default {
     min-height: 0;
     overflow: hidden;
     height: 100%;
-    -webkit-transition: all 0.5s;
-    -moz-transition: all 0.5s;
-    transition: all 0.5s;
 
     @media screen and (min-width: 560px) {
         margin-bottom: 40px;
