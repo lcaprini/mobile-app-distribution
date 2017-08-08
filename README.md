@@ -68,7 +68,7 @@ To see general help menu and available commands run the following command:
     $ distribute --help
 
 ### Configuration
-To use `distribute` command you'll need to create a `distribute.json` first, like [`distribute-example.json`](./distribute-example.json).
+To use `distribute` command you'll need to create a `distribute.json` first, like [`distribute-example.json`](./resources/distribute-example.json).
 
 The following paragraphs describes all sections of a tipical `distribute.json` for a Cordova app.
 
