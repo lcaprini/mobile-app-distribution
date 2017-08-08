@@ -167,6 +167,7 @@ export default {
     .versions {
         height: 100%;
         overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
 
         @media screen and (min-width: 560px) {
             width: 30%;

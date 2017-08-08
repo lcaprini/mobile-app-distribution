@@ -140,6 +140,11 @@ form {
 div.version-list-container{
     overflow-x: hidden;
     overflow-y: auto;
+    -webkit-box-flex: 1;
+    -moz-box-flex: 1;
+    -webkit-flex: 1;
+    -ms-flex: 1;
+    flex: 1;
 
     ul.version-list {
         list-style: none;
