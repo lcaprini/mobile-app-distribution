@@ -23,6 +23,8 @@ Compile, build and publish over FTP a Cordova mobile app for wireless distributi
   * [Options](#options)
 * [`wd` command](#wd-command)
   * [Synopsis](#synopsis-wd)
+* [`resources` command](#resources-command)
+  * [Synopsis](#synopsis-resources)
 
 ## What is "Distribute"?
 Mobile App Distribution is a command line tool for distributing a Cordova mobile app over FTP to allow its download over the air.
@@ -53,7 +55,8 @@ Distribute tools have multiple commands to cover all aspects of mobile app distr
 
 * `$ distribute init`: The utility makes some questions and with them answers initializes the config file for distribution process.
 * `$ distribute cordova`: The utility launches all tasks for compiling, building and uploading a Cordova mobile app
-* `$ distribute wd`: The utility create the `wd` folder for manually upload on FTP remote repository
+* `$ distribute wd`: The utility creates the `wd` folder for manually upload on FTP remote repository
+* `$ distribute resources`: The utility generate iOS and Android icons and splash from one single icon and one single splash
 * `$ distribute ios`: *[Coming soon...]* The utility launches all tasks for building and uploading an iOS mobile app
 * `$ distribute android`: *[Coming soon...]* The utility launches all tasks for building and uploading an Android mobile app
 
@@ -68,7 +71,7 @@ To see general help menu and available commands run the following command:
     $ distribute --help
 
 ### Configuration
-To use `distribute` command you'll need to create a `distribute.json` first, like [`distribute-example.json`](./distribute-example.json).
+To use `distribute` command you'll need to create a `distribute.json` first, like [`distribute-example.json`](./resources/distribute-example.json).
 
 The following paragraphs describes all sections of a tipical `distribute.json` for a Cordova app.
 
@@ -139,7 +142,7 @@ All details about final email sending; if you require the send email task (`e`) 
 * `email.to`__*__ : List of email's recipients
 
 ## `init` command
-This utility make some questions to user and create the `distribute.json` file for make builds. Please see [Configuration](#configuration) paragraph to find more info about all configuration attributes.
+This utility makes some questions to user and create the `distribute.json` file for make builds. Please see [Configuration](#configuration) paragraph to find more info about all configuration attributes.
 
 ## `cordova` command
 This utility launches all tasks for compiling, building and uploading a Cordova mobile app.
@@ -188,8 +191,29 @@ To correcly run process you'll need to specify the app version in [semver](http:
   _descr_: Hide this build from repository homepage; use it for pre release and alpha/beta versions
 
 ## `wd` command
-This utility create a new folder called `wd` that contains all files for wireless distribution repository, ready to manually upload on FTP repo.
+This utility creates a new folder called `wd` that contains all files for wireless distribution repository, ready to manually upload on FTP repo.
 
 ### <a id="synopsis-wd"></a> Synopsis
     
     $ distribute wd
+
+## `resources` command
+This utility create icons and splashes for iOS and Android platforms from one icon and one splash.
+
+### <a id="synopsis-resources"></a> Synopsis
+    
+    $ distribute resources
+
+### Options
+
+* _option_: `-i, --icon <icon-image-path>`  
+  _descr_: Path of image to use as icon to resize for all required platfoms
+  _defaut_: `./resources/icon.png`
+
+* _option_: `-s, --splash <splash-image-path>`  
+  _descr_: Path of image to use as splash to resize (and crop) for all required platfoms
+  _defaut_: `./resources/icon.png`
+
+* _option_: `-p, --platforms <i,a>`  
+  _descr_: Platforms to target for icons and splashes generate process
+  _defaut_: `i,a`

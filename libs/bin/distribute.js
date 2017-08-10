@@ -9,7 +9,8 @@ const packageJson = JSON.parse(fs.readFileSync(path.join(__dirname, '../../packa
 
 program
     .version(packageJson.version)
-    .command('init', 'initialize distribution')
-    .command('wd', 'create wireless distribution folder')
-    .command('cordova <version>', 'build new version of a Cordova app')
+    .command('init', 'initializes distribution')
+    .command('resources', 'generates icons and splashes for iOS and Android platforms')
+    .command('wd', 'creates wireless distribution folder')
+    .command('cordova <version>', 'builds new version of a Cordova app')
     .parse(process.argv);

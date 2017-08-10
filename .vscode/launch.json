@@ -40,6 +40,15 @@
             "program": "${workspaceRoot}/libs/bin/distribute-wd.js",
             "args": []
         },{
+            "type": "node",
+            "request": "launch",
+            "name": "Generate Icon",
+            "program": "${workspaceRoot}/libs/bin/distribute-generate.js",
+            "args": [
+                "--icon",
+                "/Users/Masterplan/Desktop/icon.png"
+            ]
+        },{
             "name": "Webpack",
             "type": "node",
             "request": "launch",
