@@ -25,6 +25,8 @@ Compile, build and publish over FTP a Cordova mobile app for wireless distributi
   * [Synopsis](#synopsis-wd)
 * [`resources` command](#resources-command)
   * [Synopsis](#synopsis-resources)
+* [`serve` command](#serve-command)
+  * [Synopsis](#synopsis-serve)
 
 ## What is "Distribute"?
 Mobile App Distribution is a command line tool for distributing a Cordova mobile app over FTP to allow its download over the air. It also have many command for icons and splashes generation, a local server creation, and so on.
@@ -47,6 +49,7 @@ Distribute tools have multiple commands to cover all aspects of mobile app distr
 * `$ distribute cordova`: The utility launches all tasks for compiling, building and uploading a Cordova mobile app
 * `$ distribute wd`: The utility creates the `wd` folder for manually upload on FTP remote repository
 * `$ distribute resources`: The utility generate iOS and Android icons and splash from one single icon and one single splash
+* `$ distribute serve`: The utility create a local host to test website or webapp
 * `$ distribute ios`: *[Coming soon...]* The utility launches all tasks for building and uploading an iOS mobile app
 * `$ distribute android`: *[Coming soon...]* The utility launches all tasks for building and uploading an Android mobile app
 
@@ -215,3 +218,19 @@ This utility creates icons and splashes for iOS and Android platforms from one i
   _descr_: Platforms to target for icons and splashes generate process  
   _default_: `i,a`
 
+## `serve` command
+This utility creates and starts a local web server to test every single page application, like a Cordova `www` folder.
+
+### <a id="synopsis-serve"></a> Synopsis
+
+	$ distribute serve <www-root-path> [options]
+
+The tool starts a local web server with root on `<www-root-path>` and a new browser window automatically appear on the following url
+
+	http://127.0.0.1:9001/
+
+## Options
+
+* _option_: `-p, --port <port-number>`  
+  _descr_: Port for local server
+  _default_: `9001`

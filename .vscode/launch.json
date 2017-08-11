@@ -27,11 +27,19 @@
                 "--ios-bundle-version",
                 "185",
                 "--tasks",
-                "vciaue",
-                "--qr-code",
+                "z",
                 "-h",
-                "-v",
                 "-f"
+            ]
+        },{
+            "type": "node",
+            "request": "launch",
+            "name": "Serve",
+            "program": "${workspaceRoot}/libs/bin/distribute-serve.js",
+            "args": [
+                "/Users/Lucacaprini/Development/FIAT/iLinkConf/app/www",
+                "--port",
+                "9002"
             ]
         },{
             "type": "node",
