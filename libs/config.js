@@ -104,6 +104,14 @@ class Config {
                 iosManifestUrlPath : '',
                 androidUrlPath     : '',
                 homepageUrl        : ''
+            },
+
+            sources : {
+                host            : '',
+                port            : 21,
+                user            : '',
+                sourcesPath     : '',
+                archiveFilePath : ''
             }
         };
 
@@ -163,6 +171,10 @@ class Config {
                         config.remote.repo.iosIpaUrlPath = url.resolve(config.remote.repo.iosUrlPath, config.ios.ipaFileName);
                         config.remote.repo.iosManifestUrlPath = url.resolve(config.remote.repo.iosUrlPath, config.ios.manifestFileName);
                         config.remote.repo.androidUrlPath = url.resolve(config.remote.repo.androidUrlPath, config.android.apkFileName);
+
+                        let archiveFileName = `./${config.app.label}_v.${config.app.versionLabel}.zip`.replace(/ /g, '_');
+                        config.remote.sources.archiveFilePath = path.join(config.buildsDir, archiveFileName);
+                        config.remote.sources.sourcesPath = path.join(config.remote.sources.sourcesPath, archiveFileName);
 
                         logger.setFileLogger(config.rootPath);
 
@@ -308,7 +320,12 @@ class Config {
             remote.verifyUploadBuildsSteps(this);
         }
 
-        // Check params for FTP sources upload
+        // Check params for FTP sources uploader
+        if (this.tasks.contains(cordovaTasks.UPLOAD_SOURCES)) {
+            remote.verifyUploadSourcesStep(this);
+        }
+
+        // Check params for email sender
         if (this.tasks.contains(cordovaTasks.SEND_EMAIL)) {
             email.verify(this);
         }

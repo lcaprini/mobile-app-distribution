@@ -4,6 +4,7 @@ const _ = require('lodash');
 const moment = require('moment');
 const JSFtp = require('jsftp');
 const fs = require('fs');
+const archiver = require('archiver');
 const path = require('path');
 const Promise = require('bluebird');
 const inquirer = require('inquirer');
@@ -101,6 +102,41 @@ const Remote = {
         });
     },
 
+    uploadSources({archiveFilePath, sourceSrcPath, server, sourceDestPath}) {
+        return new Promise((resolve, reject) => {
+            var output = fs.createWriteStream(archiveFilePath);
+            var archive = archiver('zip', {
+                zlib : { level : 9 }
+            });
+
+            output.on('close', function() {
+                Remote.uploadFile({
+                    localFile  : archiveFilePath,
+                    remoteFile : sourceDestPath,
+                    server
+                }).then(
+                    () => {
+                        fs.unlinkSync(archiveFilePath);
+                        resolve();
+                    },
+                    err => {
+                        reject(err);
+                    }
+                );
+            });
+            archive.on('error', function(err) {
+                reject(err);
+            });
+
+            archive.pipe(output);
+
+            archive.directory(sourceSrcPath, 'app/www');
+            archive.file(path.join(__dirname, '../resources/source-upload-readme.md'), { name : 'app/README.md' });
+
+            archive.finalize();
+        });
+    },
+
     verifyUploadBuildsSteps(config) {
         if (!config.remote.builds.host) {
             throw new Error('FTP build upload error: missing "remote.builds.hosts" value in config file');
@@ -148,6 +184,24 @@ const Remote = {
         }
         if (!config.remote.repo.homepageUrl) {
             throw new Error('Repo update error: missing "remote.repo.homepageUrl" value in config file');
+        }
+    },
+
+    verifyUploadSourcesStep(config) {
+        if (!config.remote.sources.host) {
+            throw new Error('Sources update error: missing "remote.sources.hosts" value in config file');
+        }
+        if (!config.remote.sources.port) {
+            throw new Error('Sources update error: missing "remote.sources.port" value in config file');
+        }
+        if (!config.remote.sources.user) {
+            throw new Error('Sources update error: missing "remote.sources.user" value in config file');
+        }
+        if (!config.remote.sources.password) {
+            throw new Error('Sources update error: missing "remote.sources.password" value in config file');
+        }
+        if (!config.remote.sources.sourcesPath) {
+            throw new Error('Sources update error: missing "remote.sources.sourcesPath" value in config file');
         }
     },
 

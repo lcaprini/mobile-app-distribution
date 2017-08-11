@@ -27,17 +27,7 @@ Compile, build and publish over FTP a Cordova mobile app for wireless distributi
   * [Synopsis](#synopsis-resources)
 
 ## What is "Distribute"?
-Mobile App Distribution is a command line tool for distributing a Cordova mobile app over FTP to allow its download over the air.
-
-This module
-* launches all necessary command line tools for compiling HTML, Javascript and CSS files
-* updates app version
-* builds iOS and Android platforms
-* creates certified `.apk` and `.ipa` (with `.plist`) apps
-* publishes final apps in a remote server over FTP
-* updates via FTP the HTML page to download the final apps
-* sends email to all working group with QRCode and direct download link
-* prints a QRCode on terminal to make app download more simple
+Mobile App Distribution is a command line tool for distributing a Cordova mobile app over FTP to allow its download over the air. It also have many command for icons and splashes generation, a local server creation, and so on.
 
 ## Installation
 To make `distribute` command line available in your system you'll need to install [Mobile App Distribution](https://github.com/lcaprini/mobile-app-distribution) globally first. You can do that with the following command:
@@ -114,7 +104,7 @@ All details about building, exporting and signing Android platform; if you requi
    * `alias`__*__ : Alias of the keystore file
    * `password`__*__ : Password of the keystore file
 
-#### Builds upload and repo update section
+#### Builds upload, repo update and sources upload sections
 All details about the processes to upload created builds over FTP and update remote file to allow download over the web; if you require build's upload task (`u`) all fields marked with __*__ are mandatory.
 * `remote.builds.host`__*__ : FTP host for builds upload
 * `remote.builds.port` : FTP port for builds upload; if not specified the default value will be `21`
@@ -131,6 +121,12 @@ All details about the processes to upload created builds over FTP and update rem
 * `remote.repo.androidUrlPath`__*__ : Public URL of `remote.builds.androidDestinationPath` for Android app download
 * `remote.repo.jsonPath`__*__ : Absolute path of remote folder that contains `builds.json` file to update it
 * `remote.repo.homepageUrl`__*__ : Public URL of `remote.repo.jsonPath` for wireless distribution repository
+
+* `remote.sources.host`__*__ : FTP host for sources upload
+* `remote.sources.port` : FTP port for sources upload; if not specified the default value will be `21`
+* `remote.sources.user`__*__ : Username for FTP connection with read and write permissions
+* `remote.sources.password`__*__ : Password of `remote.sources.user`
+* `remote.sources.sourcesPath`__*__ : Absolute path of folder will contains all zipped sources
 
 #### Email section
 All details about final email sending; if you require the send email task (`e`) all fields marked with __*__ are mandatory.
@@ -158,25 +154,26 @@ To correcly run process you'll need to specify the app version in [semver](http:
 * `i` : Builds, archives, exports a certified `.ipa` file with its `.plist` and moves all files into `buildsDir` folder
 * `a` : Builds, archives, exports a certified `.apk` file and moves it into `buildsDir` folder
 * `u` : Uploads the created app on the remote FTP server
+* `z` : Zip and upload Cordova `www` folder on the remote FTP server
 * `e` : Sends an email with links and QRCode for download when the process ends
 
 ### Options
 
 * _option_: `-p, --config <config-path>`  
   _descr_: Path of `distribute.json` to use for process  
-  _defaut_: `./distribute.json`
+  _default_: `./distribute.json`
 
 * _option_: `-a, --android-version-code <version-code>`  
   _descr_: Version Code for Android build
-  _defaut_: `MAJOR * 10000 + MINOR * 100 + PATCH`
+  _default_: `MAJOR * 10000 + MINOR * 100 + PATCH`
 
 * _option_: `-i, --ios-bundle-version <bundle-version>`  
   _descr_: CF Bundle Version for build
-  _defaut_: `MAJOR * 100 + MINOR * 10 + PATCH`
+  _default_: `MAJOR * 100 + MINOR * 10 + PATCH`
 
 * _option_: `-c, --change-log <changelog.txt | "Text with *** line separator"`  
-  _descr_: Path of a `.txt` file that contains all changelog (one per line), or a string with `***` line separator
-  _defaut_: `No changelog`
+  _descr_: Path of a `.txt` file that contains all changelog (one per line), or a string with `***` line separator  
+  _default_: `No changelog`
 
 * _option_: `-q, --qr-code`  
   _descr_: Print a QRCode coded with repository homepage in the terminal window when process is complete
@@ -198,7 +195,7 @@ This utility creates a new folder called `wd` that contains all files for wirele
     $ distribute wd
 
 ## `resources` command
-This utility create icons and splashes for iOS and Android platforms from one icon and one splash.
+This utility creates icons and splashes for iOS and Android platforms from one icon and one splash.
 
 ### <a id="synopsis-resources"></a> Synopsis
     
@@ -207,13 +204,14 @@ This utility create icons and splashes for iOS and Android platforms from one ic
 ### Options
 
 * _option_: `-i, --icon <icon-image-path>`  
-  _descr_: Path of image to use as icon to resize for all required platfoms
-  _defaut_: `./resources/icon.png`
+  _descr_: Path of image to use as icon to resize for all required platfoms  
+  _default_: `./resources/icon.png`
 
 * _option_: `-s, --splash <splash-image-path>`  
-  _descr_: Path of image to use as splash to resize (and crop) for all required platfoms
-  _defaut_: `./resources/icon.png`
+  _descr_: Path of image to use as splash to resize (and crop) for all required platfoms  
+  _default_: `./resources/icon.png`
 
 * _option_: `-p, --platforms <i,a>`  
-  _descr_: Platforms to target for icons and splashes generate process
-  _defaut_: `i,a`
+  _descr_: Platforms to target for icons and splashes generate process  
+  _default_: `i,a`
+

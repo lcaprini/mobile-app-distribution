@@ -17,10 +17,11 @@ const TASKS = require('../cordova').TASKS;
 
 let iosBuildProcessCompleted;
 let androidBuildProcessCompleted;
+let sourcesUploadProcessCompleted;
 
 program
     .allowUnknownOption()
-    .usage(`<app-version> -t <[${TASKS.COMPILE_SOURCES},${TASKS.CHANGE_VERSION},${TASKS.BUILD_IOS},${TASKS.BUILD_ANDROID},${TASKS.UPLOAD_BUILDS},${TASKS.SEND_EMAIL}]> [options]`)
+    .usage(`<app-version> -t <[${TASKS.COMPILE_SOURCES},${TASKS.CHANGE_VERSION},${TASKS.BUILD_IOS},${TASKS.BUILD_ANDROID},${TASKS.UPLOAD_BUILDS},${TASKS.UPLOAD_SOURCES},${TASKS.SEND_EMAIL}]> [options]`)
     .option('-p, --config <config-path>', 'config file for app distribution', config.path)
     .option('-a, --android-version-code <version-code>', 'Android version code')
     .option('-i, --ios-bundle-version <bundle-version>', 'iOS bundle version')
@@ -31,6 +32,7 @@ program
       ${TASKS.BUILD_IOS} : builds, exports and signs iOS platform into ipa file
       ${TASKS.BUILD_ANDROID} : builds, exports and signs Android platform into apk file
       ${TASKS.UPLOAD_BUILDS} : uploads builds on remote FTP server
+      ${TASKS.UPLOAD_SOURCES} : uploads sources of Cordova www folder
       ${TASKS.SEND_EMAIL}:  sends email when finished with URL and QRCode for download`, config.tasks)
     .option('-q, --qr-code', 'prints QRCode of repository homepage', config.qrcode)
     .option('-v, --verbose', 'prints all logs in console', config.verbose)
@@ -46,8 +48,8 @@ const endDistribute = err => {
     const logger = require('../logger');
 
     if (err) {
-        // logger.error(err);
-        logger.error(err.message);
+        logger.error(err);
+        // logger.error(err.message);
         process.exit(1);
     }
 
@@ -57,6 +59,9 @@ const endDistribute = err => {
     }
     if (config.tasks.contains(TASKS.BUILD_ANDROID)) {
         processes.push(androidBuildProcessCompleted);
+    }
+    if (config.tasks.contains(TASKS.UPLOAD_SOURCES)) {
+        processes.push(sourcesUploadProcessCompleted);
     }
 
     // Close process when uploading and updating repo tasks are completed for all platforms
@@ -290,6 +295,37 @@ const startDistribution = () => {
             }
         }
 
+        /**
+         * UPLOAD SOURCES
+         */
+        if (config.tasks.contains(TASKS.UPLOAD_SOURCES)) {
+            let processes = [];
+            if (config.tasks.contains(TASKS.BUILD_IOS)) {
+                processes.push(iosBuildProcessCompleted);
+            }
+            if (config.tasks.contains(TASKS.BUILD_ANDROID)) {
+                processes.push(androidBuildProcessCompleted);
+            }
+            // Start upload when all other upload processes end
+            sourcesUploadProcessCompleted = Promise.all(processes).then(
+                () => {
+                    return remote.uploadSources({
+                        archiveFilePath : config.remote.sources.archiveFilePath,
+                        sourceSrcPath   : path.join(config.cordova.path, './www'),
+                        server          : {
+                            host : config.remote.sources.host,
+                            port : config.remote.sources.port,
+                            user : config.remote.sources.user,
+                            pass : config.remote.sources.password
+                        },
+                        sourceDestPath : config.remote.sources.sourcesPath
+                    });
+                },
+                () => {
+                    process.exit(1);
+                });
+        }
+
         endDistribute();
     }
     catch (err) {
@@ -313,8 +349,8 @@ config.init({
         }
     },
     err => {
-        console.error(err.message);
-        // console.error(err);
+        // console.error(err.message);
+        console.error(err);
         program.help();
     }
 );
