@@ -115,7 +115,6 @@ All details about the processes to upload created builds over FTP and update rem
 * `remote.builds.password`__*__ : Password of `remote.builds.user`
 * `remote.builds.iosDestinationPath`__*__ : Absolute path of folder will contains all iOS `.ipa` and `.plist` files
 * `remote.builds.androidDestinationPath`__*__ : Absolute path of folder will contains all Android `.apk` files
-
 * `remote.repo.host`__*__ : FTP host for repository update
 * `remote.repo.port` : FTP port for repository update; if not specified the default value will be `21`
 * `remote.repo.user`__*__ : Username for FTP connection with read and write permissions
@@ -124,7 +123,6 @@ All details about the processes to upload created builds over FTP and update rem
 * `remote.repo.androidUrlPath`__*__ : Public URL of `remote.builds.androidDestinationPath` for Android app download
 * `remote.repo.jsonPath`__*__ : Absolute path of remote folder that contains `builds.json` file to update it
 * `remote.repo.homepageUrl`__*__ : Public URL of `remote.repo.jsonPath` for wireless distribution repository
-
 * `remote.sources.host`__*__ : FTP host for sources upload
 * `remote.sources.port` : FTP port for sources upload; if not specified the default value will be `21`
 * `remote.sources.user`__*__ : Username for FTP connection with read and write permissions
