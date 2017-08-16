@@ -29,7 +29,7 @@ const Utils = {
 
     printQRCode(data) {
         var qrcode = require('qrcode-terminal');
-        qrcode.generate(data, {small: true});
+        qrcode.generate(data, {small : true});
     },
 
     findAppName() {

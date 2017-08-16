@@ -23,7 +23,7 @@ console.log('Press ^C at any time to quit.\n');
 const createWd = ({create}) => {
     utils.askAppName().then(
         appName => {
-            if(create){
+            if (create) {
                 fs.mkdirSync(workingDir);
             }
             fs.createReadStream(path.join(wdModuleDir, './index.html')).pipe(fs.createWriteStream(path.join(workingDir, 'index.html')));
