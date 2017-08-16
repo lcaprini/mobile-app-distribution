@@ -1,5 +1,11 @@
 <template>
     <div id="app" class="container">
+
+        <Spin size="large" fix v-if="!ready">
+            <Icon type="load-c" size=18 class="demo-spin-icon-load"></Icon>
+            <div>Loading</div>
+        </Spin>
+
         <div id="header">
             <h2 class="title"> {{ appName }} </h2>
             <app-changelog :builds="builds" @selected="showVersionDetails"></app-changelog>
@@ -33,6 +39,7 @@
                 :date="selectedVersion.date"
                 :androidLink="selectedVersion.androidBuildPath"
                 :iosLink="selectedVersion.iosBuildPath"
+                v-show="ready"
                 class="hidden-xs"></version-details>
 
         </div>
@@ -59,7 +66,8 @@ export default {
         return {
             appName : '',
             builds : [],
-            selectedVersion : {}
+            selectedVersion : {},
+            ready: false
         }
     },
     created() {
@@ -98,6 +106,7 @@ export default {
                             else{
                                 App.showVersionDetails(0);
                             }
+                            App.ready = true;
                         }
                     })
 
@@ -141,11 +150,19 @@ export default {
 }
 </script>
 
-<style lang="sass"> @import "assets/css/main"; </style>
-
-<style lang="sass" scoped>
-
+<style lang="sass">
+@import "assets/css/main";
 @import "assets/css/colors";
+
+.demo-spin-icon-load{
+    animation: ani-demo-spin 1s linear infinite;
+}
+
+@keyframes ani-demo-spin {
+    from { transform: rotate(0deg);}
+    50%  { transform: rotate(180deg);}
+    to   { transform: rotate(360deg);}
+}
 
 #header {
     position: relative;
@@ -164,9 +181,10 @@ export default {
     min-height: 0;
     overflow: hidden;
     height: 100%;
+    margin-bottom: 40px;
 
-    @media screen and (min-width: 560px) {
-        margin-bottom: 40px;
+    @media screen and (max-width: 559px) {
+        margin-bottom: 20px;
     }
 
     .versions {
@@ -177,6 +195,15 @@ export default {
         @media screen and (min-width: 560px) {
             width: 30%;
             border-right: 1px solid $main-color;
+        }
+
+        @media screen and (max-width: 559px) {
+            margin-bottom: 20px;
+            border: 1px solid $main-color;
+
+            & > div:first-of-type .tab .tab-toggle {
+                border-top: none;
+            }
         }
     }
 }

@@ -95,7 +95,7 @@ export default {
         text-align: left;
 
         @media screen and (max-width: 559px) {
-            border: 1px solid $main-color;
+            border-top: 1px solid $main-color;
             border-bottom-width: 0;
             border-radius: 0;
         }

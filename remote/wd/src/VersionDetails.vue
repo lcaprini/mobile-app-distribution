@@ -81,8 +81,6 @@ export default {
     overflow: auto;
     padding: 0 16px;
     z-index: -1;
-    border-left: 1px solid $main-color;
-    border-right: 1px solid $main-color;
 
     @media screen and (min-width: 559px) {
         max-height: none;
