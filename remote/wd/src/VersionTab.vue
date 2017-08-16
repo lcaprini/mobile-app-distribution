@@ -9,7 +9,17 @@
             </div>
         </button>
     </div>
-    <div class="details visible-xs" :class="{visible : active}"> </div>
+    <version-details
+        id="main-viewer"
+        :app-name="appName"
+        :version="version"
+        :hidden="hidden"
+        :changelog="changelog"
+        :date="date"
+        :androidLink="androidLink"
+        :iosLink="iosLink"
+        class="details visible visible-xs"
+        v-if="active"></version-details>
 </div>
 </template>
 <script>
@@ -35,6 +45,14 @@ export default {
         hidden: {
             type: Boolean,
             default: false
+        },
+        changelog: {
+            type: String,
+            required: true
+        },
+        date: {
+            type: String,
+            default: ''
         },
         androidLink: {
             type: String,

@@ -16,6 +16,8 @@
                     :app-name="appName"
                     :version="build.version"
                     :hidden="build.hidden"
+                    :changelog="build.changelogString"
+                    :date="build.date"
                     :androidLink="build.androidBuildPath"
                     :iosLink="build.iosBuildPath"
                     :active="selectedVersion.version == build.version"
@@ -114,14 +116,17 @@ export default {
                 versionIndex = 0;
             }
             this.selectedVersion = this.builds[versionIndex];
-            setTimeout(() => {
-                document.querySelector(`#v_${versionIndex} .details`).innerHTML = document.querySelector('#main-viewer').innerHTML;
-                if(window.innerWidth < 560){
-                    const url = window.location.href;
-                    location.href = `#v_${versionIndex}`;
-                    window.history.replaceState(null, null, url);
-                }
-            }, 250);
+            if(window.innerWidth < 560){
+                const App = this;
+                setTimeout(() => {
+                    const options = {
+                        container: '.versions',
+                        easing: 'ease-in',
+                        offset: -50
+                    };
+                    App.$scrollTo(`#v_${versionIndex}`, 300, options);
+                }, 250);
+            }
         },
         getParameterByName(url, name) {
             if (!url) url = window.location.href;
