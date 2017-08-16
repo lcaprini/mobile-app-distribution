@@ -240,7 +240,7 @@ const Remote = {
             type    : 'input',
             name    : 'iosDestinationPath',
             message : 'remote.builds.iosDestinationPath',
-            default : 'lcapriniftp'
+            default : '/var/www/html/test/builds/iOS'
         }]).then(({iosDestinationPath}) => {
             config.remote.builds.iosDestinationPath = iosDestinationPath;
             return config;
@@ -252,7 +252,7 @@ const Remote = {
             type    : 'input',
             name    : 'androidDestinationPath',
             message : 'remote.builds.androidDestinationPath',
-            default : 'lcapriniftp'
+            default : '/var/www/html/test/builds/Android'
         }]).then(({androidDestinationPath}) => {
             config.remote.builds.androidDestinationPath = androidDestinationPath;
             return config;
