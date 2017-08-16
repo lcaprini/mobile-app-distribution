@@ -40,7 +40,7 @@
                                 type="ghost"
                                 shape="circle"
                                 size="small"
-                                @click="showVersion(build.version)"
+                                @click="showVersion(iB)"
                                 class="select"> Show ▶ </Button>
                         </p>
                         <p class="changelog" v-html="build.changelogString"></p>
