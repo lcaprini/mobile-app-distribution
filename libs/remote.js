@@ -305,8 +305,8 @@ const Remote = {
         return inquirer.prompt([{
             type    : 'input',
             name    : 'iosUrlPath',
-            message : 'remote.builds.iosUrlPath',
-            default : 'lcapriniftp'
+            message : 'remote.repo.iosUrlPath',
+            default : 'https://mycert-server.lcaprini.com/iOS'
         }]).then(({iosUrlPath}) => {
             config.remote.repo.iosUrlPath = iosUrlPath;
             return config;
@@ -317,10 +317,46 @@ const Remote = {
         return inquirer.prompt([{
             type    : 'input',
             name    : 'androidUrlPath',
-            message : 'remote.builds.androidUrlPath',
-            default : 'lcapriniftp'
+            message : 'remote.repo.androidUrlPath',
+            default : 'https://mycert-server.lcaprini.com/Android'
         }]).then(({androidUrlPath}) => {
             config.remote.repo.androidUrlPath = androidUrlPath;
+            return config;
+        });
+    },
+
+    initializeSourcesUpload(config) {
+        return inquirer.prompt([{
+            type    : 'input',
+            name    : 'host',
+            message : 'remote.sources.host',
+            default : 'lcapriniftp'
+        }, {
+            type    : 'input',
+            name    : 'user',
+            message : 'remote.sources.user',
+            default : 'lcaprini-user'
+        }, {
+            type    : 'input',
+            name    : 'password',
+            message : 'remote.sources.password',
+            default : 'lcaprini-password'
+        }, {
+            type    : 'input',
+            name    : 'sourcesPath',
+            message : 'remote.sources.sourcesPath',
+            default : '/var/www/html/test/sources'
+        }]).then(({host, user, password, sourcesPath}) => {
+            if (!config.remote) {
+                config.remote = {};
+            }
+            if (!config.remote.sources) {
+                config.remote.sources = {};
+            }
+            config.remote.sources.host = host;
+            config.remote.sources.user = user;
+            config.remote.sources.password = password;
+            config.remote.sources.sourcesPath = sourcesPath;
             return config;
         });
     }

@@ -402,6 +402,7 @@ const Cordova = {
             BUILD_IOS       : 'Build Cordova iOS platform',
             BUILD_ANDROID   : 'Build Cordova Android platform',
             UPLOAD_BUILDS   : 'Upload builds',
+            UPLOAD_SOURCES  : 'Upload sources',
             SEND_EMAIL      : 'Send email to working group'
         };
 
@@ -415,6 +416,7 @@ const Cordova = {
                 { name : TASKS.BUILD_IOS },
                 { name : TASKS.BUILD_ANDROID },
                 { name : TASKS.UPLOAD_BUILDS },
+                { name : TASKS.UPLOAD_SOURCES },
                 { name : TASKS.SEND_EMAIL }
             ]}]).then(({tasks}) => {
                 let questions = [];
@@ -457,6 +459,10 @@ const Cordova = {
                     if (tasks.contains(TASKS.BUILD_ANDROID)) {
                         questions.push(remote.initializeAndroidRepoUpdate);
                     }
+                }
+
+                if (tasks.contains(TASKS.UPLOAD_SOURCES)) {
+                    questions.push(remote.initializeSourcesUpload);
                 }
 
                 if (tasks.contains(TASKS.SEND_EMAIL)) {

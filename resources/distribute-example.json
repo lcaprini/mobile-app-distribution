@@ -51,6 +51,13 @@
             "iosUrlPath": "https://lcaprini.com/test/iOS",
             "androidUrlPath": "https://lcaprini.com/test/Android",
             "homepageUrl": "https://lcaprini.com/test/wd"
+        },
+        
+        "sources" : {
+            "host": "lcapriniftp",
+            "user": "lcaprini-user",
+            "password": "lcaprini-passwd",
+            "sourcesPath": "/var/www/html/test/sources"
         }
     },
 

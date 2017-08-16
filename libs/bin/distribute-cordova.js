@@ -26,7 +26,7 @@ program
     .option('-a, --android-version-code <version-code>', 'Android version code')
     .option('-i, --ios-bundle-version <bundle-version>', 'iOS bundle version')
     .option('-c, --change-log <change-log.txt or "First edit***Other edit...">', 'file path or list with "***" separator', config.changeLog)
-    .option(`-t, --tasks <[${TASKS.CHANGE_VERSION},${TASKS.COMPILE_SOURCES},${TASKS.BUILD_IOS},${TASKS.BUILD_ANDROID},${TASKS.UPLOAD_BUILDS},${TASKS.SEND_EMAIL}]>`, `
+    .option(`-t, --tasks <[${TASKS.CHANGE_VERSION},${TASKS.COMPILE_SOURCES},${TASKS.BUILD_IOS},${TASKS.BUILD_ANDROID},${TASKS.UPLOAD_BUILDS},${TASKS.UPLOAD_SOURCES},${TASKS.SEND_EMAIL}]>`, `
       ${TASKS.CHANGE_VERSION} : changes app version editing the config.xml of Cordova project
       ${TASKS.COMPILE_SOURCES} : compiles HTML, Javascript, CSS files into www folder
       ${TASKS.BUILD_IOS} : builds, exports and signs iOS platform into ipa file
