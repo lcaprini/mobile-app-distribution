@@ -33,6 +33,7 @@
     "commander": "^2.9.0",
     "connect": "^3.6.3",
     "cordova-config": "^0.7.0",
+    "corser": "^2.0.1",
     "elementtree": "^0.1.7",
     "find-versions": "^2.0.0",
     "inquirer": "^3.2.0",
