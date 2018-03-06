@@ -24,7 +24,7 @@ class Android {
     /**
      * Sign APK with keystore
      * @param {Object} param0
-     * @param {String} param0.androidProjectPath - Root path of Android project
+     * @param {String} param0.buildApkPath - Directory that contains of release unsigned apk
      * @param {Object} param0.keystore - Keystore info
      * @param {String} param0.keystore.path - Keystore path
      * @param {String} param0.keystore.alias - Keystore alias
@@ -32,8 +32,7 @@ class Android {
      * @param {String} param0.appName - Label of release APK created after build process
      * @param {Boolean} param0.verbose - The logger prints every process message only if it's true
      */
-    signAPK({androidProjectPath, keystore : {path : keystorePath, alias : keystoreAlias, password : keystorePassword}, buildAndroidApkDir, appName = 'android', verbose}) {
-        const buildApkPath = path.join(androidProjectPath, buildAndroidApkDir);
+    signAPK({buildApkPath, keystore : {path : keystorePath, alias : keystoreAlias, password : keystorePassword}, appName = 'android', verbose}) {
         process.chdir(buildApkPath);
         const cmdAndroidSignAPK = `jarsigner -verbose -sigalg SHA1withRSA -digestalg SHA1 -keystore '${keystorePath}' -storepass '${keystorePassword}' '${appName}-release-unsigned.apk' '${keystoreAlias}'`;
         let err = shell.exec(cmdAndroidSignAPK, {silent : !verbose}).stderr;
@@ -50,13 +49,12 @@ class Android {
     /**
      * Align signed APK
      * @param {Object} param0
-     * @param {String} param0.androidProjectPath - Root path of Android project
+     * @param {String} param0.buildApkPath - Directory that contains of release unsigned apk
      * @param {String} param0.appName - Label of release APK created and signed
      * @param {String} param0.apkFilePath - Destination path of aligned APK
      * @param {Boolean} param0.verbose - The logger prints every process message only if it's true
      */
-    alignAPK({androidProjectPath, appName = 'android', apkFilePath, buildAndroidApkDir, verbose}) {
-        const buildApkPath = path.join(androidProjectPath, buildAndroidApkDir);
+    alignAPK({buildApkPath, appName = 'android', apkFilePath, verbose}) {
         process.chdir(buildApkPath);
         const cmdAndroidAlignAPK = `zipalign -vf 4 '${appName}-release-unsigned.apk' '${apkFilePath}'`;
         let err = shell.exec(cmdAndroidAlignAPK, {silent : !verbose}).stderr;

@@ -48,8 +48,7 @@ class Config {
             configPath          : '',
             rootPath            : '',
             buildIosCommand     : 'cordova build ios',
-            buildAndroidCommand : 'cordova build --release android',
-            buildAndroidApkDir  : './build/outputs/apk/release'
+            buildAndroidCommand : 'cordova build --release android'
         };
 
         this.buildsDir = 'builds/';
@@ -74,9 +73,10 @@ class Config {
         };
 
         this.android = {
-            bundleId    : '',
-            versionCode : '',
-            keystore    : {
+            bundleId      : '',
+            versionCode   : '',
+            releaseApkDir : './build/outputs/apk/release',
+            keystore      : {
                 path     : '',
                 alias    : '',
                 password : ''
