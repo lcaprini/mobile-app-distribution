@@ -102,6 +102,7 @@ All details about building, exporting and signing iOS platform; if you require t
 All details about building, exporting and signing Android platform; if you require the Android build task (`a`) all fields marked with __*__ are mandatory.
 * `cordova.buildAndroidCommand` : Command to build iOS platform; if not specified the default value will be `cordova build android --relase`
 * `android.bundleId`__*__ : Bundle ID app to write into info plist of iOS platform
+* `android.releaseApkDir`__*__ : Relative path of release unsigned generated apk
 * `android.keystore`__*__ : JSON object that specify an Android keystore and its credentials for signing process:
    * `path`__*__ : Path of the keystore file
    * `alias`__*__ : Alias of the keystore file
