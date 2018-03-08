@@ -33,6 +33,7 @@ class Android {
      * @param {Boolean} param0.verbose - The logger prints every process message only if it's true
      */
     signAPK({buildApkPath, keystore : {path : keystorePath, alias : keystoreAlias, password : keystorePassword}, appName = 'android', verbose}) {
+        logger.section(`Sign Android apk with jarsigner command`);
         process.chdir(buildApkPath);
         const cmdAndroidSignAPK = `jarsigner -verbose -sigalg SHA1withRSA -digestalg SHA1 -keystore '${keystorePath}' -storepass '${keystorePassword}' '${appName}-release-unsigned.apk' '${keystoreAlias}'`;
         let err = shell.exec(cmdAndroidSignAPK, {silent : !verbose}).stderr;
@@ -55,6 +56,7 @@ class Android {
      * @param {Boolean} param0.verbose - The logger prints every process message only if it's true
      */
     alignAPK({buildApkPath, appName = 'android', apkFilePath, verbose}) {
+        logger.section(`Align signed Android apk with zipalign command`);
         process.chdir(buildApkPath);
         const cmdAndroidAlignAPK = `zipalign -vf 4 '${appName}-release-unsigned.apk' '${apkFilePath}'`;
         let err = shell.exec(cmdAndroidAlignAPK, {silent : !verbose}).stderr;
