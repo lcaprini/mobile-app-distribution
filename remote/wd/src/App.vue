@@ -8,12 +8,24 @@
 
         <div id="header">
             <h2 class="title"> {{ appName }} </h2>
-            <app-changelog :builds="builds" @selected="showVersionDetails"></app-changelog>
+            <app-changelog
+                :builds="builds"
+                @selected="showVersionDetails"></app-changelog>
         </div>
         
         <div class="tabs">
 
-            <div class="versions">
+            <div class="versions" :class="{'no-builds': ready && builds.length === 0}">
+
+                <Card v-if="ready && builds.length === 0" class="no-builds">
+                    <div>
+                        <Icon
+                            type="sad-outline"
+                            size="28"></Icon>
+                        <h3> No builds available </h3>
+                    </div>
+                </Card>
+
                 <version-tab
                     v-for="(build, index) in builds"
                     :key="build.version"
@@ -32,6 +44,7 @@
 
             <version-details
                 id="main-viewer"
+                v-if="ready && builds.length > 0"
                 :app-name="appName"
                 :version="selectedVersion.version"
                 :hidden="selectedVersion.hidden"
@@ -106,8 +119,8 @@ export default {
                             else{
                                 App.showVersionDetails(0);
                             }
-                            App.ready = true;
                         }
+                        App.ready = true;
                     })
 
                     document.title = App.appName;
@@ -192,18 +205,28 @@ export default {
         overflow-y: auto;
         -webkit-overflow-scrolling: touch;
 
-        @media screen and (min-width: 560px) {
-            width: 30%;
-            border-right: 1px solid $main-color;
+        &:not(.no-builds){
+
+            @media screen and (min-width: 560px) {
+                width: 30%;
+                border-right: 1px solid $main-color;
+            }
+
+            @media screen and (max-width: 559px) {
+                margin-bottom: 20px;
+                border: 1px solid $main-color;
+
+                & > div:first-of-type .tab .tab-toggle {
+                    border-top: none;
+                }
+            }
         }
 
-        @media screen and (max-width: 559px) {
-            margin-bottom: 20px;
-            border: 1px solid $main-color;
-
-            & > div:first-of-type .tab .tab-toggle {
-                border-top: none;
-            }
+        .no-builds {
+            text-align: center;
+            color: #5fa8f3;
+            width: 320px;
+            margin: 100px auto;
         }
     }
 }

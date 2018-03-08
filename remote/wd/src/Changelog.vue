@@ -1,5 +1,5 @@
 <template>
-    <span id="changelog">
+    <span id="changelog" v-if="builds.length > 0">
 
         <Button 
             type="ghost"
