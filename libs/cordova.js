@@ -84,12 +84,27 @@ const Cordova = {
     },
 
     /**
+     * Get the right strings.xml path in the Android project structure
+     */
+    getAndroidStringsPath({cordovaPath}) {
+        let cordovaAndroidStringsPath = null;
+        // Test for cordova-android >= 7.0.0
+        cordovaAndroidStringsPath = path.join(cordovaPath, './platforms/android/app/src/main/res/values/strings.xml');
+        if (!fs.existsSync(cordovaAndroidStringsPath)) {
+            // Test for cordova-android < 7.0.0
+            cordovaAndroidStringsPath = path.join(cordovaPath, './platforms/android/res/values/strings.xml');
+        }
+
+        return cordovaAndroidStringsPath;
+    },
+
+    /**
      * Set Android app launcher name in strings.xml file using elementtre module
      */
     setLauncherName({cordovaPath, launcherName}) {
         logger.section(`Set '${launcherName}' as Android launcher name in strings.xml`);
         try {
-            const cordovaAndroidStringsPath = path.join(cordovaPath, './platforms/android/res/values/strings.xml');
+            const cordovaAndroidStringsPath = this.getAndroidStringsPath({cordovaPath});
             let strings = fs.readFileSync(cordovaAndroidStringsPath, 'utf-8');
             let stringsTree = new et.ElementTree(et.XML(strings));
             let launcherNameElement = stringsTree.findall('./string/[@name="launcher_name"]')[0];
@@ -308,9 +323,9 @@ const Cordova = {
      * @param {Object} config
      */
     verifyAndroid(config) {
-        const cordovaAndroidStringsPath = path.join(config.cordova.path, './platforms/android/res/values/strings.xml');
-        if (!fs.existsSync(cordovaAndroidStringsPath)) {
-            throw new Error(`Android build error: file "${cordovaAndroidStringsPath}" does not exists`);
+        const cordovaAndroidStringsPath = this.getAndroidStringsPath(config.cordova.path);
+        if (!cordovaAndroidStringsPath) {
+            throw new Error(`Android build error: strings.xml file does not exists`);
         }
         android.verify(config);
     },
