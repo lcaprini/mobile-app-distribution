@@ -22,6 +22,21 @@ class Android {
     }
 
     /**
+     * Get the right strings.xml path in project
+     */
+    getStringsPath({rootPath}) {
+        let stringsPath = null;
+        // Test for last project structure
+        stringsPath = path.join(rootPath, './app/src/main/res/values/strings.xml');
+        if (!fs.existsSync(stringsPath)) {
+            // Test for previuos folder structure
+            stringsPath = path.join(rootPath, './res/values/strings.xml');
+        }
+
+        return stringsPath;
+    }
+
+    /**
      * Sign APK with keystore
      * @param {Object} param0
      * @param {String} param0.buildApkPath - Directory that contains of release unsigned apk
@@ -84,9 +99,13 @@ class Android {
         if (!config.android.bundleId) {
             throw new Error('Android build error: missing "android.bundleId" value in config file');
         }
-        const androidProjectPath = path.join(config.cordova.path, './platforms/android');
-        if (!fs.existsSync(androidProjectPath)) {
-            throw new Error(`Android build error: no Android project in "${androidProjectPath}" directory`);
+        const projectPath = path.join(config.cordova.path, './platforms/android');
+        if (!fs.existsSync(projectPath)) {
+            throw new Error(`Android build error: no Android project in "${projectPath}" directory`);
+        }
+        const stringsPath = this.getStringsPath({rootPath : projectPath});
+        if (!stringsPath) {
+            throw new Error(`Android build error: strings.xml file does not exists`);
         }
         if (!fs.existsSync(config.android.keystore.path)) {
             throw new Error(`Android build error: missing file "${config.android.keystore.path}"`);
