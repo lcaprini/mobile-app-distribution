@@ -2,7 +2,6 @@
 
 const shell = require('shelljs');
 const fs = require('fs');
-const et = require('elementtree');
 const path = require('path');
 const CordovaConfig = require('cordova-config');
 const inquirer = require('inquirer');
@@ -84,25 +83,6 @@ const Cordova = {
     },
 
     /**
-     * Set Android app launcher name in strings.xml file using elementtre module
-     */
-    setLauncherName({cordovaPath, launcherName}) {
-        logger.section(`Set '${launcherName}' as Android launcher name in strings.xml`);
-        try {
-            let androidPlatformPath = path.join(cordovaPath, './platforms/android/');
-            const androidStringsPath = android.getStringsPath({rootPath : androidPlatformPath});
-            let strings = fs.readFileSync(androidStringsPath, 'utf-8');
-            let stringsTree = new et.ElementTree(et.XML(strings));
-            let launcherNameElement = stringsTree.findall('./string/[@name="launcher_name"]')[0];
-            launcherNameElement.text = launcherName;
-            fs.writeFileSync(androidStringsPath, stringsTree.write({indent : 4}), 'utf-8');
-        }
-        catch (err) {
-            logger.error(err);
-        }
-    },
-
-    /**
      * Build Android Cordova Platform
      */
     buildAndroid({buildAndroidCommand, cordovaPath, verbose}) {
@@ -125,7 +105,8 @@ const Cordova = {
     distributeAndroid({launcherName, id, versionCode, cordovaPath, releaseApkDir, buildAndroidCommand = 'cordova build --release android', apkFilePath, keystore, verbose = false}) {
         this.setId({cordovaPath, id});
         this.setAndroidVersionCode({cordovaPath, versionCode});
-        this.setLauncherName({cordovaPath, launcherName});
+        let androidPlatformPath = path.join(cordovaPath, './platforms/android/');
+        android.setLauncherName({rootPath : androidPlatformPath, launcherName});
         this.buildAndroid({buildAndroidCommand, cordovaPath, verbose});
         const buildApkPath = path.join(cordovaPath, './platforms/android', releaseApkDir);
         android.signAPK({buildApkPath, keystore, verbose});

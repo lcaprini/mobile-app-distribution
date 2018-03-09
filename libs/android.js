@@ -1,6 +1,7 @@
 'use strict';
 
 const fs = require('fs');
+const et = require('elementtree');
 const path = require('path');
 const shell = require('shelljs');
 const commandExists = require('command-exists').sync;
@@ -34,6 +35,24 @@ class Android {
         }
 
         return stringsPath;
+    }
+
+    /**
+     * Set app launcher name in strings.xml file using ElementTree module
+     */
+    setLauncherName({rootPath, launcherName}) {
+        logger.section(`Set '${launcherName}' as Android launcher name in strings.xml`);
+        try {
+            const androidStringsPath = this.getStringsPath({rootPath});
+            let strings = fs.readFileSync(androidStringsPath, 'utf-8');
+            let stringsTree = new et.ElementTree(et.XML(strings));
+            let launcherNameElement = stringsTree.findall('./string/[@name="launcher_name"]')[0];
+            launcherNameElement.text = launcherName;
+            fs.writeFileSync(androidStringsPath, stringsTree.write({indent : 4}), 'utf-8');
+        }
+        catch (err) {
+            logger.error(err);
+        }
     }
 
     /**
