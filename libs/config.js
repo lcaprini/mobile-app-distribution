@@ -246,7 +246,7 @@ class Config {
         };
 
         if (this.hidden) {
-            this.app.versionLabel += '-[DEV]';
+            this.app.versionLabel += '_DEV';
         }
     }
 
