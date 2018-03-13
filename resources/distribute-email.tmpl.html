@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+
+<head>
+    <meta charset="utf-8">
+    <title> ___APP_LABEL___ </title>
+    <meta name="viewport" content="viewport-fit=cover, width=device-width">
+    <meta name="format-detection" content="telephone=no">
+    <meta name="msapplication-tap-highlight" content="no">
+    <link rel="stylesheet" href="http://unpkg.com/iview/dist/styles/iview.css">
+    <style type="text/css" media="screen">
+        .text-center {
+            text-align: center;
+        }
+        .text-bold {
+            font-weight: bold;
+        }
+        .padding {
+            padding: 4px;
+        }
+        .details {
+            padding: 16px;
+            max-width: 1024px;
+            margin: 0 auto;
+        }
+        .details h3 {
+            color: #57a3f3;
+            text-align: center;
+            font-size: 16px;
+        }
+        .details .ivu-row {
+            margin: 10px 0;
+        }
+        @media screen and (min-width: 560px) {
+            .details .downloader .ivu-col {
+                width: 33%;
+            }
+        }
+        p.changelog {
+            margin: 0;
+            padding: 0;
+        }
+        .hidden {
+            display: none !important;
+        }
+        .qrcode {
+            max-width: 300px;
+            margin: 0 auto;
+            width: 100%;
+        }
+        .downloader .ivu-col {
+            margin-bottom: 20px;
+        }
+        button.ivu-btn {
+            background: white;
+        }
+        button.ivu-btn.ios {
+            color: #3498db;
+            border-color: #3498db;
+        }
+        button.ivu-btn.android {
+            color: #9c0;
+            border-color: #9c0;
+        }
+        button.ivu-btn .qrcode {
+            width: 100%;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="details visible" id="main-viewer">
+        <h3> ___APP_NAME___ </h3>
+        <div class="ivu-row">
+            <div class="ivu-col ivu-col-span-xs-24 text-center">
+                The version <span class="text-bold"> ___APP_VERSION___ </span> of <span class="text-bold"> ___APP_NAME___ </span> app is now available!
+            </div>
+        </div>
+        <div class="ivu-row">
+            <div class="ivu-col ivu-col-span-xs-24 ivu-col-span-sm-3 text-bold"> Changelog </div>
+            <div class="ivu-col ivu-col-span-xs-24 ivu-col-span-sm-21 changelogText">
+                <p class="changelog">
+                    ___CHANGELOG___
+                </p>
+            </div>
+        </div>
+        <div class="ivu-row">
+            <div class="ivu-col ivu-col-span-xs-8 ivu-col-span-sm-3 text-bold"> Release date </div>
+            <div class="ivu-col ivu-col-span-xs-16 ivu-col-span-sm-19"> ___RELEASE_DATE___ </div>
+        </div>
+        <div class="ivu-row">
+            <div class="ivu-col ivu-col-span-xs-24 text-center padding">
+                Please scan the following QRCode, ora click the following link; if it does not work please copy it and paste it into your browser:
+            </div>
+            <div class="ivu-col ivu-col-span-xs-24 text-center padding">
+                <a href="___REPO_HOMEPAGE_URL___">
+                    ___REPO_HOMEPAGE_URL___
+                </a>
+            </div>
+            <div class="ivu-col ivu-col-span-xs-24 text-center padding">
+                <a href="___REPO_HOMEPAGE_URL___"><img class="qrcode" src="https://chart.googleapis.com/chart?cht=qr&chs=300x300&choe=UTF-8&chld=H|0&chl=___REPO_HOMEPAGE_URL___"/></a>
+            </div>
+        </div>
+        <div class="ivu-row">
+            <div class="ivu-col ivu-col-span-xs-24 text-center">
+                You can also directly download the app by scanning the following QRCodes or tapping on it:
+            </div>
+        </div>
+        <div class="ivu-row ivu-row-flex ivu-row-flex-space-around downloader">
+            <div class="ivu-col ivu-col-span-xs-24 ___IOS_DOWNLOAD_NOT_AVAILABLE___">
+                <button type="button" class="ivu-btn ivu-btn-long ios">
+                    Download IPA
+                    <br/><br/>
+                    <a href="___IOS_DIRECT_DOWNLOAD_URL___">
+                        <img class="qrcode" src="https://chart.googleapis.com/chart?cht=qr&chs=300x300&choe=UTF-8&chld=H|0&chl=___IOS_DIRECT_DOWNLOAD_URL___"/>
+                    </a>
+                </button>
+            </div>
+            <div class="ivu-col ivu-col-span-xs-24 ___ANDROID_DOWNLOAD_NOT_AVAILABLE___">
+                <button type="button" class="ivu-btn ivu-btn-long android">
+                    Download APK
+                    <br/><br/>
+                    <a href="___ANDROID_DIRECT_DOWNLOAD_URL___">
+                        <img class="qrcode" src="https://chart.googleapis.com/chart?cht=qr&chs=300x300&choe=UTF-8&chld=H|0&chl=___ANDROID_DIRECT_DOWNLOAD_URL___"/>
+                    </a>
+                </button>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

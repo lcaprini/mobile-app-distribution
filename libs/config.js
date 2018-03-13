@@ -16,6 +16,7 @@ const android = require('./android');
 const ios = require('./ios');
 const remote = require('./remote');
 const email = require('./email');
+const moment = require('moment');
 
 class Config {
     constructor() {
@@ -29,6 +30,7 @@ class Config {
         this.tasks = 'vciafjze';
 
         this.changeLog = 'No changelog';
+        this.releaseDate = moment().format('DD/MM/YYYY HH:mm');
 
         this.app = {
             name         : '',
@@ -240,8 +242,7 @@ class Config {
 
         // Set if builds are hidden on wireless distribution html page
         if (_.isBoolean(program.hidden)) {
-            this.hidden = program.hidden
-            ;
+            this.hidden = program.hidden;
         };
 
         if (this.hidden) {
