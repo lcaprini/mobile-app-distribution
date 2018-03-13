@@ -239,7 +239,6 @@ const startDistribution = () => {
                 versionCode  : config.android.versionCode,
 
                 cordovaPath         : config.cordova.path,
-                releaseApkDir       : config.android.releaseApkDir,
                 buildAndroidCommand : config.cordova.buildAndroidCommand,
 
                 apkFilePath : config.android.apkFilePath,

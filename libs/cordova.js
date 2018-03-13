@@ -102,15 +102,13 @@ const Cordova = {
     /**
      * Exec all task to prepare and build the Android platform
      */
-    distributeAndroid({launcherName, id, versionCode, cordovaPath, releaseApkDir, buildAndroidCommand = 'cordova build --release android', apkFilePath, keystore, verbose = false}) {
+    distributeAndroid({launcherName, id, versionCode, cordovaPath, buildAndroidCommand = 'cordova build --release android', apkFilePath, keystore, verbose = false}) {
         this.setId({cordovaPath, id});
         this.setAndroidVersionCode({cordovaPath, versionCode});
         let androidPlatformPath = path.join(cordovaPath, './platforms/android/');
         android.setLauncherName({rootPath : androidPlatformPath, launcherName});
         this.buildAndroid({buildAndroidCommand, cordovaPath, verbose});
-        const buildApkPath = path.join(cordovaPath, './platforms/android', releaseApkDir);
-        android.signAPK({buildApkPath, keystore, verbose});
-        android.alignAPK({buildApkPath, apkFilePath, verbose});
+        android.finalizeApk({projectPath : androidPlatformPath, keystore, apkFilePath, verbose});
     },
 
     /**

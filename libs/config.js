@@ -73,10 +73,9 @@ class Config {
         };
 
         this.android = {
-            bundleId      : '',
-            versionCode   : '',
-            releaseApkDir : './build/outputs/apk/release',
-            keystore      : {
+            bundleId    : '',
+            versionCode : '',
+            keystore    : {
                 path     : '',
                 alias    : '',
                 password : ''

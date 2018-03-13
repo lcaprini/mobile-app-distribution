@@ -56,20 +56,54 @@ class Android {
     }
 
     /**
+     * Get the right apk release folder path in project
+     */
+    getReleasePath({projectPath}) {
+        // Test for last project structure
+        let releasePath = path.join(projectPath, './app/build/outputs/apk/release');
+        if (fs.existsSync(releasePath)) {
+            return releasePath;
+        }
+        // Test for previuos folder structure
+        releasePath = path.join(projectPath, './build/outputs/apk');
+        if (fs.existsSync(releasePath)) {
+            return releasePath;
+        }
+        return null;
+    }
+
+    /**
+     * Get the right apk release file path in project
+     */
+    getReleaseApkPath({releaseFolderPath}) {
+        // Test for last project structure (module name 'app')
+        let moduleName = 'app';
+        let apkReleasePath = path.join(releaseFolderPath, `./${moduleName}-release-unsigned.apk`);
+        if (fs.existsSync(apkReleasePath)) {
+            return apkReleasePath;
+        }
+        // Test for previuos folder structure (module name 'android')
+        moduleName = 'android';
+        apkReleasePath = path.join(releaseFolderPath, `./${moduleName}-release-unsigned.apk`);
+        if (fs.existsSync(apkReleasePath)) {
+            return apkReleasePath;
+        }
+        return null;
+    }
+
+    /**
      * Sign APK with keystore
      * @param {Object} param0
-     * @param {String} param0.buildApkPath - Directory that contains of release unsigned apk
+     * @param {String} param0.apkReleasePath - Path of unsigned release apk file
      * @param {Object} param0.keystore - Keystore info
      * @param {String} param0.keystore.path - Keystore path
      * @param {String} param0.keystore.alias - Keystore alias
      * @param {String} param0.keystore.password - Keystore alias' password
-     * @param {String} param0.appName - Label of release APK created after build process
      * @param {Boolean} param0.verbose - The logger prints every process message only if it's true
      */
-    signAPK({buildApkPath, keystore : {path : keystorePath, alias : keystoreAlias, password : keystorePassword}, appName = 'android', verbose}) {
+    signAPK({apkReleasePath, keystore : {path : keystorePath, alias : keystoreAlias, password : keystorePassword}, verbose}) {
         logger.section(`Sign Android apk with jarsigner command`);
-        process.chdir(buildApkPath);
-        const cmdAndroidSignAPK = `jarsigner -verbose -sigalg SHA1withRSA -digestalg SHA1 -keystore '${keystorePath}' -storepass '${keystorePassword}' '${appName}-release-unsigned.apk' '${keystoreAlias}'`;
+        const cmdAndroidSignAPK = `jarsigner -verbose -sigalg SHA1withRSA -digestalg SHA1 -keystore '${keystorePath}' -storepass '${keystorePassword}' '${apkReleasePath}' '${keystoreAlias}'`;
         let err = shell.exec(cmdAndroidSignAPK, {silent : !verbose}).stderr;
         if (shell.error()) {
             // shelljs has already printed error,
@@ -84,15 +118,13 @@ class Android {
     /**
      * Align signed APK
      * @param {Object} param0
-     * @param {String} param0.buildApkPath - Directory that contains of release unsigned apk
-     * @param {String} param0.appName - Label of release APK created and signed
+     * @param {String} param0.apkReleasePath - Path of signed release apk file
      * @param {String} param0.apkFilePath - Destination path of aligned APK
      * @param {Boolean} param0.verbose - The logger prints every process message only if it's true
      */
-    alignAPK({buildApkPath, appName = 'android', apkFilePath, verbose}) {
+    alignAPK({apkReleasePath, apkFilePath, verbose}) {
         logger.section(`Align signed Android apk with zipalign command`);
-        process.chdir(buildApkPath);
-        const cmdAndroidAlignAPK = `zipalign -vf 4 '${appName}-release-unsigned.apk' '${apkFilePath}'`;
+        const cmdAndroidAlignAPK = `zipalign -vf 4 '${apkReleasePath}' '${apkFilePath}'`;
         let err = shell.exec(cmdAndroidAlignAPK, {silent : !verbose}).stderr;
         if (shell.error()) {
             // shelljs has already printed error,
@@ -102,6 +134,29 @@ class Android {
             }
             process.exit(1);
         }
+    }
+
+    /**
+     * Sign and align APK
+     * @param {Object} param0
+     * @param {String} param0.projectPath - Root path of Android project
+     * @param {Object} param0.keystore - Keystore info
+     * @param {String} param0.apkFilePath - Destination path of aligned APK
+     * @param {Boolean} param0.verbose - The logger prints every process message only if it's true
+     */
+    finalizeApk({projectPath, keystore, apkFilePath, verbose}) {
+        const releaseFolderPath = this.getReleasePath({projectPath});
+        if (!releaseFolderPath) {
+            logger.error('No apk release folder exists');
+            process.exit(1);
+        }
+        const apkReleasePath = this.getReleaseApkPath({releaseFolderPath});
+        if (!apkReleasePath) {
+            logger.error('No apk release file exists');
+            process.exit(1);
+        }
+        this.signAPK({apkReleasePath, keystore, verbose});
+        this.alignAPK({apkReleasePath, apkFilePath, verbose});
     }
 
     uploadAPK({apkFilePath, server, destinationPath}) {
