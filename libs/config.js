@@ -170,9 +170,21 @@ class Config {
                         }
 
                         config.remote.repo.jsonPath = path.join(config.remote.repo.jsonPath, './builds.json');
+                        config.remote.repo.iosUrlPath = config.remote.repo.iosUrlPath.trim();
+                        if (config.remote.repo.iosUrlPath.slice(-1) !== '/') {
+                            config.remote.repo.iosUrlPath = config.remote.repo.iosUrlPath + '/';
+                        }
                         config.remote.repo.iosIpaUrlPath = url.resolve(config.remote.repo.iosUrlPath, config.ios.ipaFileName);
                         config.remote.repo.iosManifestUrlPath = url.resolve(config.remote.repo.iosUrlPath, config.ios.manifestFileName);
+                        config.remote.repo.androidUrlPath = config.remote.repo.androidUrlPath.trim();
+                        if (config.remote.repo.androidUrlPath.slice(-1) !== '/') {
+                            config.remote.repo.androidUrlPath = config.remote.repo.androidUrlPath + '/';
+                        }
                         config.remote.repo.androidUrlPath = url.resolve(config.remote.repo.androidUrlPath, config.android.apkFileName);
+                        config.remote.repo.homepageUrl = config.remote.repo.homepageUrl.trim();
+                        if (config.remote.repo.homepageUrl.slice(-1) !== '/') {
+                            config.remote.repo.homepageUrl = config.remote.repo.homepageUrl + '/';
+                        }
 
                         let archiveFileName = `./${config.app.label}_v.${config.app.versionLabel}.zip`.replace(/ /g, '_');
                         config.remote.sources.archiveFilePath = path.join(config.buildsDir, archiveFileName);
