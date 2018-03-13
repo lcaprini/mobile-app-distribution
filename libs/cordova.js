@@ -2,7 +2,6 @@
 
 const shell = require('shelljs');
 const fs = require('fs');
-const et = require('elementtree');
 const path = require('path');
 const CordovaConfig = require('cordova-config');
 const inquirer = require('inquirer');
@@ -84,24 +83,6 @@ const Cordova = {
     },
 
     /**
-     * Set Android app launcher name in strings.xml file using elementtre module
-     */
-    setLauncherName({cordovaPath, launcherName}) {
-        logger.section(`Set '${launcherName}' as Android launcher name in strings.xml`);
-        try {
-            const cordovaAndroidStringsPath = path.join(cordovaPath, './platforms/android/res/values/strings.xml');
-            let strings = fs.readFileSync(cordovaAndroidStringsPath, 'utf-8');
-            let stringsTree = new et.ElementTree(et.XML(strings));
-            let launcherNameElement = stringsTree.findall('./string/[@name="launcher_name"]')[0];
-            launcherNameElement.text = launcherName;
-            fs.writeFileSync(cordovaAndroidStringsPath, stringsTree.write({indent : 4}), 'utf-8');
-        }
-        catch (err) {
-            logger.error(err);
-        }
-    },
-
-    /**
      * Build Android Cordova Platform
      */
     buildAndroid({buildAndroidCommand, cordovaPath, verbose}) {
@@ -121,14 +102,13 @@ const Cordova = {
     /**
      * Exec all task to prepare and build the Android platform
      */
-    distributeAndroid({launcherName, id, versionCode, cordovaPath, releaseApkDir, buildAndroidCommand = 'cordova build --release android', apkFilePath, keystore, verbose = false}) {
+    distributeAndroid({launcherName, id, versionCode, cordovaPath, buildAndroidCommand = 'cordova build --release android', apkFilePath, keystore, verbose = false}) {
         this.setId({cordovaPath, id});
         this.setAndroidVersionCode({cordovaPath, versionCode});
-        this.setLauncherName({cordovaPath, launcherName});
+        let androidPlatformPath = path.join(cordovaPath, './platforms/android/');
+        android.setLauncherName({rootPath : androidPlatformPath, launcherName});
         this.buildAndroid({buildAndroidCommand, cordovaPath, verbose});
-        const buildApkPath = path.join(cordovaPath, './platforms/android', releaseApkDir);
-        android.signAPK({buildApkPath, keystore, verbose});
-        android.alignAPK({buildApkPath, apkFilePath, verbose});
+        android.finalizeApk({projectPath : androidPlatformPath, keystore, apkFilePath, verbose});
     },
 
     /**
@@ -177,93 +157,39 @@ const Cordova = {
     /**
      * Compose email for
      */
-    composeEmail({appName, appLabel, appVersion, repoHomepageUrl, androidBuildPath = null, iosBuildPath = null}) {
-        let bodyEmail = `
-        <!DOCTYPE html>
-            <head>
-            <meta charset="utf-8">
-            <title>${appLabel}</title>
-            <meta name="viewport" content="width=500">
-                <style type="text/css" media="screen">
-                    body {
-                        font-family: Helvetica;
-                    }
-                    .center{
-                        text-align: center;
-                    }
-                    div#main {
-                        font-size: 1em;
-                    }
-                    .emph {
-                        font-weight: bold;
-                        font-size: large;
-                    }
-                    div#main table {
-                        width: 90%;
-                        border: none;
-                        margin: 0 auto;
-                    }
-                    div#main table td,
-                    div#main table th {
-                        border: none;
-                    }
-                    .qrcode-container {
-                        width: 400px;
-                        margin: 0 auto;
-                    }
-                    .qrcode {
-                        width: 200px;
-                        margin: 0 auto;
-                    }
-                </style>
-            </head>
-            <body>
-                <header> <h1 class="center"> ${appName} </h1> </header>
-                <div id="main">
-                    <p>The version <span class="emph">${appVersion}</span> of <span class="emph">${appName}</span> app is now available</p>
-                    <p>Please scan the following QRCode, ora click the following link; if it does not work please copy it and paste it into your browser</p>
-                    <p class="center"><a href="${repoHomepageUrl}">${repoHomepageUrl}</a></p>
-                    <div  class="center qrcode-container">
-                        <a href="${repoHomepageUrl}"><img class="qrcode" src="https://chart.googleapis.com/chart?cht=qr&chs=300x300&choe=UTF-8&chld=H|0&chl=${repoHomepageUrl}"/></a>
-                    </div>
-                    <br/>
-                    <p>You can also directly download the app by scanning the following QRCodes or tapping on it</p>
-                    <table>
-                        <tr>
-        `;
+    composeEmail({appName, appLabel, appVersion, changelog, releaseDate, repoHomepageUrl, androidBuildPath = null, iosBuildPath = null}) {
+        let bodyEmail = fs.readFileSync(path.join(__dirname, '../resources/distribute-email.tmpl.html')).toString();
+
+        bodyEmail = bodyEmail.replace(/___APP_LABEL___/g, appLabel);
+        bodyEmail = bodyEmail.replace(/___APP_NAME___/g, appName);
+        bodyEmail = bodyEmail.replace(/___APP_VERSION___/g, appVersion);
+
+        let htmlChangelog = '';
+        for (let i = 0; i < changelog.length; i++) {
+            htmlChangelog += `✓ ${changelog[i]} <br/>`;
+        }
+
+        bodyEmail = bodyEmail.replace(/___CHANGELOG___/g, htmlChangelog);
+        bodyEmail = bodyEmail.replace(/___RELEASE_DATE___/g, releaseDate);
+        bodyEmail = bodyEmail.replace(/___REPO_HOMEPAGE_URL___/g, repoHomepageUrl);
 
         const androidDirectDownload = androidBuildPath;
-        const iosDirectDownload = (iosBuildPath) ? 'itms-services://?action=download-manifest&amp;url=' + iosBuildPath : null;
+        const iosDirectDownload = (iosBuildPath) ? 'itms-services://?action=download-manifest&url=' + iosBuildPath : null;
 
         if (androidDirectDownload) {
-            bodyEmail += '<th class="emph"> Android </th>';
+            bodyEmail = bodyEmail.replace(/___ANDROID_DIRECT_DOWNLOAD_URL___/g, androidDirectDownload);
+            bodyEmail = bodyEmail.replace(/___ANDROID_DOWNLOAD_NOT_AVAILABLE___/g, '');
+        }
+        else {
+            bodyEmail = bodyEmail.replace(/___ANDROID_DOWNLOAD_NOT_AVAILABLE___/g, 'hidden');
         }
         if (iosDirectDownload) {
-            bodyEmail += '<th class="emph"> iOS </th>';
+            bodyEmail = bodyEmail.replace(/___IOS_DIRECT_DOWNLOAD_URL___/g, iosDirectDownload);
+            bodyEmail = bodyEmail.replace(/___IOS_DOWNLOAD_NOT_AVAILABLE___/g, '');
         }
-        bodyEmail += '</tr>';
-
-        bodyEmail += '<tr>';
-        if (androidDirectDownload) {
-            bodyEmail += `
-                <td class="center qrcode-container">
-                    <a href="${androidDirectDownload}"><img class="qrcode" src="https://chart.googleapis.com/chart?cht=qr&chs=300x300&choe=UTF-8&chld=H|0&chl=${androidDirectDownload}"/></a>
-                </td>
-            `;
+        else {
+            bodyEmail = bodyEmail.replace(/___IOS_DOWNLOAD_NOT_AVAILABLE___/g, 'hidden');
         }
-        if (iosDirectDownload) {
-            bodyEmail += `
-                <td class="center qrcode-container">
-                    <a href="${iosDirectDownload}"><img class="qrcode" src="https://chart.googleapis.com/chart?cht=qr&chs=300x300&choe=UTF-8&chld=H|0&chl=${iosDirectDownload}"/></a>
-                </td>
-            `;
-        }
-        bodyEmail += `  </tr>
-                    </table>
-                </div>
-            </body>
-        </html>
-        `;
 
         return bodyEmail;
     },
@@ -308,10 +234,6 @@ const Cordova = {
      * @param {Object} config
      */
     verifyAndroid(config) {
-        const cordovaAndroidStringsPath = path.join(config.cordova.path, './platforms/android/res/values/strings.xml');
-        if (!fs.existsSync(cordovaAndroidStringsPath)) {
-            throw new Error(`Android build error: file "${cordovaAndroidStringsPath}" does not exists`);
-        }
         android.verify(config);
     },
 

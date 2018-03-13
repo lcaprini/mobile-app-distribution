@@ -1,7 +1,6 @@
 'use strict';
 
 const _ = require('lodash');
-const moment = require('moment');
 const JSFtp = require('jsftp');
 const fs = require('fs');
 const archiver = require('archiver');
@@ -53,7 +52,7 @@ const Remote = {
         });
     },
 
-    updateRepo({repoPath, server, version, hidden, changelog, androidBuildPath = null, iosBuildPath = null, rootPath}) {
+    updateRepo({repoPath, server, version, hidden, changelog, releaseDate, androidBuildPath = null, iosBuildPath = null, rootPath}) {
         logger.section(`Update repository`);
 
         return new Promise((resolve, reject) => {
@@ -71,7 +70,7 @@ const Remote = {
                         };
                     }
                     build.changelog = changelog;
-                    build.date = moment().format('DD/MM/YYYY HH:mm:ss');
+                    build.date = releaseDate;
                     if (androidBuildPath) {
                         build.androidBuildPath = androidBuildPath;
                     }

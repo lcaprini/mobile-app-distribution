@@ -1,6 +1,7 @@
 'use strict';
 
 const fs = require('fs');
+const et = require('elementtree');
 const path = require('path');
 const shell = require('shelljs');
 const commandExists = require('command-exists').sync;
@@ -22,19 +23,87 @@ class Android {
     }
 
     /**
+     * Get the right strings.xml path in project
+     */
+    getStringsPath({rootPath}) {
+        let stringsPath = null;
+        // Test for last project structure
+        stringsPath = path.join(rootPath, './app/src/main/res/values/strings.xml');
+        if (!fs.existsSync(stringsPath)) {
+            // Test for previuos folder structure
+            stringsPath = path.join(rootPath, './res/values/strings.xml');
+        }
+
+        return stringsPath;
+    }
+
+    /**
+     * Set app launcher name in strings.xml file using ElementTree module
+     */
+    setLauncherName({rootPath, launcherName}) {
+        logger.section(`Set '${launcherName}' as Android launcher name in strings.xml`);
+        try {
+            const androidStringsPath = this.getStringsPath({rootPath});
+            let strings = fs.readFileSync(androidStringsPath, 'utf-8');
+            let stringsTree = new et.ElementTree(et.XML(strings));
+            let launcherNameElement = stringsTree.findall('./string/[@name="launcher_name"]')[0];
+            launcherNameElement.text = launcherName;
+            fs.writeFileSync(androidStringsPath, stringsTree.write({indent : 4}), 'utf-8');
+        }
+        catch (err) {
+            logger.error(err);
+        }
+    }
+
+    /**
+     * Get the right apk release folder path in project
+     */
+    getReleasePath({projectPath}) {
+        // Test for last project structure
+        let releasePath = path.join(projectPath, './app/build/outputs/apk/release');
+        if (fs.existsSync(releasePath)) {
+            return releasePath;
+        }
+        // Test for previuos folder structure
+        releasePath = path.join(projectPath, './build/outputs/apk');
+        if (fs.existsSync(releasePath)) {
+            return releasePath;
+        }
+        return null;
+    }
+
+    /**
+     * Get the right apk release file path in project
+     */
+    getReleaseApkPath({releaseFolderPath}) {
+        // Test for last project structure (module name 'app')
+        let moduleName = 'app';
+        let apkReleasePath = path.join(releaseFolderPath, `./${moduleName}-release-unsigned.apk`);
+        if (fs.existsSync(apkReleasePath)) {
+            return apkReleasePath;
+        }
+        // Test for previuos folder structure (module name 'android')
+        moduleName = 'android';
+        apkReleasePath = path.join(releaseFolderPath, `./${moduleName}-release-unsigned.apk`);
+        if (fs.existsSync(apkReleasePath)) {
+            return apkReleasePath;
+        }
+        return null;
+    }
+
+    /**
      * Sign APK with keystore
      * @param {Object} param0
-     * @param {String} param0.buildApkPath - Directory that contains of release unsigned apk
+     * @param {String} param0.apkReleasePath - Path of unsigned release apk file
      * @param {Object} param0.keystore - Keystore info
      * @param {String} param0.keystore.path - Keystore path
      * @param {String} param0.keystore.alias - Keystore alias
      * @param {String} param0.keystore.password - Keystore alias' password
-     * @param {String} param0.appName - Label of release APK created after build process
      * @param {Boolean} param0.verbose - The logger prints every process message only if it's true
      */
-    signAPK({buildApkPath, keystore : {path : keystorePath, alias : keystoreAlias, password : keystorePassword}, appName = 'android', verbose}) {
-        process.chdir(buildApkPath);
-        const cmdAndroidSignAPK = `jarsigner -verbose -sigalg SHA1withRSA -digestalg SHA1 -keystore '${keystorePath}' -storepass '${keystorePassword}' '${appName}-release-unsigned.apk' '${keystoreAlias}'`;
+    signAPK({apkReleasePath, keystore : {path : keystorePath, alias : keystoreAlias, password : keystorePassword}, verbose}) {
+        logger.section(`Sign Android apk with jarsigner command`);
+        const cmdAndroidSignAPK = `jarsigner -verbose -sigalg SHA1withRSA -digestalg SHA1 -keystore '${keystorePath}' -storepass '${keystorePassword}' '${apkReleasePath}' '${keystoreAlias}'`;
         let err = shell.exec(cmdAndroidSignAPK, {silent : !verbose}).stderr;
         if (shell.error()) {
             // shelljs has already printed error,
@@ -49,14 +118,13 @@ class Android {
     /**
      * Align signed APK
      * @param {Object} param0
-     * @param {String} param0.buildApkPath - Directory that contains of release unsigned apk
-     * @param {String} param0.appName - Label of release APK created and signed
+     * @param {String} param0.apkReleasePath - Path of signed release apk file
      * @param {String} param0.apkFilePath - Destination path of aligned APK
      * @param {Boolean} param0.verbose - The logger prints every process message only if it's true
      */
-    alignAPK({buildApkPath, appName = 'android', apkFilePath, verbose}) {
-        process.chdir(buildApkPath);
-        const cmdAndroidAlignAPK = `zipalign -vf 4 '${appName}-release-unsigned.apk' '${apkFilePath}'`;
+    alignAPK({apkReleasePath, apkFilePath, verbose}) {
+        logger.section(`Align signed Android apk with zipalign command`);
+        const cmdAndroidAlignAPK = `zipalign -vf 4 '${apkReleasePath}' '${apkFilePath}'`;
         let err = shell.exec(cmdAndroidAlignAPK, {silent : !verbose}).stderr;
         if (shell.error()) {
             // shelljs has already printed error,
@@ -66,6 +134,29 @@ class Android {
             }
             process.exit(1);
         }
+    }
+
+    /**
+     * Sign and align APK
+     * @param {Object} param0
+     * @param {String} param0.projectPath - Root path of Android project
+     * @param {Object} param0.keystore - Keystore info
+     * @param {String} param0.apkFilePath - Destination path of aligned APK
+     * @param {Boolean} param0.verbose - The logger prints every process message only if it's true
+     */
+    finalizeApk({projectPath, keystore, apkFilePath, verbose}) {
+        const releaseFolderPath = this.getReleasePath({projectPath});
+        if (!releaseFolderPath) {
+            logger.error('No apk release folder exists');
+            process.exit(1);
+        }
+        const apkReleasePath = this.getReleaseApkPath({releaseFolderPath});
+        if (!apkReleasePath) {
+            logger.error('No apk release file exists');
+            process.exit(1);
+        }
+        this.signAPK({apkReleasePath, keystore, verbose});
+        this.alignAPK({apkReleasePath, apkFilePath, verbose});
     }
 
     uploadAPK({apkFilePath, server, destinationPath}) {
@@ -82,9 +173,13 @@ class Android {
         if (!config.android.bundleId) {
             throw new Error('Android build error: missing "android.bundleId" value in config file');
         }
-        const androidProjectPath = path.join(config.cordova.path, './platforms/android');
-        if (!fs.existsSync(androidProjectPath)) {
-            throw new Error(`Android build error: no Android project in "${androidProjectPath}" directory`);
+        const projectPath = path.join(config.cordova.path, './platforms/android');
+        if (!fs.existsSync(projectPath)) {
+            throw new Error(`Android build error: no Android project in "${projectPath}" directory`);
+        }
+        const stringsPath = this.getStringsPath({rootPath : projectPath});
+        if (!stringsPath) {
+            throw new Error(`Android build error: strings.xml file does not exists`);
         }
         if (!fs.existsSync(config.android.keystore.path)) {
             throw new Error(`Android build error: missing file "${config.android.keystore.path}"`);

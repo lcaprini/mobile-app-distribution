@@ -67,7 +67,7 @@ const endDistribute = err => {
     // Close process when uploading and updating repo tasks are completed for all platforms
     Promise.all(processes).then(
         () => {
-            exit();
+            finalize();
         },
         () => {
             process.exit(1);
@@ -77,7 +77,7 @@ const endDistribute = err => {
 /**
  * Send email, print close message and close process
  */
-const exit = () => {
+const finalize = () => {
     const logger = require('../logger');
 
     let finalRepoHomepageUrl = `${config.remote.repo.homepageUrl}?v=${config.app.versionLabel}`;
@@ -91,8 +91,10 @@ const exit = () => {
     if (config.tasks.contains(TASKS.SEND_EMAIL)) {
         let emailData = {
             appName         : config.app.name,
-            appVersion      : config.app.versionLabel,
             appLabel        : config.app.label,
+            appVersion      : config.app.versionLabel,
+            changelog       : config.changeLog,
+            releaseDate     : config.releaseDate,
             repoHomepageUrl : finalRepoHomepageUrl
         };
         if (config.tasks.contains(TASKS.BUILD_ANDROID)) {
@@ -218,6 +220,7 @@ const startDistribution = () => {
                             iosBuildPath : 'itms-services://?action=download-manifest&amp;url=' + config.remote.repo.iosManifestUrlPath,
                             version      : config.app.versionLabel,
                             changelog    : config.changeLog,
+                            releaseDate  : config.releaseDate,
                             hidden       : config.hidden,
                             rootPath     : config.rootPath
                         }).then(resolve, reject);
@@ -239,7 +242,6 @@ const startDistribution = () => {
                 versionCode  : config.android.versionCode,
 
                 cordovaPath         : config.cordova.path,
-                releaseApkDir       : config.android.releaseApkDir,
                 buildAndroidCommand : config.cordova.buildAndroidCommand,
 
                 apkFilePath : config.android.apkFilePath,
@@ -276,6 +278,7 @@ const startDistribution = () => {
                                 androidBuildPath : config.remote.repo.androidUrlPath,
                                 version          : config.app.versionLabel,
                                 changelog        : config.changeLog,
+                                releaseDate      : config.releaseDate,
                                 hidden           : config.hidden,
                                 rootPath         : config.rootPath
                             }).then(resolve, reject);
