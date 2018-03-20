@@ -48,8 +48,8 @@ const endDistribute = err => {
     const logger = require('../logger');
 
     if (err) {
-        logger.error(err);
-        // logger.error(err.message);
+        // logger.error(err);
+        logger.error(err.message);
         process.exit(1);
     }
 
@@ -174,30 +174,37 @@ const startDistribution = () => {
         /**
          * BUILD IOS PLATFORM
          */
-        if (config.tasks.contains(TASKS.BUILD_IOS)) {
-            cordova.distributeIos({
-                appName       : config.app.name,
-                displayName   : config.app.label,
-                ipaFileName   : config.ios.ipaFileName,
-                id            : config.ios.bundleId,
-                version       : config.app.version,
-                bundleVersion : config.ios.bundleVersion,
-                schema        : config.ios.targetSchema,
-
-                infoPlistPath          : config.ios.infoPlistPath,
-                cordovaPath            : config.cordova.path,
-                buildIosCommand        : config.cordova.buildIosCommand,
-                exportOptionsPlist     : config.ios.exportOptionsPlist,
-                exportOptionsPlistPath : config.ios.exportOptionsPlistPath,
-                exportDir              : config.buildsDir,
-
-                ipaUrlPath   : config.remote.repo.iosIpaUrlPath,
-                manifestPath : path.join(config.buildsDir, config.ios.manifestFileName),
-
-                verbose : config.verbose
-            });
+        if (!config.tasks.contains(TASKS.BUILD_IOS)) {
+            iosBuildProcessCompleted = Promise.resolve();
+        }
+        else {
             iosBuildProcessCompleted = new Promise((resolve, reject) => {
-                if (config.tasks.contains(TASKS.UPLOAD_BUILDS)) {
+                cordova.distributeIos({
+                    appName       : config.app.name,
+                    displayName   : config.app.label,
+                    ipaFileName   : config.ios.ipaFileName,
+                    id            : config.ios.bundleId,
+                    version       : config.app.version,
+                    bundleVersion : config.ios.bundleVersion,
+                    schema        : config.ios.targetSchema,
+
+                    infoPlistPath          : config.ios.infoPlistPath,
+                    cordovaPath            : config.cordova.path,
+                    buildIosCommand        : config.cordova.buildIosCommand,
+                    exportOptionsPlist     : config.ios.exportOptionsPlist,
+                    exportOptionsPlistPath : config.ios.exportOptionsPlistPath,
+                    exportDir              : config.buildsDir,
+
+                    ipaUrlPath   : config.remote.repo.iosIpaUrlPath,
+                    manifestPath : path.join(config.buildsDir, config.ios.manifestFileName),
+
+                    verbose : config.verbose
+                });
+
+                if (!config.tasks.contains(TASKS.UPLOAD_BUILDS)) {
+                    resolve();
+                }
+                else {
                     ios.uploadManifestAndIPA({
                         ipaFilePath      : config.ios.ipaFilePath,
                         manifestFilePath : config.ios.manifestFilePath,
@@ -226,83 +233,80 @@ const startDistribution = () => {
                         }).then(resolve, reject);
                     }, reject);
                 }
-                else {
-                    resolve();
-                }
             });
         }
 
         /**
          * BUILD ANDROID PLATFORM
          */
-        if (config.tasks.contains(TASKS.BUILD_ANDROID)) {
-            cordova.distributeAndroid({
-                launcherName : config.app.label,
-                id           : config.android.bundleId,
-                versionCode  : config.android.versionCode,
+        if (!config.tasks.contains(TASKS.BUILD_ANDROID)) {
+            androidBuildProcessCompleted = Promise.resolve();
+        }
+        else {
+            androidBuildProcessCompleted = new Promise((resolve, reject) => {
+                iosBuildProcessCompleted.then(
+                    () => {
+                        cordova.distributeAndroid({
+                            launcherName : config.app.label,
+                            id           : config.android.bundleId,
+                            versionCode  : config.android.versionCode,
 
-                cordovaPath         : config.cordova.path,
-                buildAndroidCommand : config.cordova.buildAndroidCommand,
+                            cordovaPath         : config.cordova.path,
+                            buildAndroidCommand : config.cordova.buildAndroidCommand,
 
-                apkFilePath : config.android.apkFilePath,
-                keystore    : {
-                    path     : config.android.keystore.path,
-                    alias    : config.android.keystore.alias,
-                    password : config.android.keystore.password
-                },
-
-                verbose : config.verbose
-            });
-
-            const androidUpdate = () => {
-                return new Promise((resolve, reject) => {
-                    if (config.tasks.contains(TASKS.UPLOAD_BUILDS)) {
-                        android.uploadAPK({
                             apkFilePath : config.android.apkFilePath,
-                            server      : {
-                                host : config.remote.builds.host,
-                                port : config.remote.builds.port,
-                                user : config.remote.builds.user,
-                                pass : config.remote.builds.password
+                            keystore    : {
+                                path     : config.android.keystore.path,
+                                alias    : config.android.keystore.alias,
+                                password : config.android.keystore.password
                             },
-                            destinationPath : config.remote.builds.androidDestinationPath
-                        }).then(() => {
-                            remote.updateRepo({
-                                repoPath : config.remote.repo.jsonPath,
-                                server   : {
-                                    host : config.remote.repo.host,
-                                    port : config.remote.repo.port,
-                                    user : config.remote.repo.user,
-                                    pass : config.remote.repo.password
+
+                            verbose : config.verbose
+                        });
+
+                        if (!config.tasks.contains(TASKS.UPLOAD_BUILDS)) {
+                            resolve();
+                        }
+                        else {
+                            android.uploadAPK({
+                                apkFilePath : config.android.apkFilePath,
+                                server      : {
+                                    host : config.remote.builds.host,
+                                    port : config.remote.builds.port,
+                                    user : config.remote.builds.user,
+                                    pass : config.remote.builds.password
                                 },
-                                androidBuildPath : config.remote.repo.androidUrlPath,
-                                version          : config.app.versionLabel,
-                                changelog        : config.changeLog,
-                                releaseDate      : config.releaseDate,
-                                hidden           : config.hidden,
-                                rootPath         : config.rootPath
-                            }).then(resolve, reject);
-                        }, reject);
+                                destinationPath : config.remote.builds.androidDestinationPath
+                            }).then(() => {
+                                remote.updateRepo({
+                                    repoPath : config.remote.repo.jsonPath,
+                                    server   : {
+                                        host : config.remote.repo.host,
+                                        port : config.remote.repo.port,
+                                        user : config.remote.repo.user,
+                                        pass : config.remote.repo.password
+                                    },
+                                    androidBuildPath : config.remote.repo.androidUrlPath,
+                                    version          : config.app.versionLabel,
+                                    changelog        : config.changeLog,
+                                    releaseDate      : config.releaseDate,
+                                    hidden           : config.hidden,
+                                    rootPath         : config.rootPath
+                                }).then(resolve, reject);
+                            }, reject);
+                        }
                     }
-                    else {
-                        resolve();
-                    }
-                });
-            };
-            if (config.tasks.contains(TASKS.BUILD_IOS)) {
-                androidBuildProcessCompleted = new Promise((resolve, reject) => {
-                    iosBuildProcessCompleted.then(androidUpdate).then(resolve, reject);
-                });
-            }
-            else {
-                androidBuildProcessCompleted = androidUpdate();
-            }
+                ).then(resolve, reject);
+            });
         }
 
         /**
          * UPLOAD SOURCES
          */
-        if (config.tasks.contains(TASKS.UPLOAD_SOURCES)) {
+        if (!config.tasks.contains(TASKS.UPLOAD_SOURCES)) {
+            sourcesUploadProcessCompleted = Promise.resolve();
+        }
+        else {
             let processes = [];
             if (config.tasks.contains(TASKS.BUILD_IOS)) {
                 processes.push(iosBuildProcessCompleted);
@@ -353,8 +357,8 @@ config.init({
         }
     },
     err => {
-        // console.error(err.message);
-        console.error(err);
+        console.error(err.message);
+        // console.error(err);
         program.help();
     }
 );
