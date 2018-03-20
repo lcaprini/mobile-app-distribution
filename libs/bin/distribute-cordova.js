@@ -224,7 +224,7 @@ const startDistribution = () => {
                                 user : config.remote.repo.user,
                                 pass : config.remote.repo.password
                             },
-                            iosBuildPath : 'itms-services://?action=download-manifest&amp;url=' + config.remote.repo.iosManifestUrlPath,
+                            iosBuildPath : config.remote.repo.iosManifestUrlPath,
                             version      : config.app.versionLabel,
                             changelog    : config.changeLog,
                             releaseDate  : config.releaseDate,

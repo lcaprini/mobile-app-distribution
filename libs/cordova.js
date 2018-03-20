@@ -178,6 +178,7 @@ const Cordova = {
 
         if (androidDirectDownload) {
             bodyEmail = bodyEmail.replace(/___ANDROID_DIRECT_DOWNLOAD_URL___/g, androidDirectDownload);
+            bodyEmail = bodyEmail.replace(/___ANDROID_DIRECT_DOWNLOAD_ENCODED_URL___/g, encodeURIComponent(androidDirectDownload));
             bodyEmail = bodyEmail.replace(/___ANDROID_DOWNLOAD_NOT_AVAILABLE___/g, '');
         }
         else {
@@ -185,6 +186,7 @@ const Cordova = {
         }
         if (iosDirectDownload) {
             bodyEmail = bodyEmail.replace(/___IOS_DIRECT_DOWNLOAD_URL___/g, iosDirectDownload);
+            bodyEmail = bodyEmail.replace(/___IOS_DIRECT_DOWNLOAD_ENCODED_URL___/g, encodeURIComponent(iosDirectDownload));
             bodyEmail = bodyEmail.replace(/___IOS_DOWNLOAD_NOT_AVAILABLE___/g, '');
         }
         else {
