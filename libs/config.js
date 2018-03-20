@@ -273,7 +273,12 @@ class Config {
         const readFile = changelog => {
             return fs.readFileAsync(changelog, 'utf8').then(
                 changeLogText => {
-                    config.changeLog = changeLogText.split('\n');
+                    config.changeLog = _.filter(changeLogText.split('\n'), line => {
+                        line = line.trim();
+                        if (line !== '') {
+                            return line;
+                        }
+                    });
                     next();
                 },
                 () => {
