@@ -53,19 +53,12 @@ const endDistribute = err => {
         process.exit(1);
     }
 
-    let processes = [];
-    if (config.tasks.contains(TASKS.BUILD_IOS)) {
-        processes.push(iosBuildProcessCompleted);
-    }
-    if (config.tasks.contains(TASKS.BUILD_ANDROID)) {
-        processes.push(androidBuildProcessCompleted);
-    }
-    if (config.tasks.contains(TASKS.UPLOAD_SOURCES)) {
-        processes.push(sourcesUploadProcessCompleted);
-    }
-
     // Close process when uploading and updating repo tasks are completed for all platforms
-    Promise.all(processes).then(
+    Promise.all([
+        iosBuildProcessCompleted,
+        androidBuildProcessCompleted,
+        sourcesUploadProcessCompleted
+    ]).then(
         () => {
             finalize();
         },
@@ -296,7 +289,7 @@ const startDistribution = () => {
                             }, reject);
                         }
                     }
-                ).then(resolve, reject);
+                );
             });
         }
 
