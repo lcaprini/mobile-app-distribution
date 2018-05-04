@@ -64,7 +64,11 @@ class Android {
         if (fs.existsSync(releasePath)) {
             return releasePath;
         }
-        // Test for previuos folder structure
+        // Test for previuoses folders structure
+        releasePath = path.join(projectPath, './build/outputs/apk/release');
+        if (fs.existsSync(releasePath)) {
+            return releasePath;
+        }
         releasePath = path.join(projectPath, './build/outputs/apk');
         if (fs.existsSync(releasePath)) {
             return releasePath;
