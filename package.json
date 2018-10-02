@@ -23,16 +23,16 @@
   "license": "ISC",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/lcaprini/mobile-app-distribution.git"
+    "url": "https://github.com/lcaprini/mobile-app-distribution.git"
   },
   "dependencies": {
     "archiver": "^2.0.0",
-    "asciimo": "git+https://github.com/crazyguitar/asciimo.git",
+    "asciimo": "https://github.com/crazyguitar/asciimo.git",
     "bluebird": "^3.5.0",
     "command-exists": "^1.2.2",
     "commander": "^2.9.0",
     "connect": "^3.6.3",
-    "cordova-config": "git://github.com/lcaprini/cordova-config.git#major-0",
+    "cordova-config": "https://github.com/lcaprini/cordova-config.git#major-0",
     "corser": "^2.0.1",
     "elementtree": "^0.1.7",
     "find-versions": "^2.0.0",
@@ -47,7 +47,7 @@
     "qrcode-terminal": "^0.11.0",
     "serve-static": "^1.12.4",
     "shelljs": "^0.7.7",
-    "splashicon-generator": "git+https://github.com/lcaprini/splashicon-generator.git",
+    "splashicon-generator": "https://github.com/lcaprini/splashicon-generator.git",
     "winston": "^2.3.1"
   },
   "devDependencies": {
