@@ -1,13 +1,13 @@
 <template>
     <span id="changelog" v-if="builds.length > 0">
 
-        <Button 
+        <Button
             type="ghost"
             class="visible-xs"
             shape="circle"
             icon="clipboard"
             @click="changelogModal = true"></Button>
-        
+
         <Button type="ghost" class="hidden-xs" @click="changelogModal = true"> Changelog </Button>
 
         <Modal
@@ -15,7 +15,7 @@
             title="Changelog"
             class="no-footer body-no-padding"
             :styles="{top: '20px'}">
-            
+
             <form class="form-inline">
                 <Input type="text" class="search" v-model="search" placeholder="Search..."></Input>
                 <Button
@@ -34,6 +34,7 @@
                             <span class="platforms">
                                 <Icon v-if="build.iosBuildPath" type="social-apple"></Icon>
                                 <Icon v-if="build.androidBuildPath" type="social-android"></Icon>
+                                <Icon v-if="build.angularBuildPath" type="social-angular"></Icon>
                             </span>
                             {{ build.version }}
                             <Button
@@ -47,7 +48,7 @@
                     </li>
                 </ul>
             </div>
-            
+
         </Modal>
     </span>
 </template>
@@ -123,20 +124,17 @@ export default {
 }
 </style>
 
+
 <style lang="sass" scoped>
-
 @import 'assets/css/colors';
-
 #changelog {
     position: absolute;
     top: 10px;
     right: 0;
 }
-
 form {
     position: relative;
 }
-
 div.version-list-container{
     overflow-x: hidden;
     overflow-y: auto;
@@ -145,40 +143,36 @@ div.version-list-container{
     -webkit-flex: 1;
     -ms-flex: 1;
     flex: 1;
-
     ul.version-list {
         list-style: none;
         padding: 10px;
         margin-bottom: 0;
-
         li.version {
             margin-bottom: 5px;
-
             .title {
                 background: $border-color;
                 font-size: 14px;
                 padding: 5px;
                 position: relative;
-                padding-left: 50px;
+                padding-left: 75px;
                 margin-bottom: 5px;
-
                 .platforms {
                     position: absolute;
                     top: 2px;
                     left: 7px;
-
                     .ivu-icon {
                         font-size: 25px;
                     }
-
                     .ivu-icon-social-apple {
                         color: $ios-color;
                     }
                     .ivu-icon-social-android {
                         color: $android-color;
                     }
+                    .ivu-icon-social-angular {
+                        color: $angular-color;
+                    }
                 }
-
                 .select {
                     position: absolute;
                     right: 0;
@@ -191,5 +185,4 @@ div.version-list-container{
         }
     }
 }
-
 </style>

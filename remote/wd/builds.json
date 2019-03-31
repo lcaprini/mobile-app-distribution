@@ -21,6 +21,26 @@
             "hidden": false,
             "iosBuildPath": "https://lcaprini.com/test/iOS/manifest_App_Test_v.0.9.6_beta-[DEV].plist",
             "version": "1.0.0 RC"
+        },
+        {
+            "androidBuildPath": "https://lcaprini.com/test/Android/App_Test_v.1.0.0_RC.apk",
+            "angularBuildPath": "https://lcaprini.com/test/Android/App_Test_v.1.0.0_RC.apk",
+            "changelog": [
+                "First version"
+            ],
+            "date": "01/01/2017 16:22:51",
+            "hidden": false,
+            "iosBuildPath": "https://lcaprini.com/test/iOS/manifest_App_Test_v.0.9.6_beta-[DEV].plist",
+            "version": "0.0.1"
+        },
+        {
+            "angularBuildPath": "https://lcaprini.com/test/Android/App_Test_v.1.0.0_RC.apk",
+            "changelog": [
+                "First version"
+            ],
+            "date": "01/01/2016 16:22:51",
+            "hidden": false,
+            "version": "0.0.1-1"
         }
     ]
 }

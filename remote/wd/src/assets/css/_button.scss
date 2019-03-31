@@ -16,4 +16,9 @@ button.ivu-btn {
         color: $android-color;
         border-color: $android-color;
     }
+    &.angular {
+        font-weight: bold;
+        color: $angular-color;
+        border-color: $angular-color;
+    }
 }

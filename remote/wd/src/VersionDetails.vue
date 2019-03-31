@@ -13,16 +13,19 @@
             <div class="ivu-col ivu-col-span-xs-8 ivu-col-span-sm-5"> Release date </div>
             <div class="ivu-col ivu-col-span-xs-16 ivu-col-span-sm-19"> {{ date }} </div>
         </div>
-        
+
         <div class="ivu-row ivu-row-flex ivu-row-flex-space-around downloader">
-            <div class="ivu-col ivu-col-span-xs-24" v-if="iosLink">
+            <div class="ivu-col ivu-col-span-xs-24 ivu-col-span-sm-7 ivu-col-span-sm-8" v-if="iosLink">
                 <button type="button" class="ivu-btn ivu-btn-long ios" @click="downloadIPA"> Download IPA </Button>
             </div>
-            <div class="ivu-col ivu-col-span-xs-24" v-if="androidLink">
+            <div class="ivu-col ivu-col-span-xs-24 ivu-col-span-sm-7 ivu-col-span-lg-8" v-if="androidLink">
                 <button type="button" class="ivu-btn ivu-btn-long android" @click="downloadAPK"> Download APK </button>
             </div>
+            <div class="ivu-col ivu-col-span-xs-24 ivu-col-span-sm-7 ivu-col-span-lg-8" v-if="angularLink">
+                <button type="button" class="ivu-btn ivu-btn-long angular" @click="downloadNgPkg"> Download Angular </button>
+            </div>
         </div>
-        
+
     </div>
 </template>
 <script>
@@ -56,17 +59,26 @@ export default {
         iosLink: {
             type: String,
             default: null
+        },
+        angularLink: {
+            type: String,
+            default: null
         }
     },
     methods: {
         downloadIPA(){
             const link = (this.iosLink.indexOf('itms-services') === -1)? `itms-services://?action=download-manifest&amp;url=${this.iosLink}` : this.iosLink;
-            console.log('Download IPA', link);
-            window.open(link, '_self');
+            this._download(link, 'Download IPA');
         },
         downloadAPK(){
-            const link = this.androidLink;
-            console.log('Download APK', link);
+            this._download(this.androidLink, 'Download APK');
+        },
+        downloadNgPkg(){
+            this._download(this.angularLink, 'Download Angular');
+        },
+
+        _download(link, logText){
+            console.log(logText, link);
             window.open(link, '_self');
         }
     }
@@ -105,7 +117,7 @@ export default {
         z-index: 10;
         padding: 16px;
     }
-    
+
     h3 {
         color: $main-color;
         text-align: center;
@@ -122,7 +134,7 @@ export default {
         }
     }
 
-    @media screen and (max-width: 559px) {
+    @media screen and (max-width: 767px) {
         .downloader {
             .ivu-col:not(:first-of-type){
                 margin-top: 10px;
@@ -130,13 +142,6 @@ export default {
         }
     }
 
-    @media screen and (min-width: 560px) {
-        .downloader {
-            .ivu-col {
-                width: 33%
-            }
-        }
-    }
 }
 
 </style>

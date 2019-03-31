@@ -12,7 +12,7 @@
                 :builds="builds"
                 @selected="showVersionDetails"></app-changelog>
         </div>
-        
+
         <div class="tabs">
 
             <div class="versions" :class="{'no-builds': ready && builds.length === 0}">
@@ -38,6 +38,7 @@
                     :date="build.date"
                     :androidLink="build.androidBuildPath"
                     :iosLink="build.iosBuildPath"
+                    :angularLink="build.angularBuildPath"
                     :active="selectedVersion.version == build.version"
                     @selected="showVersionDetails"></version-tab>
             </div>
@@ -52,11 +53,12 @@
                 :date="selectedVersion.date"
                 :androidLink="selectedVersion.androidBuildPath"
                 :iosLink="selectedVersion.iosBuildPath"
+                :angularLink="selectedVersion.angularBuildPath"
                 v-show="ready"
                 class="hidden-xs"></version-details>
 
         </div>
-    
+
     </div>
 </template>
 
@@ -90,7 +92,8 @@ export default {
         if(this.getParameterByName(url, 'all')){
             showAll = this.getParameterByName(url, 'all') === 'true';
         }
-        const builds = (process.env.NODE_ENV === 'production')? './builds.json' : 'http://fiatpvt-coll.engbms.it/FiatApp/ilcc/wd/builds.json';
+		// const builds = (process.env.NODE_ENV === 'production')? './builds.json' : 'http://fiatpvt-coll.engbms.it/FiatApp/ilcc/wd/builds.json';
+		const builds = './builds.json';
         this.$http.get(`${builds}?t=${new Date().getTime()}`).then(
             jsonFile => {
                 try{
@@ -106,7 +109,7 @@ export default {
                         each(jsonFile.body.builds, b => {
                             if(typeof b.hidden === 'undefined' || b.hidden === false){
                                 b.changelogString = `✓ ${b.changelog.join('<br/>✓ ')}`;
-                                App.builds.push(b);    
+                                App.builds.push(b);
                             }
                         });
                     }
@@ -179,7 +182,7 @@ export default {
 
 #header {
     position: relative;
-    
+
     .title {
         text-align: center;
         margin: 10px auto;

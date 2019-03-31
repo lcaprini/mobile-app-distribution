@@ -1,7 +1,7 @@
 {
   "name": "mobile-app-distribution",
   "version": "0.5.4",
-  "description": "A NodeJS project to build and distribute mobile app for wireless distribution",
+  "description": "A NodeJS project to build and distribute mobile and web app for wireless distribution",
   "main": "distribute.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -17,7 +17,9 @@
     "wireless",
     "distribution",
     "distribute",
-    "build"
+    "build",
+    "angular",
+    "deploy"
   ],
   "author": "Luca Caprini",
   "license": "ISC",

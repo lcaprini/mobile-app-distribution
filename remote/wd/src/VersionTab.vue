@@ -6,6 +6,7 @@
             <div class="platforms">
                 <i class="ivu-icon ivu-icon-social-apple" v-if="iosLink"></i>
                 <i class="ivu-icon ivu-icon-social-android" v-if="androidLink"></i>
+                <i class="ivu-icon ivu-icon-social-angular" v-if="angularLink"></i>
             </div>
         </button>
     </div>
@@ -18,6 +19,7 @@
         :date="date"
         :androidLink="androidLink"
         :iosLink="iosLink"
+        :angularLink="angularLink"
         class="details visible visible-xs"
         v-if="active"></version-details>
 </div>
@@ -59,6 +61,10 @@ export default {
             default: null
         },
         iosLink: {
+            type: String,
+            default: null
+        },
+        angularLink: {
             type: String,
             default: null
         },
@@ -125,6 +131,9 @@ export default {
             }
             .ivu-icon-social-android {
                 color: $android-color;
+            }
+            .ivu-icon-social-angular {
+                color: $angular-color;
             }
         }
     }
