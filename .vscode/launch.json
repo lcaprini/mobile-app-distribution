@@ -1,82 +1,90 @@
 {
-    // Use IntelliSense to learn about possible Node.js debug attributes.
-    // Hover to view descriptions of existing attributes.
-    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
-    "version": "0.2.0",
-    "configurations": [
-        {
-            "type": "node",
-            "request": "launch",
-            "name": "Distribute Version",
-            "program": "${workspaceRoot}/libs/bin/distribute.js",
-            "args": [
-                "--version"
-            ]
-        },
-        {
-            "type": "node",
-            "request": "launch",
-            "name": "Cordova",
-            "program": "${workspaceRoot}/libs/bin/distribute-cordova.js",
-            "args": [
-                "1.8.5-patch6",
-                "--config",
-                "/Users/Lucacaprini/Development/FIAT/iLinkQuotation/distribute.json",
-                "--android-version-code",
-                "10805",
-                "--ios-bundle-version",
-                "185",
-                "--tasks",
-                "z",
-                "-h",
-                "-f"
-            ]
-        },{
-            "type": "node",
-            "request": "launch",
-            "name": "Serve",
-            "program": "${workspaceRoot}/libs/bin/distribute-serve.js",
-            "args": [
-                "/Users/Lucacaprini/Development/FIAT/iLinkConf/app/www",
-                "--port",
-                "9002"
-            ]
-        },{
-            "type": "node",
-            "request": "launch",
-            "name": "Wd",
-            "program": "${workspaceRoot}/libs/bin/distribute-wd.js",
-            "args": []
-        },{
-            "type": "node",
-            "request": "launch",
-            "name": "Generate Icon",
-            "program": "${workspaceRoot}/libs/bin/distribute-generate.js",
-            "args": [
-                "--icon",
-                "/Users/Masterplan/Desktop/icon.png"
-            ]
-        },{
-            "name": "Webpack",
-            "type": "node",
-            "request": "launch",
-            "program": "${workspaceRoot}/remote/wd/node_modules/.bin/webpack-dev-server",
-            "args": [
-                "--inline",
-                "--hot"
-            ],
-            "outFiles": [
-                "${workspaceRoot}/remote/wd/dist/*"
-            ],
-            "stopOnEntry": false,
-            "cwd": "${workspaceRoot}/remote/wd/",
-            "runtimeExecutable": null,
-            "runtimeArgs": [],
-            "env": {
-                "NODE_ENV": "development"
-            },
-            "console": "internalConsole",
-            "sourceMaps": true
-        }
-    ]
+  // Use IntelliSense to learn about possible Node.js debug attributes.
+  // Hover to view descriptions of existing attributes.
+  // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Distribute Version",
+      "program": "${workspaceRoot}/libs/bin/distribute.js",
+      "args": ["--version"]
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Cordova",
+      "program": "${workspaceRoot}/libs/bin/distribute-cordova.js",
+      "args": [
+        "1.8.5-patch6",
+        "--config",
+        "/Users/Lucacaprini/Development/FIAT/iLinkQuotation/distribute.json",
+        "--android-version-code",
+        "10805",
+        "--ios-bundle-version",
+        "185",
+        "--tasks",
+        "z",
+        "-h",
+        "-f"
+      ]
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Angular",
+      "program": "${workspaceRoot}/libs/bin/distribute-angular.js",
+      "args": [
+        "1.0.1",
+        "--config",
+        "/home/federico/Projects/2019/angular6-material-panel/distribute.json",
+        "--tasks",
+        "u",
+        "-f"
+      ]
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Serve",
+      "program": "${workspaceRoot}/libs/bin/distribute-serve.js",
+      "args": [
+        "/Users/Lucacaprini/Development/FIAT/iLinkConf/app/www",
+        "--port",
+        "9002"
+      ]
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Wd",
+      "program": "${workspaceRoot}/libs/bin/distribute-wd.js",
+      "args": []
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Generate Icon",
+      "program": "${workspaceRoot}/libs/bin/distribute-generate.js",
+      "args": ["--icon", "/Users/Masterplan/Desktop/icon.png"]
+    },
+    {
+      "name": "Webpack",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceRoot}/remote/wd/node_modules/.bin/webpack-dev-server",
+      "args": ["--inline", "--hot"],
+      "outFiles": ["${workspaceRoot}/remote/wd/dist/*"],
+      "stopOnEntry": false,
+      "cwd": "${workspaceRoot}/remote/wd/",
+      "runtimeExecutable": null,
+      "runtimeArgs": [],
+      "env": {
+        "NODE_ENV": "development"
+      },
+      "console": "internalConsole",
+      "sourceMaps": true
+    }
+  ]
 }

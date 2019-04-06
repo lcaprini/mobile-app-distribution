@@ -12,6 +12,8 @@ const logger = require('./logger');
 const utils = require('./utils');
 const cordovaTasks = require('./cordova').TASKS;
 const cordova = require('./cordova').CORDOVA;
+const angularTasks = require('./angular').TASKS;
+const angular = require('./angular').ANGULAR;
 const android = require('./android');
 const ios = require('./ios');
 const remote = require('./remote');
@@ -92,7 +94,8 @@ class Config {
                 user                   : '',
                 password               : '',
                 iosDestinationPath     : '',
-                androidDestinationPath : ''
+                androidDestinationPath : '',
+                angularDestinationPath : ''
             },
 
             repo : {
@@ -105,6 +108,7 @@ class Config {
                 iosIpaUrlPath      : '',
                 iosManifestUrlPath : '',
                 androidUrlPath     : '',
+                angularUrlPath     : '',
                 homepageUrl        : ''
             },
 
@@ -189,6 +193,90 @@ class Config {
                         let archiveFileName = `./${config.app.label}_v.${config.app.versionLabel}.zip`.replace(/ /g, '_');
                         config.remote.sources.archiveFilePath = path.join(config.buildsDir, archiveFileName);
                         config.remote.sources.sourcesPath = path.join(config.remote.sources.sourcesPath, archiveFileName);
+
+                        logger.setFileLogger(config.rootPath);
+
+                        // Set task list
+                        config.tasks = program.tasks.split('');
+
+                        // Set verbose mode
+                        config.verbose = (_.isBoolean(program.verbose)) ? program.verbose : false;
+
+                        // Set force mode
+                        config.force = (_.isBoolean(program.force)) ? program.force : false;
+
+                        // Set qrcode print
+                        config.qrcode = (_.isBoolean(program.qrCode)) ? program.qrCode : false;
+
+                        config.readChangeLog(program.changeLog, (err, next) => {
+                            if (err) {
+                                reject(err);
+                                return;
+                            }
+                            try {
+                                config.verify();
+                                resolve();
+                            }
+                            catch (e) {
+                                reject(e);
+                            }
+                        });
+                    }
+                    catch (e) {
+                        reject(e);
+                    }
+                },
+                err => {
+                    reject(err);
+                }
+            );
+        });
+    }
+
+    angularInit({configPath, program}) {
+        let config = this;
+
+        return new Promise((resolve, reject) => {
+            fs.readFileAsync(configPath, 'utf8').then(
+                fileData => {
+                    try {
+                        // Verify and set app version
+                        config.setBuildVersion(program);
+
+                        const configData = JSON.parse(fileData);
+
+                        // Set all configurations from JSON
+                        _.merge(config, configData);
+
+                        // Set project root dir
+                        config.rootPath = (path.isAbsolute(configPath)) ? path.dirname(configPath) : process.cwd();
+                        // Calculate and set other dirs
+                        config.sources.compilePath = path.isAbsolute(config.sources.compilePath)
+                            ? config.sources.compilePath
+                            : path.join(config.rootPath, config.sources.compilePath);
+
+                        config.sources.updateVersion.filePath = path.isAbsolute(config.sources.updateVersion.filePath)
+                            ? config.sources.updateVersion.filePath
+                            : path.join(config.rootPath, config.sources.updateVersion.filePath);
+
+                        config.buildsDir = path.isAbsolute(config.buildsDir)
+                            ? config.buildsDir
+                            : path.join(config.rootPath, config.buildsDir);
+
+                        config.remote.repo.jsonPath = path.join(config.remote.repo.jsonPath, './builds.json');
+                        config.remote.repo.homepageUrl = config.remote.repo.homepageUrl.trim();
+                        if (config.remote.repo.homepageUrl.slice(-1) !== '/') {
+                            config.remote.repo.homepageUrl = config.remote.repo.homepageUrl + '/';
+                        }
+
+                        config.remote.repo.buildsPath = config.remote.repo.buildsPath.trim();
+                        if (config.remote.repo.buildsPath.slice(-1) !== '/') {
+                            config.remote.repo.buildsPath = config.remote.repo.buildsPath + '/';
+                        }
+
+                        let archiveFileName = `./${config.app.label}_v.${config.app.versionLabel}.zip`.replace(/ /g, '_');
+                        config.remote.sources.archiveFilePath = path.join(config.buildsDir, archiveFileName);
+                        config.remote.repo.angularUrlPath = url.resolve(config.remote.repo.angularUrlPath, archiveFileName);
 
                         logger.setFileLogger(config.rootPath);
 
@@ -318,9 +406,19 @@ class Config {
             cordova.verifyCompileConfigs(this);
         }
 
-        // Check params for sources compiler steps
+        // Check params for change version task
+        if (this.tasks.contains(angularTasks.CHANGE_VERSION)) {
+            angular.verifyVersionConfigs(this);
+        }
+
+        // Check params for change version task
         if (this.tasks.contains(cordovaTasks.CHANGE_VERSION)) {
             cordova.verifyVersionConfigs(this);
+        }
+
+        // Check params for angular
+        if (this.tasks.contains(angularTasks.BUILD)) {
+            angular.verifyBuildConfigs(this);
         }
 
         // Check params for iOS app builder
@@ -338,13 +436,28 @@ class Config {
             remote.verifyUploadBuildsSteps(this);
         }
 
+        // Check params for FTP build deploy
+        if (this.tasks.contains(angularTasks.DEPLOY_BUILD)) {
+            angular.verifyBuildDir(this);
+            remote.verifyUploadBuildsSteps(this);
+        }
+
+        // Check params for FTP build uploader on the repo
+        if (this.tasks.contains(angularTasks.UPLOAD_REPO)) {
+            angular.verifyBuildDir(this);
+            remote.verifyRepoUpdate(this);
+            angular.verifyUploadRepoConfigs(this);
+        }
+
         // Check params for FTP sources uploader
         if (this.tasks.contains(cordovaTasks.UPLOAD_SOURCES)) {
             remote.verifyUploadSourcesStep(this);
         }
 
         // Check params for email sender
-        if (this.tasks.contains(cordovaTasks.SEND_EMAIL)) {
+        if (this.tasks.contains(cordovaTasks.SEND_EMAIL) ||
+            this.tasks.contains(angularTasks.SEND_EMAIL)
+        ) {
             email.verify(this);
         }
     }
@@ -368,6 +481,10 @@ class Config {
                     logger.info('  Android bundle id:\t\t', config.android.bundleId);
                     logger.info('  Android version code:\t\t', config.android.versionCode);
                 }
+                // if (config.tasks.contains(angularTasks.UPLOAD_REPO)) {
+                //     logger.info('  Angular version :\t\t', config.app.version);
+                //     logger.info('  Android version code:\t\t', config.android.versionCode);
+                // }
                 logger.info('  Change log:\t\t\t', config.changeLog[0]);
                 for (let i = 1; i < config.changeLog.length; i++) {
                     logger.info('\t\t\t\t', config.changeLog[i]);

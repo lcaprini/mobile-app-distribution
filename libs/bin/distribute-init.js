@@ -9,6 +9,7 @@ const path = require('path');
 const logger = require('../logger');
 const utils = require('../utils');
 const cordova = require('../cordova').CORDOVA;
+const angular = require('../angular').ANGULAR;
 const workingDir = path.join(process.cwd());
 
 console.log('This utility will walk you through creating a distribute.json file.');
@@ -22,7 +23,8 @@ const init = () => {
     const DISTRIBUTE = {
         CORDOVA : 'Cordova',
         IOS     : 'iOS',
-        ANDROID : 'Android'
+        ANDROID : 'Android',
+        ANGULAR : 'Angular'
     };
 
     let appName = utils.findAppName();
@@ -44,7 +46,8 @@ const init = () => {
         choices : [
             DISTRIBUTE.CORDOVA,
             DISTRIBUTE.IOS,
-            DISTRIBUTE.ANDROID
+            DISTRIBUTE.ANDROID,
+            DISTRIBUTE.ANGULAR
         ]}
     ]).then(({name, label, distribute}) => {
         let config = {
@@ -53,16 +56,26 @@ const init = () => {
                 label : label
             }
         };
-        if (distribute === DISTRIBUTE.CORDOVA) {
+        switch (distribute) {
+        case DISTRIBUTE.CORDOVA:
             cordova.init(config).then(
-                config => {
-                    fs.writeFileSync(path.join(workingDir, './distribute.json'), JSON.stringify(config, null, 4));
-                    logger.section('distribute.json created');
-                    process.exit(0);
-                }
-            );
-        }
-        else {
+                    config => {
+                        fs.writeFileSync(path.join(workingDir, './distribute.json'), JSON.stringify(config, null, 4));
+                        logger.section('distribute.json created');
+                        process.exit(0);
+                    }
+                );
+            break;
+        case DISTRIBUTE.ANGULAR:
+            angular.init(config).then(
+                    config => {
+                        fs.writeFileSync(path.join(workingDir, './distribute.json'), JSON.stringify(config, null, 4));
+                        logger.section('distribute.json created');
+                        process.exit(0);
+                    }
+                );
+            break;
+        default:
             logger.info('Coming soon...');
             process.exit(0);
         }

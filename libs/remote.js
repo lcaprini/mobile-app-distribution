@@ -52,7 +52,40 @@ const Remote = {
         });
     },
 
-    updateRepo({repoPath, server, version, hidden, changelog, releaseDate, androidBuildPath = null, iosBuildPath = null, rootPath}) {
+    uploadArchivie({archiveFilePath, sourceSrcPath, server, sourceDestPath}) {
+        return new Promise((resolve, reject) => {
+            var output = fs.createWriteStream(archiveFilePath);
+            var archive = archiver('zip', {
+                zlib : { level : 9 }
+            });
+
+            output.on('close', function() {
+                Remote.uploadFile({
+                    localFile  : fs.readFileSync(archiveFilePath),
+                    remoteFile : path.join(sourceDestPath, path.basename(archiveFilePath)),
+                    server
+                }).then(
+                    () => {
+                        fs.unlinkSync(archiveFilePath);
+                        resolve();
+                    },
+                    err => {
+                        reject(err);
+                    }
+                );
+            });
+            archive.on('error', function(err) {
+                reject(err);
+            });
+
+            archive.pipe(output);
+
+            archive.directory(sourceSrcPath, path.basename(sourceSrcPath));
+            archive.finalize();
+        });
+    },
+
+    updateRepo({repoPath, server, version, hidden, changelog, releaseDate, androidBuildPath = null, iosBuildPath = null, angularBuildPath = null, rootPath}) {
         logger.section(`Update repository`);
 
         return new Promise((resolve, reject) => {
@@ -77,11 +110,14 @@ const Remote = {
                     if (iosBuildPath) {
                         build.iosBuildPath = iosBuildPath;
                     }
+                    if (angularBuildPath) {
+                        build.angularBuildPath = angularBuildPath;
+                    }
                     jsonFile.builds.unshift(build);
                     const tmpJsonFile = path.join(rootPath, `./.builds.json`);
                     fs.writeFileSync(tmpJsonFile, JSON.stringify(jsonFile, null, 4), {encoding : 'utf-8', flag : 'w'});
                     Remote.uploadFile({
-                        localFile  : tmpJsonFile,
+                        localFile  : fs.readFileSync(tmpJsonFile),
                         remoteFile : repoPath,
                         server
                     }).then(
@@ -150,7 +186,10 @@ const Remote = {
             throw new Error('FTP build upload error: missing "remote.builds.password" value in config file');
         }
         const cordovaTasks = require('./cordova').TASKS;
-        if (config.tasks.contains(cordovaTasks.BUILD_IOS) || config.tasks.contains(cordovaTasks.BUILD_ANDROID)) {
+        const angularTasks = require('./angular').TASKS;
+        if (config.tasks.contains(cordovaTasks.BUILD_IOS) ||
+            config.tasks.contains(cordovaTasks.BUILD_ANDROID)
+        ) {
             this.verifyRepoUpdate(config);
         }
         if (config.tasks.contains(cordovaTasks.BUILD_IOS)) {
@@ -161,6 +200,11 @@ const Remote = {
         if (config.tasks.contains(cordovaTasks.BUILD_ANDROID)) {
             if (!config.remote.builds.androidDestinationPath) {
                 throw new Error('FTP+Android upload error: missing "remote.builds.androidDestinationPath" value in config file');
+            }
+        }
+        if (config.tasks.contains(angularTasks.DEPLOY_BUILD)) {
+            if (!config.remote.builds.angularDestinationPath) {
+                throw new Error('FTP+Angular upload error: missing "remote.builds.angularDestinationPath" value in config file');
             }
         }
     },
@@ -234,6 +278,18 @@ const Remote = {
         });
     },
 
+    initializeAngularBuildUpload(config) {
+        return inquirer.prompt([{
+            type    : 'input',
+            name    : 'angularDestinationPath',
+            message : 'remote.builds.angularDestinationPath',
+            default : '/var/www/html/test/builds/angular'
+        }]).then(({angularDestinationPath}) => {
+            config.remote.builds.angularDestinationPath = angularDestinationPath;
+            return config;
+        });
+    },
+
     initializeIosBuildUpload(config) {
         return inquirer.prompt([{
             type    : 'input',
@@ -296,6 +352,24 @@ const Remote = {
             config.remote.repo.password = password;
             config.remote.repo.jsonPath = jsonPath;
             config.remote.repo.homepageUrl = homepageUrl;
+            return config;
+        });
+    },
+
+    initializeAngularRepoUpdate(config) {
+        return inquirer.prompt([{
+            type    : 'input',
+            name    : 'angularUrlPath',
+            message : 'remote.repo.angularUrlPath',
+            default : 'https://mycert-server.lcaprini.com/angular'
+        }, {
+            type    : 'input',
+            name    : 'buildsPath',
+            message : 'remote.repo.buildsPath',
+            default : '/var/www/html/angular/builds'
+        }]).then(({angularUrlPath, buildsPath}) => {
+            config.remote.repo.angularUrlPath = angularUrlPath;
+            config.remote.repo.buildsPath = buildsPath;
             return config;
         });
     },
