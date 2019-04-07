@@ -34,11 +34,6 @@ program
   .option('-h, --hidden', 'hides build in HTML download page', config.hidden)
   .parse(process.argv);
 
-/*
-TODO:
-    3- gestire l'esistenza della buildDir nei task di deploy e repo
-*/
-
 /**
  * Print error and exit process
  * @param {Error} err
@@ -47,12 +42,12 @@ const endDistribute = err => {
     const logger = require('../logger');
 
     if (err) {
-    // logger.error(err);
+        // logger.error(err);
         logger.error(err.message);
         process.exit(1);
     }
 
-  // Close process when uploading and updating repo tasks are completed
+    // Close process when uploading and updating repo tasks are completed
     Promise.all([upploadRepoProcessCompleted, deployBuildProcessCompleted]).then(
     () => {
         finalize();
@@ -69,16 +64,14 @@ const endDistribute = err => {
 const finalize = () => {
     const logger = require('../logger');
 
-    let finalRepoHomepageUrl = `${config.remote.repo.homepageUrl}?v=${
-    config.app.versionLabel
-  }`;
+    let finalRepoHomepageUrl = `${config.remote.repo.homepageUrl}?v=${config.app.versionLabel}`;
     if (config.hidden) {
         finalRepoHomepageUrl += '&all=true';
     }
 
-  /**
-   * SEND EMAIL
-   */
+    /**
+     * SEND EMAIL
+     */
     if (config.tasks.contains(TASKS.SEND_EMAIL)) {
         let emailData = {
             appName         : config.app.name,

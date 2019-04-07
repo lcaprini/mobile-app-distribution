@@ -33,8 +33,12 @@ const Angular = {
     changeVersion({ filePath, version, replacingTag }) {
         logger.section(`Set '${version}' as version in ${filePath}`);
         let versionFile = fs.readFileSync(filePath, 'utf-8');
+        this.checkReplacingTag({
+            filePath,
+            replacingTag,
+            checkBuildTask : false
+        });
         try {
-        // let newVersionFile = versionFile.replace(/<mad-app-version.*>([\s\S]*?)<\/mad-app-version>/ig, `${version}`);
             let newVersionFile = versionFile.replace(replacingTag, version);
             versionFile = newVersionFile;
             fs.writeFileSync(filePath, versionFile, 'utf-8');
@@ -162,6 +166,24 @@ const Angular = {
         }
         if (!fs.existsSync(config.sources.updateVersion.filePath) && !config.tasks.contains(TASKS.BUILD)) {
             throw new Error(`Version change error: file "sources.updateVersion.filePath" doesn't exists at ${config.sources.updateVersion.filePath}`);
+        }
+        this.checkReplacingTag({
+            filePath       : config.sources.updateVersion.filePath,
+            replacingTag   : config.sources.updateVersion.replacingTag,
+            checkBuildTask : config.tasks.contains(TASKS.BUILD)
+        });
+    },
+
+    /**
+     * Verify replacingTag at filePath if checkBuildTask not exist
+     * @param {Object} filePath
+     * @param {Object} replacingTag
+     * @param {Object} checkBuildTask
+     */
+    checkReplacingTag({filePath, replacingTag, checkBuildTask}) {
+        let versionFile = fs.readFileSync(filePath, 'utf-8');
+        if (versionFile.indexOf(replacingTag) === -1 && !checkBuildTask) {
+            throw new Error(`Angular change version error: replacingTag ${replacingTag} not found at file path ${filePath}`);
         }
     },
 
