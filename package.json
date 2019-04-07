@@ -38,6 +38,7 @@
     "corser": "^2.0.1",
     "elementtree": "^0.1.7",
     "find-versions": "^2.0.0",
+    "ftp-deploy": "^2.3.3",
     "inquirer": "^3.2.0",
     "jsftp": "^2.0.0",
     "lodash": "^4.17.4",

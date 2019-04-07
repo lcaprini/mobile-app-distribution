@@ -2,6 +2,7 @@
 
 const _ = require('lodash');
 const JSFtp = require('jsftp');
+const FtpDeploy = require('ftp-deploy');
 const fs = require('fs');
 const archiver = require('archiver');
 const path = require('path');
@@ -170,6 +171,26 @@ const Remote = {
 
             archive.finalize();
         });
+    },
+
+    deploy({folderSourcePath, folderDestPath, server, verbose}) {
+        return new FtpDeploy().deploy({
+            user         : server.user,
+            password     : server.pass,
+            host         : server.host,
+            port         : server.port,
+            localRoot    : folderSourcePath,
+            remoteRoot   : folderDestPath,
+            include      : ['*', '**/*'],
+            deleteRemote : false
+        }).then(
+            res => {
+                verbose && logger.info(res);
+            },
+            err => {
+                verbose && logger.error(err);
+            }
+        );
     },
 
     verifyUploadBuildsSteps(config) {

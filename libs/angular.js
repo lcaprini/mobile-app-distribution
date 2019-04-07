@@ -49,6 +49,58 @@ const Angular = {
     },
 
     /**
+     * Deploy angular build to server
+     * @param {String} folderSourcePath
+     * @param {String} folderDestPath
+     * @param {Object} server
+     * @param {Boolean} verbose
+     */
+    deploy({folderSourcePath, folderDestPath, server, verbose}) {
+        logger.section(`Deploy angular build at ${folderSourcePath} to server ${server.host}:${folderDestPath}`);
+        return remote.deploy({folderSourcePath, folderDestPath, server, verbose});
+    },
+
+    /**
+     * Upload angular build archive to repo
+     * @param {*} config
+     */
+    uploadRepo(config) {
+        logger.section(`Upload angular build archive to ${config.remote.repo.homepageUrl} repo`);
+        return new Promise((resolve, reject) => {
+            remote.uploadArchivie({
+                archiveFilePath : config.remote.sources.archiveFilePath,
+                sourceSrcPath   : path.join(config.buildsDir),
+                server          : {
+                    host : config.remote.repo.host,
+                    port : config.remote.repo.port,
+                    user : config.remote.repo.user,
+                    pass : config.remote.repo.password
+                },
+                sourceDestPath : config.remote.repo.buildsPath
+            }).then(
+                res => {
+                    remote.updateRepo({
+                        repoPath : config.remote.repo.jsonPath,
+                        server   : {
+                            host : config.remote.repo.host,
+                            port : config.remote.repo.port,
+                            user : config.remote.repo.user,
+                            pass : config.remote.repo.password
+                        },
+                        angularBuildPath : config.remote.repo.angularUrlPath,
+                        version          : config.app.versionLabel,
+                        changelog        : config.changeLog,
+                        releaseDate      : config.releaseDate,
+                        hidden           : config.hidden,
+                        rootPath         : config.rootPath
+                    }).then(resolve, reject);
+                },
+                reject
+            );
+        });
+    },
+
+    /**
      * Compose email for
      */
     composeEmail({

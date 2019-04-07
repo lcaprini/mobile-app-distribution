@@ -155,7 +155,7 @@ const startDistribution = () => {
         }
         else {
             // Start upload
-            deployBuildProcessCompleted = remote.uploadFolder({
+            deployBuildProcessCompleted = angular.deploy({
                 folderSourcePath : path.join(config.buildsDir),
                 folderDestPath   : config.remote.builds.angularDestinationPath,
                 server           : {
@@ -163,7 +163,8 @@ const startDistribution = () => {
                     port : config.remote.builds.port,
                     user : config.remote.builds.user,
                     pass : config.remote.builds.password
-                }
+                },
+                verbose : config.verbose
             });
         }
 
@@ -175,38 +176,7 @@ const startDistribution = () => {
         }
         else {
             // Start upload
-            upploadRepoProcessCompleted = new Promise((resolve, reject) => {
-                remote.uploadArchivie({
-                    archiveFilePath : config.remote.sources.archiveFilePath,
-                    sourceSrcPath   : path.join(config.buildsDir),
-                    server          : {
-                        host : config.remote.repo.host,
-                        port : config.remote.repo.port,
-                        user : config.remote.repo.user,
-                        pass : config.remote.repo.password
-                    },
-                    sourceDestPath : config.remote.repo.buildsPath
-                }).then(
-                    res => {
-                        remote.updateRepo({
-                            repoPath : config.remote.repo.jsonPath,
-                            server   : {
-                                host : config.remote.repo.host,
-                                port : config.remote.repo.port,
-                                user : config.remote.repo.user,
-                                pass : config.remote.repo.password
-                            },
-                            angularBuildPath : config.remote.repo.angularUrlPath,
-                            version          : config.app.versionLabel,
-                            changelog        : config.changeLog,
-                            releaseDate      : config.releaseDate,
-                            hidden           : config.hidden,
-                            rootPath         : config.rootPath
-                        }).then(resolve, reject);
-                    },
-                    reject
-                );
-            });
+            upploadRepoProcessCompleted = angular.uploadRepo(config);
         }
 
         endDistribute();
