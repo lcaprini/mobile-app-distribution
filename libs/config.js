@@ -214,7 +214,7 @@ class Config {
                                 return;
                             }
                             try {
-                                config.verify();
+                                config.cordovaVerify();
                                 resolve();
                             }
                             catch (e) {
@@ -275,7 +275,8 @@ class Config {
                         }
 
                         let archiveFileName = `./${config.app.label}_v.${config.app.versionLabel}.zip`.replace(/ /g, '_');
-                        config.remote.sources.archiveFilePath = path.join(config.buildsDir, archiveFileName);
+                        config.remote.sources.archiveFilePath = url.resolve(path.join(config.buildsDir, '../'), archiveFileName);
+                        // config.remote.sources.sourcesPath = path.join(config.remote.sources.sourcesPath, archiveFileName);
                         config.remote.repo.angularUrlPath = url.resolve(config.remote.repo.angularUrlPath, archiveFileName);
 
                         logger.setFileLogger(config.rootPath);
@@ -298,7 +299,7 @@ class Config {
                                 return;
                             }
                             try {
-                                config.verify();
+                                config.angularVerify();
                                 resolve();
                             }
                             catch (e) {
@@ -398,27 +399,50 @@ class Config {
     }
 
     /**
-     * Verifies all configuration and params
+     * Verifies all angular configuration and params
      */
-    verify() {
+    angularVerify() {
+        // Check params for change version task
+        if (this.tasks.contains(angularTasks.CHANGE_VERSION)) {
+            angular.verifyVersionConfigs(this);
+        }
+
+        // Check params for angular
+        if (this.tasks.contains(angularTasks.BUILD)) {
+            angular.verifyBuildConfigs(this);
+        }
+
+        // Check params for FTP build deploy
+        if (this.tasks.contains(angularTasks.DEPLOY_BUILD)) {
+            angular.verifyBuildDir(this);
+            remote.verifyUploadBuildsSteps(this);
+        }
+
+        // Check params for FTP build uploader on the repo
+        if (this.tasks.contains(angularTasks.UPLOAD_REPO)) {
+            angular.verifyBuildDir(this);
+            remote.verifyRepoUpdate(this);
+            angular.verifyUploadRepoConfigs(this);
+        }
+
+        // Check params for email sender
+        if (this.tasks.contains(angularTasks.SEND_EMAIL)) {
+            email.verify(this);
+        }
+    }
+
+    /**
+     * Verifies all cordova configuration and params
+     */
+    cordovaVerify() {
         // Check params for sources compiler steps
         if (this.tasks.contains(cordovaTasks.COMPILE_SOURCES)) {
             cordova.verifyCompileConfigs(this);
         }
 
         // Check params for change version task
-        if (this.tasks.contains(angularTasks.CHANGE_VERSION)) {
-            angular.verifyVersionConfigs(this);
-        }
-
-        // Check params for change version task
         if (this.tasks.contains(cordovaTasks.CHANGE_VERSION)) {
             cordova.verifyVersionConfigs(this);
-        }
-
-        // Check params for angular
-        if (this.tasks.contains(angularTasks.BUILD)) {
-            angular.verifyBuildConfigs(this);
         }
 
         // Check params for iOS app builder
@@ -436,28 +460,13 @@ class Config {
             remote.verifyUploadBuildsSteps(this);
         }
 
-        // Check params for FTP build deploy
-        if (this.tasks.contains(angularTasks.DEPLOY_BUILD)) {
-            angular.verifyBuildDir(this);
-            remote.verifyUploadBuildsSteps(this);
-        }
-
-        // Check params for FTP build uploader on the repo
-        if (this.tasks.contains(angularTasks.UPLOAD_REPO)) {
-            angular.verifyBuildDir(this);
-            remote.verifyRepoUpdate(this);
-            angular.verifyUploadRepoConfigs(this);
-        }
-
         // Check params for FTP sources uploader
         if (this.tasks.contains(cordovaTasks.UPLOAD_SOURCES)) {
             remote.verifyUploadSourcesStep(this);
         }
 
         // Check params for email sender
-        if (this.tasks.contains(cordovaTasks.SEND_EMAIL) ||
-            this.tasks.contains(angularTasks.SEND_EMAIL)
-        ) {
+        if (this.tasks.contains(cordovaTasks.SEND_EMAIL)) {
             email.verify(this);
         }
     }

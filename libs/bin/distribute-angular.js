@@ -36,9 +36,7 @@ program
 
 /*
 TODO:
-    1- gestire il replace della versione su un file che non esiste
-    2- gestire il caso in cui i task angular e cordova corrispondono
-    3- gestire l'esistenza della buildDir nel nei task di deploy e repo
+    3- gestire l'esistenza della buildDir nei task di deploy e repo
 */
 
 /**

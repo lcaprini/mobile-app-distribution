@@ -36,7 +36,7 @@
       "name": "Angular",
       "program": "${workspaceRoot}/libs/bin/distribute-angular.js",
       "args": [
-        "1.0.1",
+        "1.0.3",
         "--config",
         "/home/federico/Projects/2019/angular6-material-panel/distribute.json",
         "--tasks",
