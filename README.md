@@ -262,14 +262,6 @@ To correcly run process you'll need to specify the app version in [semver](http:
   _descr_: Path of `distribute.json` to use for process
   _default_: `./distribute.json`
 
-* _option_: `-a, --android-version-code <version-code>`
-  _descr_: Version Code for Android build
-  _default_: `MAJOR * 10000 + MINOR * 100 + PATCH`
-
-* _option_: `-i, --ios-bundle-version <bundle-version>`
-  _descr_: CF Bundle Version for build
-  _default_: `MAJOR * 100 + MINOR * 10 + PATCH`
-
 * _option_: `-c, --change-log <changelog.txt | "Text with *** line separator"`
   _descr_: Path of a `.txt` file that contains all changelog (one per line), or a string with `***` line separator
   _default_: `No changelog`
