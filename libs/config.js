@@ -498,10 +498,7 @@ class Config {
 
     printRecap() {
         const config = this;
-        let titleRecap = config.app.name;
-        if (!config.app.name) {
-            titleRecap = 'Distribute';
-        }
+        let titleRecap = config.app.name || 'Distribute';
         return new Promise(resolve => {
             asciimo.write('  ' + titleRecap, 'Ogre', art => {
                 logger.info('\n#########################################################');
