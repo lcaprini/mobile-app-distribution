@@ -20,7 +20,10 @@ Compile, build and publish over FTP a Cordova mobile app for wireless distributi
 * [`init` command](#init-command)
 * [`cordova` command](#cordova-command)
   * [Synopsis](#synopsis-cordova)
-  * [Options](#options)
+  * [Options](#options-cordova)
+* [`angular` command](#angular-command)
+  * [Synopsis](#synopsis-angular)
+  * [Options](#options-angular)
 * [`wd` command](#wd-command)
   * [Synopsis](#synopsis-wd)
 * [`resources` command](#resources-command)
@@ -29,7 +32,7 @@ Compile, build and publish over FTP a Cordova mobile app for wireless distributi
   * [Synopsis](#synopsis-serve)
 
 ## What is "Distribute"?
-Mobile App Distribution is a command line tool for distributing a Cordova mobile app over FTP to allow its download over the air. It also have many command for icons and splashes generation, a local server creation, and so on.
+Mobile App Distribution is a command line tool for distributing a Cordova mobile app over FTP to allow its download over the air. It also have many command for icons and splashes generation, a local server creation, and so on. Add support for distributing a Angular 2+ app over FTP to allow its download over the air and FTP/SFTP server deploy;
 
 ## Installation
 To make `distribute` command line available in your system you'll need to install [Mobile App Distribution](https://github.com/lcaprini/mobile-app-distribution) globally first. You can do that with the following command:
@@ -47,6 +50,7 @@ Distribute tools have multiple commands to cover all aspects of mobile app distr
 
 * `$ distribute init`: The utility makes some questions and with them answers initializes the config file for distribution process.
 * `$ distribute cordova`: The utility launches all tasks for compiling, building and uploading a Cordova mobile app
+* `$ distribute angular`: The utility launches all tasks for building, deploing and uploading a Angular app
 * `$ distribute wd`: The utility creates the `wd` folder for manually upload on FTP remote repository
 * `$ distribute resources`: The utility generate iOS and Android icons and splash from one single icon and one single splash
 * `$ distribute serve`: The utility create a local host to test website or webapp
@@ -63,7 +67,7 @@ To see general help menu and available commands run the following command:
 
     $ distribute --help
 
-### Configuration
+### Cordova configuration
 To use `distribute` command you'll need to create a `distribute.json` first, like [`distribute-example.json`](./resources/distribute-example.json).
 
 The following paragraphs describes all sections of a tipical `distribute.json` for a Cordova app.
@@ -93,7 +97,7 @@ All details about building, exporting and signing iOS platform; if you require t
 * `ios.infoPlistPath` : Main plist of iOS XCode project; if not specified the tool will look for `Info.plist` or `<app.name>-Info.plist`
 * `ios.targetSchema` : Xcode project schema to build; if not specified the default value will be `app.name`
 * `ios.exportOptionsPlist`__*__ : JSON object with same attributes and values of iOS's export options plist file (`xcodebuild --help` to view all docs). At least the following attributes must be specified
-  * `method`: (`app-store`|`package`|`ad-hoc`|`enterprise`|`development`|`developer-id`)  
+  * `method`: (`app-store`|`package`|`ad-hoc`|`enterprise`|`development`|`developer-id`)
   Describes how Xcode should export the archive; if not specified the default value will be `enterprise`
   * `teamID`__*__ : Developer Portal team to use for export
 * `ios.exportOptionsPlistPath` : Path of a phisical exportOptionsPlist file with all attributes properly configured. This field is an alternative to `ios.exportOptionsPlist`
@@ -131,7 +135,59 @@ All details about the processes to upload created builds over FTP and update rem
 
 #### Email section
 All details about final email sending; if you require the send email task (`e`) all fields marked with __*__ are mandatory.
-* `email.host`__*__ : SMTP host of email service 
+* `email.host`__*__ : SMTP host of email service
+* `email.port` : SMTP port of email service; if not specified the default value will be `25`
+* `email.user`__*__ : Email sender public name
+* `email.password`__*__ : Password of `email.user`
+* `email.from`__*__ : Sender's email
+* `email.to`__*__ : List of email's recipients
+
+### Angular configuration
+To use `distribute` command you'll need to create a `distribute.json` first, like [`distribute-example.json`](./resources/distribute-angular-example.json).
+
+The following paragraphs describes all sections of a tipical `distribute.json` for a Cordova app.
+
+#### App section email task
+All details about app; all are mandatory for email task (`e`).
+* `app.name`__*__ : App's name, usally is the Angular project's name
+* `app.label`__*__ : App's label
+
+#### Source version change section
+All details about web app version change; if you require the version changing task (`v`) all these fields are mandatory.
+* `sources.updateVersion.filePath`__*__ : Path of file that contains `sources.updateVersion.replacingTag` tag that process use to print inside the app's version label
+* `sources.updateVersion.replacingTag`__*__ : Tag to replace; if not specified the default value will be `{version}`.
+
+#### Source compile section
+All details about HTML, CSS and Javscript compiling; if you require the source compiling task (`c`) all these fields are mandatory.
+* `sources.compileCommand`__*__ : Command line tool used to build the Angular app
+* `sources.sourcePath`__*__ : Path in where to launch the `sources.compileCommand`
+
+#### Server deploy builds
+All details about the processes to sever deploy builds over FTP/SFTP; if you require server build's deploy task (`d`) all fields marked with __*__ are mandatory.
+* `buildsDir`__*__ : Path (absolute or relative) will contains the build files (usualy is the `dist` folder on the Angular project root)
+* `remote.builds.host`__*__ : FTP/SFTP host for builds deploy
+* `remote.builds.port` : Port for builds deploy, can take two values; if not specified the default value will be `21`:
+    * `21` for FTP protocol
+    * `22` for SFTP protocol
+* `remote.builds.user`__*__ : Username for FTP/SFTP connection with read and write permissions
+* `remote.builds.password`__*__ : Password of `remote.builds.user`
+* `remote.builds.angularDestinationPath`__*__ : Absolute path of remote server folder (usualy is the folder of document root of http server).
+
+#### Repo upload build and update
+All details about the processes to uppload the buil deploy builds over FTP/SFTP; if you require server build's deploy task (`d`) all fields marked with __*__ are mandatory.
+* `buildsDir`__*__ : Path (absolute or relative) will contains the build files (usualy is the `dist` folder on the Angular project root)
+* `remote.repo.host`__*__ : FTP host for repository update
+* `remote.repo.port` : FTP port for repository update; if not specified the default value will be `21`
+* `remote.repo.user`__*__ : Username for FTP connection with read and write permissions
+* `remote.repo.password`__*__ : Password of `remote.repo.user`
+* `remote.repo.jsonPath`__*__ : Absolute path of remote folder that contains `builds.json` file to update it
+* `remote.repo.homepageUrl`__*__ : Public URL of `remote.repo.jsonPath` for wireless distribution repository
+* `remote.repo.buildsPath`__*__ : Absolute path of remote repo server folder will contains all Angular `.zip` files
+* `remote.repo.angularUrlPath`__*__ : Public URL of `remote.repo.buildsPath` for Angular app download.
+
+#### Email section
+All details about final email sending; if you require the send email task (`e`) all fields marked with __*__ are mandatory.
+* `email.host`__*__ : SMTP host of email service
 * `email.port` : SMTP port of email service; if not specified the default value will be `25`
 * `email.user`__*__ : Email sender public name
 * `email.password`__*__ : Password of `email.user`
@@ -145,7 +201,7 @@ This utility makes some questions to user and create the `distribute.json` file 
 This utility launches all tasks for compiling, building and uploading a Cordova mobile app.
 
 ### <a id="synopsis-cordova"></a> Synopsis
-    
+
     $ distribute cordova <app-version> -t <[c,v,i,a,u,e]> [options]
 
 To correcly run process you'll need to specify the app version in [semver](http://semver.org/) format and one or more task from this list:
@@ -158,62 +214,107 @@ To correcly run process you'll need to specify the app version in [semver](http:
 * `z` : Zip and upload Cordova `www` folder on the remote FTP server
 * `e` : Sends an email with links and QRCode for download when the process ends
 
-### Options
+### <a id="options-cordova"></a> Options
 
-* _option_: `-p, --config <config-path>`  
-  _descr_: Path of `distribute.json` to use for process  
+* _option_: `-p, --config <config-path>`
+  _descr_: Path of `distribute.json` to use for process
   _default_: `./distribute.json`
 
-* _option_: `-a, --android-version-code <version-code>`  
+* _option_: `-a, --android-version-code <version-code>`
   _descr_: Version Code for Android build
   _default_: `MAJOR * 10000 + MINOR * 100 + PATCH`
 
-* _option_: `-i, --ios-bundle-version <bundle-version>`  
+* _option_: `-i, --ios-bundle-version <bundle-version>`
   _descr_: CF Bundle Version for build
   _default_: `MAJOR * 100 + MINOR * 10 + PATCH`
 
-* _option_: `-c, --change-log <changelog.txt | "Text with *** line separator"`  
-  _descr_: Path of a `.txt` file that contains all changelog (one per line), or a string with `***` line separator  
+* _option_: `-c, --change-log <changelog.txt | "Text with *** line separator"`
+  _descr_: Path of a `.txt` file that contains all changelog (one per line), or a string with `***` line separator
   _default_: `No changelog`
 
-* _option_: `-q, --qr-code`  
+* _option_: `-q, --qr-code`
   _descr_: Print a QRCode coded with repository homepage in the terminal window when process is complete
 
-* _option_: `-v, --verbose`  
+* _option_: `-v, --verbose`
   _descr_: Print all messages in terminal insted only the task details
 
-* _option_: `-f, --force`  
+* _option_: `-f, --force`
   _descr_: The process starts and doesn't ask anything during all tasks
 
-* _option_: `-h, --hidden`  
+* _option_: `-h, --hidden`
+  _descr_: Hide this build from repository homepage; use it for pre release and alpha/beta versions
+
+## `angular` command
+The utility launches all tasks for building, deploing and uploading a Angular app.
+
+### <a id="synopsis-angular"></a> Synopsis
+
+    $ distribute angular <app-version> -t <[b,v,d,u,e]> [options]
+
+To correcly run process you'll need to specify the app version in [semver](http://semver.org/) format and one or more task from this list:
+
+* `v` : Replace app version editing the file specified in `distribute.json`
+* `b` : Compiles Angular source into `src` folder using the command (script or task runner) specified in `distribute.json`
+* `d` : Deploy all files into `buildsDir` folder on the deploy server specified  in `distribute.json`
+* `u` : Upload `buildsDir` zip archive folder and update the repo server specified in `distribute.json`
+* `e` : Sends an email with links and QRCode for download when the process ends
+
+### <a id="options-angular"></a> Options
+
+* _option_: `-p, --config <config-path>`
+  _descr_: Path of `distribute.json` to use for process
+  _default_: `./distribute.json`
+
+* _option_: `-a, --android-version-code <version-code>`
+  _descr_: Version Code for Android build
+  _default_: `MAJOR * 10000 + MINOR * 100 + PATCH`
+
+* _option_: `-i, --ios-bundle-version <bundle-version>`
+  _descr_: CF Bundle Version for build
+  _default_: `MAJOR * 100 + MINOR * 10 + PATCH`
+
+* _option_: `-c, --change-log <changelog.txt | "Text with *** line separator"`
+  _descr_: Path of a `.txt` file that contains all changelog (one per line), or a string with `***` line separator
+  _default_: `No changelog`
+
+* _option_: `-q, --qr-code`
+  _descr_: Print a QRCode coded with repository homepage in the terminal window when process is complete
+
+* _option_: `-v, --verbose`
+  _descr_: Print all messages in terminal insted only the task details
+
+* _option_: `-f, --force`
+  _descr_: The process starts and doesn't ask anything during all tasks
+
+* _option_: `-h, --hidden`
   _descr_: Hide this build from repository homepage; use it for pre release and alpha/beta versions
 
 ## `wd` command
 This utility creates a new folder called `wd` that contains all files for wireless distribution repository, ready to manually upload on FTP repo.
 
 ### <a id="synopsis-wd"></a> Synopsis
-    
+
     $ distribute wd
 
 ## `resources` command
 This utility creates icons and splashes for iOS and Android platforms from one icon and one splash.
 
 ### <a id="synopsis-resources"></a> Synopsis
-    
+
     $ distribute resources
 
 ### Options
 
-* _option_: `-i, --icon <icon-image-path>`  
-  _descr_: Path of image to use as icon to resize for all required platfoms  
+* _option_: `-i, --icon <icon-image-path>`
+  _descr_: Path of image to use as icon to resize for all required platfoms
   _default_: `./resources/icon.png`
 
-* _option_: `-s, --splash <splash-image-path>`  
-  _descr_: Path of image to use as splash to resize (and crop) for all required platfoms  
+* _option_: `-s, --splash <splash-image-path>`
+  _descr_: Path of image to use as splash to resize (and crop) for all required platfoms
   _default_: `./resources/icon.png`
 
-* _option_: `-p, --platforms <i,a>`  
-  _descr_: Platforms to target for icons and splashes generate process  
+* _option_: `-p, --platforms <i,a>`
+  _descr_: Platforms to target for icons and splashes generate process
   _default_: `i,a`
 
 ## `serve` command
@@ -229,6 +330,6 @@ The tool starts a local web server with root on `<www-root-path>` and a new brow
 
 ## Options
 
-* _option_: `-p, --port <port-number>`  
+* _option_: `-p, --port <port-number>`
   _descr_: Port for local server
   _default_: `9001`

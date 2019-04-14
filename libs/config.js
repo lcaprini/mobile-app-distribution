@@ -44,7 +44,12 @@ class Config {
         this.sources = {
             compileCommand  : '',
             compilePath     : '',
-            htmlVersionPath : ''
+            sourcePath      : '',
+            htmlVersionPath : '',
+            updateVersion   : {
+                replacingTag : '{version}',
+                filePath     : ''
+            }
         };
 
         this.cordova = {
