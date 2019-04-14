@@ -52,7 +52,8 @@ const endDistribute = err => {
     () => {
         finalize();
     },
-    () => {
+    (err) => {
+        config.verbose && logger.error(err);
         process.exit(1);
     }
   );

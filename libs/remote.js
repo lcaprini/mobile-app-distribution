@@ -3,6 +3,7 @@
 const _ = require('lodash');
 const JSFtp = require('jsftp');
 const FtpDeploy = require('ftp-deploy');
+const SftpUpload = require('sftp-upload');
 const fs = require('fs');
 const archiver = require('archiver');
 const path = require('path');
@@ -174,6 +175,20 @@ const Remote = {
     },
 
     deploy({folderSourcePath, folderDestPath, server, verbose}) {
+        let deployPromise;
+        if (server.port == 21) {
+            deployPromise = Remote._ftpDeploy({folderSourcePath, folderDestPath, server, verbose});
+        }
+        else if (server.port == 22) {
+            deployPromise = Remote._sftpDeploy({folderSourcePath, folderDestPath, server, verbose});
+        }
+        else {
+            verbose && logger.error(`Deploy on port ${server.port} not supported`);
+        }
+        return deployPromise;
+    },
+
+    _ftpDeploy({folderSourcePath, folderDestPath, server, verbose}) {
         return new FtpDeploy().deploy({
             user         : server.user,
             password     : server.pass,
@@ -185,12 +200,40 @@ const Remote = {
             deleteRemote : false
         }).then(
             res => {
-                verbose && logger.info(res);
+                verbose && logger.section('FTP deploy completed');
             },
             err => {
-                verbose && logger.error(err);
+                throw new Error(`FTP deploy error: ${err}`);
             }
         );
+    },
+
+    _sftpDeploy({folderSourcePath, folderDestPath, server, verbose}) {
+        return new Promise((resolve, reject) => {
+            const sftp = new SftpUpload({
+                username  : server.user,
+                password  : server.pass,
+                host      : server.host,
+                port      : server.port,
+                path      : folderSourcePath,
+                remoteDir : folderDestPath
+            });
+
+            sftp.on('error', function(err) {
+                err = `SFTP deploy error: ${err}`;
+                throw new Error(err);
+            })
+            .on('uploading', function(progress) {
+                verbose && process.stdout.write(`${progress.percent}%: ${progress.file}\r`);
+            })
+            .on('completed', function() {
+                verbose && process.stdout.clearLine();
+                verbose && process.stdout.cursorTo(0);
+                verbose && logger.section('SFTP deploy completed');
+                resolve();
+            })
+            .upload();
+        });
     },
 
     verifyUploadBuildsSteps(config) {

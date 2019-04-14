@@ -219,11 +219,6 @@ const Angular = {
         if (!fs.existsSync(config.sources.updateVersion.filePath) && !config.tasks.contains(TASKS.BUILD)) {
             throw new Error(`Version change error: file "sources.updateVersion.filePath" doesn't exists at ${config.sources.updateVersion.filePath}`);
         }
-        this.checkReplacingTag({
-            filePath       : config.sources.updateVersion.filePath,
-            replacingTag   : config.sources.updateVersion.replacingTag,
-            checkBuildTask : config.tasks.contains(TASKS.BUILD)
-        });
     },
 
     /**
