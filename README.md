@@ -147,11 +147,6 @@ To use `distribute` command you'll need to create a `distribute.json` first, lik
 
 The following paragraphs describes all sections of a tipical `distribute.json` for a Cordova app.
 
-#### App section email task
-All details about app; all are mandatory for email task (`e`).
-* `app.name`__*__ : App's name, usally is the Angular project's name
-* `app.label`__*__ : App's label
-
 #### Source version change section
 All details about web app version change; if you require the version changing task (`v`) all these fields are mandatory.
 * `sources.updateVersion.filePath`__*__ : Path of file that contains `sources.updateVersion.replacingTag` tag that process use to print inside the app's version label
@@ -162,16 +157,16 @@ All details about HTML, CSS and Javscript compiling; if you require the source c
 * `sources.compileCommand`__*__ : Command line tool used to build the Angular app
 * `sources.sourcePath`__*__ : Path in where to launch the `sources.compileCommand`
 
-#### Server deploy builds
-All details about the processes to sever deploy builds over FTP/SFTP; if you require server build's deploy task (`d`) all fields marked with __*__ are mandatory.
+#### Server deploy
+All details about the processes to sever deploy over FTP/SFTP; if you require server deploy task (`d`) all fields marked with __*__ are mandatory.
 * `buildsDir`__*__ : Path (absolute or relative) will contains the build files (usualy is the `dist` folder on the Angular project root)
-* `remote.builds.host`__*__ : FTP/SFTP host for builds deploy
-* `remote.builds.port` : Port for builds deploy, can take two values; if not specified the default value will be `21`:
+* `remote.deploy.host`__*__ : FTP/SFTP host for builds deploy
+* `remote.deploy.port` : Port for builds deploy, can take two values; if not specified the default value will be `21`:
     * `21` for FTP protocol
     * `22` for SFTP protocol
-* `remote.builds.user`__*__ : Username for FTP/SFTP connection with read and write permissions
-* `remote.builds.password`__*__ : Password of `remote.builds.user`
-* `remote.builds.angularDestinationPath`__*__ : Absolute path of remote server folder (usualy is the folder of document root of http server).
+* `remote.deploy.user`__*__ : Username for FTP/SFTP connection with read and write permissions
+* `remote.deploy.password`__*__ : Password of `remote.deploy.user`
+* `remote.deploy.angularDestinationPath`__*__ : Absolute path of remote server folder (usualy is the folder of document root of http server).
 
 #### Repo upload build and update
 All details about the processes to uppload the buil deploy builds over FTP/SFTP; if you require server build's deploy task (`d`) all fields marked with __*__ are mandatory.
@@ -187,6 +182,8 @@ All details about the processes to uppload the buil deploy builds over FTP/SFTP;
 
 #### Email section
 All details about final email sending; if you require the send email task (`e`) all fields marked with __*__ are mandatory.
+* `app.name`__*__ : App's name, usally is the Angular project's name
+* `app.label`__*__ : App's label
 * `email.host`__*__ : SMTP host of email service
 * `email.port` : SMTP port of email service; if not specified the default value will be `25`
 * `email.user`__*__ : Email sender public name
