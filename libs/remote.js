@@ -236,6 +236,27 @@ const Remote = {
         });
     },
 
+    verifyAngularDeploySteps(config) {
+        if (!config.remote.deploy.host) {
+            throw new Error('FTP build upload error: missing "remote.deploy.hosts" value in config file');
+        }
+        if (!config.remote.deploy.port) {
+            throw new Error('FTP build upload error: missing "remote.deploy.port" value in config file');
+        }
+        if (!config.remote.deploy.user) {
+            throw new Error('FTP build upload error: missing "remote.deploy.user" value in config file');
+        }
+        if (!config.remote.deploy.password) {
+            throw new Error('FTP build upload error: missing "remote.deploy.password" value in config file');
+        }
+        const angularTasks = require('./angular').TASKS;
+        if (config.tasks.contains(angularTasks.DEPLOY_BUILD)) {
+            if (!config.remote.deploy.angularDestinationPath) {
+                throw new Error('FTP+Angular upload error: missing "remote.deploy.angularDestinationPath" value in config file');
+            }
+        }
+    },
+
     verifyUploadBuildsSteps(config) {
         if (!config.remote.builds.host) {
             throw new Error('FTP build upload error: missing "remote.builds.hosts" value in config file');
@@ -250,7 +271,6 @@ const Remote = {
             throw new Error('FTP build upload error: missing "remote.builds.password" value in config file');
         }
         const cordovaTasks = require('./cordova').TASKS;
-        const angularTasks = require('./angular').TASKS;
         if (config.tasks.contains(cordovaTasks.BUILD_IOS) ||
             config.tasks.contains(cordovaTasks.BUILD_ANDROID)
         ) {
@@ -264,11 +284,6 @@ const Remote = {
         if (config.tasks.contains(cordovaTasks.BUILD_ANDROID)) {
             if (!config.remote.builds.androidDestinationPath) {
                 throw new Error('FTP+Android upload error: missing "remote.builds.androidDestinationPath" value in config file');
-            }
-        }
-        if (config.tasks.contains(angularTasks.DEPLOY_BUILD)) {
-            if (!config.remote.builds.angularDestinationPath) {
-                throw new Error('FTP+Angular upload error: missing "remote.builds.angularDestinationPath" value in config file');
             }
         }
     },
@@ -342,14 +357,44 @@ const Remote = {
         });
     },
 
-    initializeAngularBuildUpload(config) {
+    initializeAngularDeploy(config) {
         return inquirer.prompt([{
             type    : 'input',
+            name    : 'port',
+            message : 'remote.deploy.port',
+            default : '21'
+        }, {
+            type    : 'input',
+            name    : 'host',
+            message : 'remote.deploy.host',
+            default : 'lcapriniftp'
+        }, {
+            type    : 'input',
+            name    : 'user',
+            message : 'remote.deploy.user',
+            default : 'lcaprini-user'
+        }, {
+            type    : 'input',
+            name    : 'password',
+            message : 'remote.deploy.password',
+            default : 'lcaprini-password'
+        }, {
+            type    : 'input',
             name    : 'angularDestinationPath',
-            message : 'remote.builds.angularDestinationPath',
+            message : 'remote.deploy.angularDestinationPath',
             default : '/var/www/html/test/builds/angular'
-        }]).then(({angularDestinationPath}) => {
-            config.remote.builds.angularDestinationPath = angularDestinationPath;
+        }]).then(({port, host, user, password, angularDestinationPath}) => {
+            if (!config.remote) {
+                config.remote = {};
+            }
+            if (!config.remote.deploy) {
+                config.remote.deploy = {};
+            }
+            config.remote.deploy.port = port;
+            config.remote.deploy.host = host;
+            config.remote.deploy.user = user;
+            config.remote.deploy.password = password;
+            config.remote.deploy.angularDestinationPath = angularDestinationPath;
             return config;
         });
     },

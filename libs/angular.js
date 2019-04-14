@@ -306,9 +306,9 @@ const Angular = {
     },
 
     /**
-     * Inizialize general configuration for angular build
+     * Inizialize builds dir for angular command
      */
-    initializeGeneral(config) {
+    initializeBuildsDir(config) {
         return inquirer
             .prompt([
                 {
@@ -357,8 +357,6 @@ const Angular = {
             .then(({ tasks }) => {
                 let questions = [];
 
-                questions.push(angular.initializeGeneral);
-
                 if (tasks.contains(TASKS.CHANGE_VERSION)) {
                     questions.push(angular.initializeChangeVersion);
                 }
@@ -368,11 +366,12 @@ const Angular = {
                 }
 
                 if (tasks.contains(TASKS.DEPLOY_BUILD)) {
-                    questions.push(remote.initializeBuildUpload);
-                    questions.push(remote.initializeAngularBuildUpload);
+                    questions.push(angular.initializeBuildsDir);
+                    questions.push(remote.initializeAngularDeploy);
                 }
 
                 if (tasks.contains(TASKS.UPLOAD_REPO)) {
+                    questions.push(angular.initializeBuildsDir);
                     questions.push(remote.initializeRepoUpdate);
                     questions.push(remote.initializeAngularRepoUpdate);
                 }

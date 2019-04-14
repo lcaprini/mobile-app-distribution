@@ -103,6 +103,14 @@ class Config {
                 angularDestinationPath : ''
             },
 
+            deploy : {
+                host                   : '',
+                port                   : 21,
+                user                   : '',
+                password               : '',
+                angularDestinationPath : ''
+            },
+
             repo : {
                 host               : '',
                 port               : 21,
@@ -114,7 +122,8 @@ class Config {
                 iosManifestUrlPath : '',
                 androidUrlPath     : '',
                 angularUrlPath     : '',
-                homepageUrl        : ''
+                homepageUrl        : '',
+                buildsPath         : ''
             },
 
             sources : {
@@ -145,6 +154,8 @@ class Config {
                     try {
                         // Verify and set app version
                         config.setBuildVersion(program);
+                        config.setAndroidBuildVersion(program.androidVersionCode);
+                        config.setiOSBuildVersion(program.iosBundleVersion);
 
                         const configData = JSON.parse(fileData);
 
@@ -256,9 +267,9 @@ class Config {
                         // Set project root dir
                         config.rootPath = (path.isAbsolute(configPath)) ? path.dirname(configPath) : process.cwd();
                         // Calculate and set other dirs
-                        config.sources.compilePath = path.isAbsolute(config.sources.compilePath)
-                            ? config.sources.compilePath
-                            : path.join(config.rootPath, config.sources.compilePath);
+                        config.sources.sourcePath = path.isAbsolute(config.sources.sourcePath)
+                            ? config.sources.sourcePath
+                            : path.join(config.rootPath, config.sources.sourcePath);
 
                         config.sources.updateVersion.filePath = path.isAbsolute(config.sources.updateVersion.filePath)
                             ? config.sources.updateVersion.filePath
@@ -324,8 +335,7 @@ class Config {
     }
 
     /**
-     * Verifies app version and calculates app label,
-     * iOS Bundle Identifier and Android Version Code
+     * Verifies app version and calculates app label
      * @param {Object} program
      */
     setBuildVersion(program) {
@@ -340,12 +350,6 @@ class Config {
         // Set app version label from program args
         this.app.versionLabel = program.args[0];
 
-        // Set Android Version Code
-        this.android.versionCode = (program.androidVersionCode) ? program.androidVersionCode : android.calculateVersionCode(this.app.version);
-
-        // Set iOS Bundle Version
-        this.ios.bundleVersion = (program.iosBundleVersion) ? program.iosBundleVersion : ios.calculateBundleVersion(this.app.version);
-
         // Set if builds are hidden on wireless distribution html page
         if (_.isBoolean(program.hidden)) {
             this.hidden = program.hidden;
@@ -354,6 +358,22 @@ class Config {
         if (this.hidden) {
             this.app.versionLabel += '_DEV';
         }
+    }
+
+    /**
+     * Set Android Version Code
+     * @param {String} androidVersionCode
+     */
+    setAndroidBuildVersion(androidVersionCode) {
+        this.android.versionCode = androidVersionCode || android.calculateVersionCode(this.app.version);
+    }
+
+    /**
+     * Set iOS Bundle Identifier
+     * @param {String} iosBundleVersion
+     */
+    setiOSBuildVersion(iosBundleVersion) {
+        this.ios.bundleVersion = iosBundleVersion || ios.calculateBundleVersion(this.app.version);
     }
 
     readChangeLog(changeLog, next) {
@@ -420,7 +440,7 @@ class Config {
         // Check params for FTP build deploy
         if (this.tasks.contains(angularTasks.DEPLOY_BUILD)) {
             angular.verifyBuildDir(this);
-            remote.verifyUploadBuildsSteps(this);
+            remote.verifyAngularDeploySteps(this);
         }
 
         // Check params for FTP build uploader on the repo
@@ -478,8 +498,12 @@ class Config {
 
     printRecap() {
         const config = this;
+        let titleRecap = config.app.name;
+        if (!config.app.name) {
+            titleRecap = 'Distribute';
+        }
         return new Promise(resolve => {
-            asciimo.write('  ' + config.app.name, 'Ogre', art => {
+            asciimo.write('  ' + titleRecap, 'Ogre', art => {
                 logger.info('\n#########################################################');
                 logger.info(art);
                 logger.info('#########################################################');

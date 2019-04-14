@@ -158,12 +158,12 @@ const startDistribution = () => {
             // Start upload
             deployBuildProcessCompleted = angular.deploy({
                 folderSourcePath : path.join(config.buildsDir),
-                folderDestPath   : config.remote.builds.angularDestinationPath,
+                folderDestPath   : config.remote.deploy.angularDestinationPath,
                 server           : {
-                    host : config.remote.builds.host,
-                    port : config.remote.builds.port,
-                    user : config.remote.builds.user,
-                    pass : config.remote.builds.password
+                    host : config.remote.deploy.host,
+                    port : config.remote.deploy.port,
+                    user : config.remote.deploy.user,
+                    pass : config.remote.deploy.password
                 },
                 verbose : config.verbose
             });

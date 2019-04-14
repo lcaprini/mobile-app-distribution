@@ -16,7 +16,7 @@
   "buildsDir": "dist/nome_app",
 
   "remote": {
-    "builds": {
+    "deploy": {
       "host": "lcapriniftp",
       "user": "lcaprini-user",
       "password": "lcaprini-password",

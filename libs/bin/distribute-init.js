@@ -27,19 +27,7 @@ const init = () => {
         ANGULAR : 'Angular'
     };
 
-    let appName = utils.findAppName();
-
-    inquirer.prompt([{
-        type    : 'input',
-        name    : 'name',
-        message : 'app.name',
-        default : appName
-    }, {
-        type    : 'input',
-        name    : 'label',
-        message : 'app.label',
-        default : appName
-    }, {
+    inquirer.prompt({
         type    : 'list',
         name    : 'distribute',
         message : 'Which distribute system you want initilize?',
@@ -48,23 +36,35 @@ const init = () => {
             DISTRIBUTE.IOS,
             DISTRIBUTE.ANDROID,
             DISTRIBUTE.ANGULAR
-        ]}
-    ]).then(({name, label, distribute}) => {
-        let config = {
-            app : {
-                name  : name,
-                label : label
-            }
-        };
+        ]
+    }).then(({distribute}) => {
+        let config = {};
         switch (distribute) {
         case DISTRIBUTE.CORDOVA:
-            cordova.init(config).then(
+            let appName = utils.findAppName();
+            inquirer.prompt([{
+                type    : 'input',
+                name    : 'name',
+                message : 'app.name',
+                default : appName
+            }, {
+                type    : 'input',
+                name    : 'label',
+                message : 'app.label',
+                default : appName
+            }]).then(({name, label}) => {
+                config.app = {
+                    name  : name,
+                    label : label
+                };
+                cordova.init(config).then(
                     config => {
                         fs.writeFileSync(path.join(workingDir, './distribute.json'), JSON.stringify(config, null, 4));
                         logger.section('distribute.json created');
                         process.exit(0);
                     }
                 );
+            });
             break;
         case DISTRIBUTE.ANGULAR:
             angular.init(config).then(
