@@ -147,6 +147,11 @@ To use `distribute` command you'll need to create a `distribute.json` first, lik
 
 The following paragraphs describes all sections of a tipical `distribute.json` for a Cordova app.
 
+#### App section
+All details about app; all are mandatory.
+* `app.name`__*__ : App's name, usally is the Cordova project's name
+* `app.label`__*__ : App's label vibile on the launcher of device
+
 #### Source version change section
 All details about web app version change; if you require the version changing task (`v`) all these fields are mandatory.
 * `sources.updateVersion.filePath`__*__ : Path of file that contains `sources.updateVersion.replacingTag` tag that process use to print inside the app's version label
@@ -182,8 +187,6 @@ All details about the processes to uppload the buil deploy builds over FTP/SFTP;
 
 #### Email section
 All details about final email sending; if you require the send email task (`e`) all fields marked with __*__ are mandatory.
-* `app.name`__*__ : App's name, usally is the Angular project's name
-* `app.label`__*__ : App's label
 * `email.host`__*__ : SMTP host of email service
 * `email.port` : SMTP port of email service; if not specified the default value will be `25`
 * `email.user`__*__ : Email sender public name
