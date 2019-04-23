@@ -36,12 +36,13 @@
       "name": "Angular",
       "program": "${workspaceRoot}/libs/bin/distribute-angular.js",
       "args": [
-        "1.0.11",
+        "2.0.0",
         "--config",
         "/home/federico/Projects/2019/angular6-material-panel/distribute.json",
         "--tasks",
-        "bd",
-        "-f"
+        "ue",
+        "-f",
+        "-v"
       ]
     },
     {

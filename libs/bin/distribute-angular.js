@@ -8,7 +8,6 @@ const path = require('path');
 const config = require('../config');
 const utils = require('../utils');
 const email = require('../email');
-const remote = require('../remote');
 const angular = require('../angular').ANGULAR;
 const TASKS = require('../angular').TASKS;
 
@@ -75,19 +74,16 @@ const finalize = () => {
      */
     if (config.tasks.contains(TASKS.SEND_EMAIL)) {
         let emailData = {
-            appName         : config.app.name,
-            appLabel        : config.app.label,
+            appName         : config.app.name || utils.findAppName(),
+            appLabel        : config.app.label || config.app.name || utils.findAppName(),
             appVersion      : config.app.versionLabel,
             changelog       : config.changeLog,
             releaseDate     : config.releaseDate,
             repoHomepageUrl : finalRepoHomepageUrl
         };
 
-        if (config.tasks.contains(TASKS.BUILD_ANDROID)) {
-            emailData.androidBuildPath = config.remote.repo.androidUrlPath;
-        }
-        if (config.tasks.contains(TASKS.BUILD_IOS)) {
-            emailData.iosBuildPath = config.remote.repo.iosManifestUrlPath;
+        if (config.tasks.contains(TASKS.UPLOAD_REPO)) {
+            emailData.angularBuildPath = config.remote.repo.angularUrlPath;
         }
         const emailBody = angular.composeEmail(emailData);
         email.sendEmail({

@@ -104,20 +104,19 @@ const Angular = {
      * Compose email for
      */
     composeEmail({
-    appName,
-    appLabel,
-    appVersion,
-    changelog,
-    releaseDate,
-    repoHomepageUrl,
-    androidBuildPath = null,
-    iosBuildPath = null
-  }) {
+        appName,
+        appLabel,
+        appVersion,
+        changelog,
+        releaseDate,
+        repoHomepageUrl,
+        angularBuildPath = null
+    }) {
         let bodyEmail = fs
-      .readFileSync(
-        path.join(__dirname, '../resources/distribute-email.tmpl.html')
-      )
-      .toString();
+            .readFileSync(
+                path.join(__dirname, '../resources/distribute-angular-email.tmpl.html')
+            )
+            .toString();
 
         bodyEmail = bodyEmail.replace(/___APP_LABEL___/g, appLabel);
         bodyEmail = bodyEmail.replace(/___APP_NAME___/g, appName);
@@ -132,47 +131,17 @@ const Angular = {
         bodyEmail = bodyEmail.replace(/___RELEASE_DATE___/g, releaseDate);
         bodyEmail = bodyEmail.replace(/___REPO_HOMEPAGE_URL___/g, repoHomepageUrl);
 
-        const androidDirectDownload = androidBuildPath;
-        const iosDirectDownload = iosBuildPath
-      ? 'itms-services://?action=download-manifest&url=' + iosBuildPath
-      : null;
+        const angularDirectDownload = angularBuildPath;
 
-        if (androidDirectDownload) {
+        if (angularDirectDownload) {
             bodyEmail = bodyEmail.replace(
-        /___ANDROID_DIRECT_DOWNLOAD_URL___/g,
-        androidDirectDownload
-      );
+                /___ANGULAR_DIRECT_DOWNLOAD_URL___/g,
+                angularDirectDownload
+            );
             bodyEmail = bodyEmail.replace(
-        /___ANDROID_DIRECT_DOWNLOAD_ENCODED_URL___/g,
-        encodeURIComponent(androidDirectDownload)
-      );
-            bodyEmail = bodyEmail.replace(
-        /___ANDROID_DOWNLOAD_NOT_AVAILABLE___/g,
-        ''
-      );
-        }
-        else {
-            bodyEmail = bodyEmail.replace(
-        /___ANDROID_DOWNLOAD_NOT_AVAILABLE___/g,
-        'hidden'
-      );
-        }
-        if (iosDirectDownload) {
-            bodyEmail = bodyEmail.replace(
-        /___IOS_DIRECT_DOWNLOAD_URL___/g,
-        iosDirectDownload
-      );
-            bodyEmail = bodyEmail.replace(
-        /___IOS_DIRECT_DOWNLOAD_ENCODED_URL___/g,
-        encodeURIComponent(iosDirectDownload)
-      );
-            bodyEmail = bodyEmail.replace(/___IOS_DOWNLOAD_NOT_AVAILABLE___/g, '');
-        }
-        else {
-            bodyEmail = bodyEmail.replace(
-        /___IOS_DOWNLOAD_NOT_AVAILABLE___/g,
-        'hidden'
-      );
+                /___ANDROID_DIRECT_DOWNLOAD_ENCODED_URL___/g,
+                encodeURIComponent(angularDirectDownload)
+            );
         }
 
         return bodyEmail;
