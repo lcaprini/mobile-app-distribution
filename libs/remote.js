@@ -1,7 +1,7 @@
 'use strict';
 
 const _ = require('lodash');
-const JSFtp = require('jsftp');
+const ftp = require('basic-ftp');
 const fs = require('fs');
 const archiver = require('archiver');
 const path = require('path');
@@ -12,43 +12,61 @@ const logger = require('./logger');
 
 const Remote = {
 
-    downloadFile({file, server}) {
+    downloadFile({localFile, remoteFile, server}) {
         return new Promise((resolve, reject) => {
-            let ftp = new JSFtp(server);
-            ftp.get(file, (err, socket) => {
-                if (err) {
-                    reject(new Error(err));
-                    throw new Error(err);
-                }
-
-                let builds = '';
-                socket.on('data', chunk => {
-                    builds += chunk.toString();
-                });
-                socket.on('close', err => {
-                    ftp.destroy();
-                    if (err) {
-                        reject(new Error(err));
-                        throw new Error(err);
-                    }
-                    resolve(builds);
-                });
-                socket.resume();
-            });
+            const client = new ftp.Client();
+            client.access({
+                host     : server.host,
+                port     : server.port,
+                user     : server.user,
+                password : server.pass
+            }).then(
+              () => {
+                  client.download(fs.createWriteStream(localFile), remoteFile).then(
+                  () => {
+                      client.close();
+                      resolve();
+                  },
+                  (err) => {
+                      reject(new Error(err));
+                      throw new Error(err);
+                  }
+                );
+              },
+              (err) => {
+                  reject(new Error(err));
+                  throw new Error(err);
+              }
+            );
         });
     },
 
     uploadFile({localFile, server, remoteFile}) {
         return new Promise((resolve, reject) => {
-            let ftp = new JSFtp(server);
-            ftp.put(localFile, remoteFile, err => {
-                ftp.destroy();
-                if (err) {
-                    reject(new Error(err));
-                    throw new Error(err);
-                }
-                resolve();
-            });
+            const client = new ftp.Client();
+            client.access({
+                host     : server.host,
+                port     : server.port,
+                user     : server.user,
+                password : server.pass
+            }).then(
+              () => {
+                  client.upload(fs.createReadStream(localFile), remoteFile).then(
+                  () => {
+                      client.close();
+                      resolve();
+                  },
+                  (err) => {
+                      reject(new Error(err));
+                      throw new Error(err);
+                  }
+                );
+              },
+              (err) => {
+                  reject(new Error(err));
+                  throw new Error(err);
+              }
+            );
         });
     },
 
@@ -56,12 +74,12 @@ const Remote = {
         logger.section(`Update repository`);
 
         return new Promise((resolve, reject) => {
-            Remote.downloadFile({file : repoPath, server}).then(
-                data => {
-                    let jsonFile = JSON.parse(data);
+            const tmpJsonFile = path.join(rootPath, `./.builds.json`);
+            Remote.downloadFile({localFile : tmpJsonFile, remoteFile : repoPath, server}).then(
+                () => {
+                    let jsonFile = JSON.parse(fs.readFileSync(tmpJsonFile));
                     let build = _.remove(jsonFile.builds, b => {
-                        return b.version === version
-                        ;
+                        return b.version === version;
                     })[0];
                     if (!build) {
                         build = {
@@ -78,7 +96,7 @@ const Remote = {
                         build.iosBuildPath = iosBuildPath;
                     }
                     jsonFile.builds.unshift(build);
-                    const tmpJsonFile = path.join(rootPath, `./.builds.json`);
+
                     fs.writeFileSync(tmpJsonFile, JSON.stringify(jsonFile, null, 4), {encoding : 'utf-8', flag : 'w'});
                     Remote.uploadFile({
                         localFile  : tmpJsonFile,
