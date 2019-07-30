@@ -19,19 +19,17 @@
             "name": "Cordova",
             "program": "${workspaceRoot}/libs/bin/distribute-cordova.js",
             "args": [
-                "1.8.5-patch6",
+                "0.1.0",
                 "--config",
-                "/Users/Lucacaprini/Development/FIAT/iLinkQuotation/distribute.json",
-                "--android-version-code",
-                "10805",
-                "--ios-bundle-version",
-                "185",
+                "/Users/lucacaprini/Development/Projects/TesserinoCaccia/distribute.json",
                 "--tasks",
-                "z",
-                "-h",
+                "iu",
+                "-c",
+                "last-changelog.txt",
                 "-f"
             ]
-        },{
+        },
+        {
             "type": "node",
             "request": "launch",
             "name": "Serve",
@@ -41,13 +39,15 @@
                 "--port",
                 "9002"
             ]
-        },{
+        },
+        {
             "type": "node",
             "request": "launch",
             "name": "Wd",
             "program": "${workspaceRoot}/libs/bin/distribute-wd.js",
             "args": []
-        },{
+        },
+        {
             "type": "node",
             "request": "launch",
             "name": "Generate Icon",
@@ -56,7 +56,8 @@
                 "--icon",
                 "/Users/Masterplan/Desktop/icon.png"
             ]
-        },{
+        },
+        {
             "name": "Webpack",
             "type": "node",
             "request": "launch",
