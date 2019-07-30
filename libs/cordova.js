@@ -148,7 +148,6 @@ const Cordova = {
         this.buildIos({buildIosCommand, cordovaPath, verbose});
         ios.setDisplayName({infoPlistPath, displayName});
         const projectPath = path.join(cordovaPath, './platforms/ios');
-        ios.cleanProject({projectPath, verbose});
         ios.archiveProject({projectPath, appName, schema, verbose});
         ios.exportIpa({projectPath, appName, ipaFileName, exportOptionsPlist, exportOptionsPlistPath, exportDir, verbose});
         ios.createManifest({id, version, ipaUrlPath, manifestPath, appName, schema, exportDir});

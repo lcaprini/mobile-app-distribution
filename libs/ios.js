@@ -25,21 +25,6 @@ class Ios {
         fs.writeFileSync(infoPlistPath, updatedPlist);
     }
 
-    cleanProject({ projectPath, verbose }) {
-        logger.section(`Clean iOS Project in '${projectPath}'`);
-        process.chdir(projectPath);
-        const cmdXcodebuildClean = 'xcodebuild clean -configuration Release -alltargets';
-        let err = shell.exec(cmdXcodebuildClean, { silent : !verbose }).stderr;
-        if (shell.error()) {
-            // shelljs has already printed error,
-            // so I print it only if verbose mode is OFF
-            if (!verbose) {
-                logger.error(err);
-            }
-            process.exit(1);
-        }
-    }
-
     archiveProject({ projectPath, appName, schema, verbose }) {
         const xcodeprojFilePath = path.join(projectPath, `./${appName}.xcodeproj`);
         const xcarchiveFilePath = path.join(projectPath, `./${appName}.xcarchive`);
