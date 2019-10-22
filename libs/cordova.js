@@ -145,7 +145,7 @@ const Cordova = {
     distributeIos({appName, displayName, ipaFileName, id, version, bundleVersion, buildWorkspace, schema, infoPlistPath, cordovaPath, buildIosCommand = 'cordova build ios', exportOptionsPlist, exportOptionsPlistPath, exportDir, ipaUrlPath, manifestPath, verbose = false}) {
         this.setId({cordovaPath, id});
         this.setIosBundleVersion({cordovaPath, bundleVersion});
-        // this.buildIos({buildIosCommand, cordovaPath, verbose});
+        this.buildIos({buildIosCommand, cordovaPath, verbose});
         ios.setDisplayName({infoPlistPath, displayName});
         const projectPath = path.join(cordovaPath, './platforms/ios');
         if(buildWorkspace){
