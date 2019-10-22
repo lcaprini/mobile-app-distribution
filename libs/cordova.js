@@ -142,13 +142,18 @@ const Cordova = {
     /**
      * Exec all task to prepare and build the iOS platform
      */
-    distributeIos({appName, displayName, ipaFileName, id, version, bundleVersion, schema, infoPlistPath, cordovaPath, buildIosCommand = 'cordova build ios', exportOptionsPlist, exportOptionsPlistPath, exportDir, ipaUrlPath, manifestPath, verbose = false}) {
+    distributeIos({appName, displayName, ipaFileName, id, version, bundleVersion, buildWorkspace, schema, infoPlistPath, cordovaPath, buildIosCommand = 'cordova build ios', exportOptionsPlist, exportOptionsPlistPath, exportDir, ipaUrlPath, manifestPath, verbose = false}) {
         this.setId({cordovaPath, id});
         this.setIosBundleVersion({cordovaPath, bundleVersion});
-        this.buildIos({buildIosCommand, cordovaPath, verbose});
+        // this.buildIos({buildIosCommand, cordovaPath, verbose});
         ios.setDisplayName({infoPlistPath, displayName});
         const projectPath = path.join(cordovaPath, './platforms/ios');
-        ios.archiveProject({projectPath, appName, schema, verbose});
+        if(buildWorkspace){
+            ios.archiveWorkspace({projectPath, appName, schema, verbose});
+        }
+        else {
+            ios.archiveProject({projectPath, appName, schema, verbose});
+        }
         ios.exportIpa({projectPath, appName, ipaFileName, exportOptionsPlist, exportOptionsPlistPath, exportDir, verbose});
         ios.createManifest({id, version, ipaUrlPath, manifestPath, appName, schema, exportDir});
     },

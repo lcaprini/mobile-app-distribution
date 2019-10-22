@@ -25,6 +25,23 @@ class Ios {
         fs.writeFileSync(infoPlistPath, updatedPlist);
     }
 
+    archiveWorkspace({ projectPath, appName, schema, verbose }) {
+        const xcodeWorkspaceFilePath = path.join(projectPath, `./${appName}.xcworkspace`);
+        const xcarchiveFilePath = path.join(projectPath, `./${appName}.xcarchive`);
+        logger.section(`Archive iOS Workspace into '${xcarchiveFilePath}'`);
+        process.chdir(projectPath);
+        const cmdXcodebuildArchive = `xcodebuild archive -workspace '${xcodeWorkspaceFilePath}' -scheme '${schema}' -archivePath '${xcarchiveFilePath}'`;
+        let err = shell.exec(cmdXcodebuildArchive, { silent : !verbose }).stderr;
+        if (shell.error()) {
+            // shelljs has already printed error,
+            // so I print it only if verbose mode is OFF
+            if (!verbose) {
+                logger.error(err);
+            }
+            process.exit(1);
+        }
+    }
+
     archiveProject({ projectPath, appName, schema, verbose }) {
         const xcodeprojFilePath = path.join(projectPath, `./${appName}.xcodeproj`);
         const xcarchiveFilePath = path.join(projectPath, `./${appName}.xcarchive`);

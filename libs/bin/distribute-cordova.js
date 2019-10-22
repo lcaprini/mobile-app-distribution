@@ -179,6 +179,7 @@ const startDistribution = () => {
                     id            : config.ios.bundleId,
                     version       : config.app.version,
                     bundleVersion : config.ios.bundleVersion,
+                    buildWorkspace: config.ios.buildWorkspace,
                     schema        : config.ios.targetSchema,
 
                     infoPlistPath          : config.ios.infoPlistPath,
