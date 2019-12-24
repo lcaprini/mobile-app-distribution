@@ -211,12 +211,13 @@ const Remote = {
     _sftpDeploy({folderSourcePath, folderDestPath, server, verbose}) {
         return new Promise((resolve, reject) => {
             const sftp = new SftpUpload({
-                username  : server.user,
-                password  : server.pass,
-                host      : server.host,
-                port      : server.port,
-                path      : folderSourcePath,
-                remoteDir : folderDestPath
+                username   : server.user,
+                password   : server.pass,
+                host       : server.host,
+                port       : server.port,
+                privateKey : fs.readFileSync(server.privateKey),
+                path       : folderSourcePath,
+                remoteDir  : folderDestPath
             });
 
             sftp.on('error', function(err) {
@@ -246,9 +247,14 @@ const Remote = {
         if (!config.remote.deploy.user) {
             throw new Error('FTP build upload error: missing "remote.deploy.user" value in config file');
         }
-        if (!config.remote.deploy.password) {
-            throw new Error('FTP build upload error: missing "remote.deploy.password" value in config file');
+        if (!config.remote.deploy.password && !config.remote.deploy.privateKey) {
+            throw new Error('FTP build upload error: missing "remote.deploy.password" and "remote.deploy.privateKey" values in config file');
         }
+
+        if (config.remote.deploy.privateKey && !fs.existsSync(config.remote.deploy.privateKey)) {
+            throw new Error('FTP build upload error: file not found on "remote.deploy.privateKey" value in config file');
+        }
+
         const angularTasks = require('./angular').TASKS;
         if (config.tasks.contains(angularTasks.DEPLOY_BUILD)) {
             if (!config.remote.deploy.angularDestinationPath) {
@@ -383,7 +389,12 @@ const Remote = {
             name    : 'angularDestinationPath',
             message : 'remote.deploy.angularDestinationPath',
             default : '/var/www/html/test/builds/angular'
-        }]).then(({port, host, user, password, angularDestinationPath}) => {
+        }, {
+            type    : 'input',
+            name    : 'privateKey',
+            message : 'remote.deploy.privateKey',
+            default : ''
+        }]).then(({port, host, user, password, angularDestinationPath, privateKey}) => {
             if (!config.remote) {
                 config.remote = {};
             }
@@ -395,6 +406,7 @@ const Remote = {
             config.remote.deploy.user = user;
             config.remote.deploy.password = password;
             config.remote.deploy.angularDestinationPath = angularDestinationPath;
+            config.remote.deploy.privateKey = privateKey;
             return config;
         });
     },

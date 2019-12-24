@@ -20,7 +20,8 @@
       "host": "lcapriniftp",
       "user": "lcaprini-user",
       "password": "lcaprini-password",
-      "angularDestinationPath": "/var/www/html/test/angular_app"
+      "angularDestinationPath": "/var/www/html/test/angular_app",
+      "privateKey": "/home/federico/Projects/2019/test-sftp-upload/smart-agricolture_private.key"
     },
 
     "repo": {
