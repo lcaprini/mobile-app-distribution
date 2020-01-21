@@ -215,7 +215,7 @@ const Remote = {
                 password   : server.pass,
                 host       : server.host,
                 port       : server.port,
-                privateKey : fs.readFileSync(server.privateKey),
+                privateKey : server.privateKey ? fs.readFileSync(server.privateKey) : null,
                 path       : folderSourcePath,
                 remoteDir  : folderDestPath
             });
