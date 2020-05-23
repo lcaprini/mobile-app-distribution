@@ -1,4 +1,5 @@
 # Mobile App Distribution
+
 Compile, build and publish over FTP a Cordova mobile app for wireless distribution.
 
 ## Table of Contents
@@ -35,6 +36,7 @@ Compile, build and publish over FTP a Cordova mobile app for wireless distributi
 Mobile App Distribution is a command line tool for distributing a Cordova mobile app over FTP to allow its download over the air. It also have many command for icons and splashes generation, a local server creation, and so on. Add support for distributing a Angular 2+ app over FTP to allow its download over the air and FTP/SFTP server deploy;
 
 ## Installation
+
 To make `distribute` command line available in your system you'll need to install [Mobile App Distribution](https://github.com/lcaprini/mobile-app-distribution) globally first. You can do that with the following command:
 
     $ npm install mobile-app-distribution -g
@@ -46,6 +48,7 @@ You should be now able to run `distribute` via terminal with the following comma
 ## Command line usage
 
 ### Commands
+
 Distribute tools have multiple commands to cover all aspects of mobile app distribution:
 
 * `$ distribute init`: The utility makes some questions and with them answers initializes the config file for distribution process.
@@ -58,43 +61,57 @@ Distribute tools have multiple commands to cover all aspects of mobile app distr
 * `$ distribute android`: *[Coming soon...]* The utility launches all tasks for building and uploading an Android mobile app
 
 ### Version
+
 To see the installed version number run the following command:
 
     $ distribute --version
 
 ### Help
+
 To see general help menu and available commands run the following command:
 
     $ distribute --help
 
+
 ### Cordova configuration
+
 To use `distribute` command you'll need to create a `distribute.json` first, like [`distribute-example.json`](./resources/distribute-example.json).
 
 The following paragraphs describes all sections of a tipical `distribute.json` for a Cordova app.
 
 #### App section
+
 All details about app; all are mandatory.
-* `app.name`__*__ : App's name, usally is the Cordova project's name
-* `app.label`__*__ : App's label vibile on the launcher of device
+
+- `app.name`**\*** : App's name, usally is the Cordova project's name
+- `app.label`**\*** : App's label vibile on the launcher of device
 
 #### Source version change section
+
 All details about web app version change; if you require the version changing task (`v`) all these fields are mandatory.
-* `sources.htmlVersionPath`__*__ : Path of HTML file that contains `<mad-app-version></mad-app-version>` tag that process use to print inside the app's version label.
+
+- `sources.htmlVersionPath`__*__ : Path of HTML file that contains `<mad-app-version></mad-app-version>` tag that process use to print inside the app's version label.
 
 #### Source compile section
+
 All details about HTML, CSS and Javscript compiling; if you require the source compiling task (`c`) all these fields are mandatory.
-* `sources.compileCommand`__*__ : Command line tool used to build the web app
-* `sources.compilePath`__*__ : Path in where to launch the `sources.compileCommand`
+
+- `sources.compileCommand`**\*** : Command line tool used to build the web app
+- `sources.compilePath`**\*** : Path in where to launch the `sources.compileCommand`
 
 #### General Cordova build section
+
 General details about Cordova build; all fields are mandatory.
-* `cordova.path`__*__ : Path in where to launch all cordova commands
+
+- `cordova.path`**\*** : Path in where to launch all cordova commands
 
 #### iOS build section
+
 All details about building, exporting and signing iOS platform; if you require the iOS build task (`i`) all fields marked with __*__ are mandatory.
 * `cordova.buildIosCommand` : Command to build iOS platform; if not specified the default value will be `cordova build ios`
 * `ios.bundleId`__*__ : Bundle ID app to write into info plist of iOS platform.
 * `ios.infoPlistPath` : Main plist of iOS XCode project; if not specified the tool will look for `Info.plist` or `<app.name>-Info.plist`
+* `ios.buildWorkspace` : `false` if you want build the `xcodeproj` file instead the `xcworkspace`; if not specified the default value will be `true` (build `xcworkspace`)
 * `ios.targetSchema` : Xcode project schema to build; if not specified the default value will be `app.name`
 * `ios.exportOptionsPlist`__*__ : JSON object with same attributes and values of iOS's export options plist file (`xcodebuild --help` to view all docs). At least the following attributes must be specified
   * `method`: (`app-store`|`package`|`ad-hoc`|`enterprise`|`development`|`developer-id`)
@@ -103,64 +120,51 @@ All details about building, exporting and signing iOS platform; if you require t
 * `ios.exportOptionsPlistPath` : Path of a phisical exportOptionsPlist file with all attributes properly configured. This field is an alternative to `ios.exportOptionsPlist`
 
 #### Android build section
-All details about building, exporting and signing Android platform; if you require the Android build task (`a`) all fields marked with __*__ are mandatory.
-* `cordova.buildAndroidCommand` : Command to build iOS platform; if not specified the default value will be `cordova build android --relase`
-* `android.bundleId`__*__ : Bundle ID app to write into info plist of iOS platform
-* `android.keystore`__*__ : JSON object that specify an Android keystore and its credentials for signing process:
-   * `path`__*__ : Path of the keystore file
-   * `alias`__*__ : Alias of the keystore file
-   * `password`__*__ : Password of the keystore file
+
+All details about building, exporting and signing Android platform; if you require the Android build task (`a`) all fields marked with **\*** are mandatory.
+
+- `cordova.buildAndroidCommand` : Command to build iOS platform; if not specified the default value will be `cordova build android --relase`
+- `android.bundleId`**\*** : Bundle ID app to write into info plist of iOS platform
+- `android.keystore`**\*** : JSON object that specify an Android keystore and its credentials for signing process:
+  - `path`**\*** : Path of the keystore file
+  - `alias`**\*** : Alias of the keystore file
+  - `password`**\*** : Password of the keystore file
 
 #### Builds upload, repo update and sources upload sections
-All details about the processes to upload created builds over FTP and update remote file to allow download over the web; if you require build's upload task (`u`) all fields marked with __*__ are mandatory.
-* `remote.builds.host`__*__ : FTP host for builds upload
-* `remote.builds.port` : FTP port for builds upload; if not specified the default value will be `21`
-* `remote.builds.user`__*__ : Username for FTP connection with read and write permissions
-* `remote.builds.password`__*__ : Password of `remote.builds.user`
-* `remote.builds.iosDestinationPath`__*__ : Absolute path of folder will contains all iOS `.ipa` and `.plist` files
-* `remote.builds.androidDestinationPath`__*__ : Absolute path of folder will contains all Android `.apk` files
-* `remote.repo.host`__*__ : FTP host for repository update
-* `remote.repo.port` : FTP port for repository update; if not specified the default value will be `21`
-* `remote.repo.user`__*__ : Username for FTP connection with read and write permissions
-* `remote.repo.password`__*__ : Password of `remote.repo.user`
-* `remote.repo.iosUrlPath`__*__ : Public URL of `remote.builds.iosDestinationPath` for iOS app download
-* `remote.repo.androidUrlPath`__*__ : Public URL of `remote.builds.androidDestinationPath` for Android app download
-* `remote.repo.jsonPath`__*__ : Absolute path of remote folder that contains `builds.json` file to update it
-* `remote.repo.homepageUrl`__*__ : Public URL of `remote.repo.jsonPath` for wireless distribution repository
-* `remote.sources.host`__*__ : FTP host for sources upload
-* `remote.sources.port` : FTP port for sources upload; if not specified the default value will be `21`
-* `remote.sources.user`__*__ : Username for FTP connection with read and write permissions
-* `remote.sources.password`__*__ : Password of `remote.sources.user`
-* `remote.sources.sourcesPath`__*__ : Absolute path of folder will contains all zipped sources
+All details about the processes to upload created builds over FTP and update remote file to allow download over the web; if you require build's upload task (`u`) all fields marked with **\*** are mandatory.
 
-#### Email section
-All details about final email sending; if you require the send email task (`e`) all fields marked with __*__ are mandatory.
-* `email.host`__*__ : SMTP host of email service
-* `email.port` : SMTP port of email service; if not specified the default value will be `25`
-* `email.user`__*__ : Email sender public name
-* `email.password`__*__ : Password of `email.user`
-* `email.from`__*__ : Sender's email
-* `email.to`__*__ : List of email's recipients
+- `remote.builds.host`**\*** : FTP host for builds upload
+- `remote.builds.port` : FTP port for builds upload; if not specified the default value will be `21`
+- `remote.builds.user`**\*** : Username for FTP connection with read and write permissions
+- `remote.builds.password`**\*** : Password of `remote.builds.user`
+- `remote.builds.iosDestinationPath`**\*** : Absolute path of folder will contains all iOS `.ipa` and `.plist` files
+- `remote.builds.androidDestinationPath`**\*** : Absolute path of folder will contains all Android `.apk` files
+
+- `remote.repo.host`**\*** : FTP host for repository update
+- `remote.repo.port` : FTP port for repository update; if not specified the default value will be `21`
+- `remote.repo.user`**\*** : Username for FTP connection with read and write permissions
+- `remote.repo.password`**\*** : Password of `remote.repo.user`
+- `remote.repo.iosUrlPath`**\*** : Public URL of `remote.builds.iosDestinationPath` for iOS app download
+- `remote.repo.androidUrlPath`**\*** : Public URL of `remote.builds.androidDestinationPath` for Android app download
+- `remote.repo.jsonPath`**\*** : Absolute path of remote folder that contains `builds.json` file to update it
+- `remote.repo.homepageUrl`**\*** : Public URL of `remote.repo.jsonPath` for wireless distribution repository
+
+- `remote.sources.host`**\*** : FTP host for sources upload
+- `remote.sources.port` : FTP port for sources upload; if not specified the default value will be `21`
+- `remote.sources.user`**\*** : Username for FTP connection with read and write permissions
+- `remote.sources.password`**\*** : Password of `remote.sources.user`
+- `remote.sources.sourcesPath`**\*** : Absolute path of folder will contains all zipped sources
 
 ### Angular configuration
 To use `distribute` command you'll need to create a `distribute.json` first, like [`distribute-example.json`](./resources/distribute-angular-example.json).
 
 The following paragraphs describes all sections of a tipical `distribute.json` for a Cordova app.
 
-#### App section
-All details about app; all are mandatory.
-* `app.name`__*__ : App's name, usally is the Cordova project's name
-* `app.label`__*__ : App's label vibile on the launcher of device
-
 #### Source version change section
 All details about web app version change; if you require the version changing task (`v`) all these fields are mandatory.
-* `sources.updateVersion.filePath`__*__ : Path of file that contains `sources.updateVersion.replacingTag` tag that process use to print inside the app's version label
-* `sources.updateVersion.replacingTag`__*__ : Tag to replace; if not specified the default value will be `{version}`.
 
-#### Source compile section
-All details about HTML, CSS and Javscript compiling; if you require the source compiling task (`c`) all these fields are mandatory.
-* `sources.compileCommand`__*__ : Command line tool used to build the Angular app
-* `sources.sourcePath`__*__ : Path in where to launch the `sources.compileCommand`
+- `sources.updateVersion.filePath`__*__ : Path of file that contains `sources.updateVersion.replacingTag` tag that process use to print inside the app's version label
+- `sources.updateVersion.replacingTag`__*__ : Tag to replace; if not specified the default value will be `{version}`.
 
 #### Server deploy
 All details about the processes to sever deploy over FTP/SFTP; if you require server deploy task (`d`) all fields marked with __*__ are mandatory.
@@ -195,9 +199,11 @@ All details about final email sending; if you require the send email task (`e`) 
 * `email.to`__*__ : List of email's recipients
 
 ## `init` command
+
 This utility makes some questions to user and create the `distribute.json` file for make builds. Please see [Configuration](#configuration) paragraph to find more info about all configuration attributes.
 
 ## `cordova` command
+
 This utility launches all tasks for compiling, building and uploading a Cordova mobile app.
 
 ### <a id="synopsis-cordova"></a> Synopsis
@@ -206,13 +212,13 @@ This utility launches all tasks for compiling, building and uploading a Cordova 
 
 To correcly run process you'll need to specify the app version in [semver](http://semver.org/) format and one or more task from this list:
 
-* `v` : Changes app version editing the `config.xml` of Cordova project
-* `c` : Compiles HTML, Javascript, CSS files into `www` folder using the command (script or task runner) specified in `distribute.json`
-* `i` : Builds, archives, exports a certified `.ipa` file with its `.plist` and moves all files into `buildsDir` folder
-* `a` : Builds, archives, exports a certified `.apk` file and moves it into `buildsDir` folder
-* `u` : Uploads the created app on the remote FTP server
-* `z` : Zip and upload Cordova `www` folder on the remote FTP server
-* `e` : Sends an email with links and QRCode for download when the process ends
+- `v` : Changes app version editing the `config.xml` of Cordova project
+- `c` : Compiles HTML, Javascript, CSS files into `www` folder using the command (script or task runner) specified in `distribute.json`
+- `i` : Builds, archives, exports a certified `.ipa` file with its `.plist` and moves all files into `buildsDir` folder
+- `a` : Builds, archives, exports a certified `.apk` file and moves it into `buildsDir` folder
+- `u` : Uploads the created app on the remote FTP server
+- `z` : Zip and upload Cordova `www` folder on the remote FTP server
+- `e` : Sends an email with links and QRCode for download when the process ends
 
 ### <a id="options-cordova"></a> Options
 
@@ -282,6 +288,7 @@ To correcly run process you'll need to specify the app version in [semver](http:
   _descr_: Hide this build from repository homepage; use it for pre release and alpha/beta versions
 
 ## `wd` command
+
 This utility creates a new folder called `wd` that contains all files for wireless distribution repository, ready to manually upload on FTP repo.
 
 ### <a id="synopsis-wd"></a> Synopsis
@@ -289,6 +296,7 @@ This utility creates a new folder called `wd` that contains all files for wirele
     $ distribute wd
 
 ## `resources` command
+
 This utility creates icons and splashes for iOS and Android platforms from one icon and one splash.
 
 ### <a id="synopsis-resources"></a> Synopsis
@@ -310,15 +318,16 @@ This utility creates icons and splashes for iOS and Android platforms from one i
   _default_: `i,a`
 
 ## `serve` command
+
 This utility creates and starts a local web server to test every single page application, like a Cordova `www` folder.
 
 ### <a id="synopsis-serve"></a> Synopsis
 
-	$ distribute serve <www-root-path> [options]
+    $ distribute serve <www-root-path> [options]
 
 The tool starts a local web server with root on `<www-root-path>` and a new browser window automatically appear on the following url
 
-	http://127.0.0.1:9001/
+    http://127.0.0.1:9001/
 
 ## Options
 

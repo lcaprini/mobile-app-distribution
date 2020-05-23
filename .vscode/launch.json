@@ -19,7 +19,7 @@
       "args": [
         "1.8.5-patch6",
         "--config",
-        "/Users/Lucacaprini/Development/FIAT/iLinkQuotation/distribute.json",
+        "/Users/lcaprini/Development/mobile-app-distribution/distribute.json",
         "--android-version-code",
         "10805",
         "--ios-bundle-version",
@@ -38,7 +38,7 @@
       "args": [
         "2.0.0",
         "--config",
-        "/home/federico/Projects/2019/angular6-material-panel/distribute.json",
+        "/Users/lcaprini/Development/mobile-app-distribution/distribute.json",
         "--tasks",
         "ue",
         "-f",
@@ -51,7 +51,7 @@
       "name": "Serve",
       "program": "${workspaceRoot}/libs/bin/distribute-serve.js",
       "args": [
-        "/Users/Lucacaprini/Development/FIAT/iLinkConf/app/www",
+        "/Users/lcaprini/Development/mobile-app-distribution/app/www",
         "--port",
         "9002"
       ]
@@ -68,7 +68,7 @@
       "request": "launch",
       "name": "Generate Icon",
       "program": "${workspaceRoot}/libs/bin/distribute-generate.js",
-      "args": ["--icon", "/Users/Masterplan/Desktop/icon.png"]
+      "args": ["--icon", "/Users/lcaprini/Development/mobile-app-distribution/icon.png"]
     },
     {
       "name": "Webpack",

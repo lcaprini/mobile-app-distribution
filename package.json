@@ -1,6 +1,6 @@
 {
   "name": "mobile-app-distribution",
-  "version": "0.5.4",
+  "version": "0.6.4",
   "description": "A NodeJS project to build and distribute mobile and web app for wireless distribution",
   "main": "distribute.js",
   "scripts": {
@@ -30,6 +30,7 @@
   "dependencies": {
     "archiver": "^2.0.0",
     "asciimo": "https://github.com/crazyguitar/asciimo.git",
+    "basic-ftp": "^3.8.0",
     "bluebird": "^3.5.0",
     "command-exists": "^1.2.2",
     "commander": "^2.9.0",
@@ -40,7 +41,6 @@
     "find-versions": "^2.0.0",
     "ftp-deploy": "^2.3.3",
     "inquirer": "^3.2.0",
-    "jsftp": "^2.0.0",
     "lodash": "^4.17.4",
     "moment": "^2.18.1",
     "nodemailer": "^4.0.1",
@@ -55,7 +55,7 @@
     "winston": "^2.3.1"
   },
   "devDependencies": {
-    "eslint": "^3.19.0",
+    "eslint": "^4.19.1",
     "eslint-config-standard": "^10.2.1",
     "eslint-loader": "^1.7.1",
     "eslint-plugin-import": "^2.2.0",

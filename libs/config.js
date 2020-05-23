@@ -68,6 +68,7 @@ class Config {
             ipaFileName        : '',
             ipaFilePath        : '',
             infoPlistPath      : '',
+            buildWorkspace     : true,
             targetSchema       : '',
             exportOptionsPlist : {
                 method         : 'enterprise',

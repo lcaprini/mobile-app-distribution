@@ -25,11 +25,13 @@ class Ios {
         fs.writeFileSync(infoPlistPath, updatedPlist);
     }
 
-    cleanProject({ projectPath, verbose }) {
-        logger.section(`Clean iOS Project in '${projectPath}'`);
+    archiveWorkspace({ projectPath, appName, schema, verbose }) {
+        const xcodeWorkspaceFilePath = path.join(projectPath, `./${appName}.xcworkspace`);
+        const xcarchiveFilePath = path.join(projectPath, `./${appName}.xcarchive`);
+        logger.section(`Archive iOS Workspace into '${xcarchiveFilePath}'`);
         process.chdir(projectPath);
-        const cmdXcodebuildClean = 'xcodebuild clean -configuration Release -alltargets';
-        let err = shell.exec(cmdXcodebuildClean, { silent : !verbose }).stderr;
+        const cmdXcodebuildArchive = `xcodebuild archive -workspace '${xcodeWorkspaceFilePath}' -scheme '${schema}' -archivePath '${xcarchiveFilePath}'`;
+        let err = shell.exec(cmdXcodebuildArchive, { silent : !verbose }).stderr;
         if (shell.error()) {
             // shelljs has already printed error,
             // so I print it only if verbose mode is OFF
