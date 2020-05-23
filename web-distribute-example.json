@@ -1,0 +1,44 @@
+{
+  "app": {
+    "name": "App Test",
+    "label": "App Test"
+  },
+
+  "sources": {
+    "compileCommand": "ng build",
+    "compilePath": "./",
+    "updateVersion": {
+      "replacingTag": "{version}",
+      "filePath": "dist/nome_app/index.html"
+    }
+  },
+
+  "buildsDir": "dist/nome_app",
+
+  "remote": {
+    "deploy": {
+      "host": "lcapriniftp",
+      "user": "lcaprini-user",
+      "password": "lcaprini-password",
+      "angularDestinationPath": "/var/www/html/test/angular_app",
+      "privateKey": "/home/federico/Projects/2019/test-sftp-upload/smart-agricolture_private.key"
+    },
+
+    "repo": {
+      "host": "lcapriniftp",
+      "user": "lcaprini-user",
+      "password": "lcaprini-password",
+      "jsonPath": "/var/www/html/test/wd",
+      "angularUrlPath": "https://lcaprini.com/test/Angular",
+      "homepageUrl": "https://lcaprini.com/test/wd"
+    }
+  },
+
+  "email": {
+    "host": "mail.gmail.com",
+    "user": "lcaprini-user",
+    "password": "lcaprini-password",
+    "from": "luca.caprini@gmail.com",
+    "to": ["luca.caprini@gmail.com"]
+  }
+}

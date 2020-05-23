@@ -1,7 +1,7 @@
 {
   "name": "mobile-app-distribution",
   "version": "0.6.4",
-  "description": "A NodeJS project to build and distribute mobile app for wireless distribution",
+  "description": "A NodeJS project to build and distribute mobile and web app for wireless distribution",
   "main": "distribute.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -17,7 +17,9 @@
     "wireless",
     "distribution",
     "distribute",
-    "build"
+    "build",
+    "angular",
+    "deploy"
   ],
   "author": "Luca Caprini",
   "license": "ISC",
@@ -37,6 +39,7 @@
     "corser": "^2.0.1",
     "elementtree": "^0.1.7",
     "find-versions": "^2.0.0",
+    "ftp-deploy": "^2.3.3",
     "inquirer": "^3.2.0",
     "lodash": "^4.17.4",
     "moment": "^2.18.1",
@@ -46,6 +49,7 @@
     "prompt": "^1.0.0",
     "qrcode-terminal": "^0.11.0",
     "serve-static": "^1.12.4",
+    "sftp-upload": "^1.0.1",
     "shelljs": "^0.7.7",
     "splashicon-generator": "https://github.com/lcaprini/splashicon-generator.git",
     "winston": "^2.3.1"

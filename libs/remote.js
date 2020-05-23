@@ -1,6 +1,8 @@
 'use strict';
 
 const _ = require('lodash');
+const FtpDeploy = require('ftp-deploy');
+const SftpUpload = require('sftp-upload');
 const ftp = require('basic-ftp');
 const fs = require('fs');
 const archiver = require('archiver');
@@ -70,7 +72,40 @@ const Remote = {
         });
     },
 
-    updateRepo({repoPath, server, version, hidden, changelog, releaseDate, androidBuildPath = null, iosBuildPath = null, rootPath}) {
+    uploadArchivie({archiveFilePath, sourceSrcPath, server, sourceDestPath}) {
+        return new Promise((resolve, reject) => {
+            var output = fs.createWriteStream(archiveFilePath);
+            var archive = archiver('zip', {
+                zlib : { level : 9 }
+            });
+
+            output.on('close', function() {
+                Remote.uploadFile({
+                    localFile  : fs.readFileSync(archiveFilePath),
+                    remoteFile : path.join(sourceDestPath, path.basename(archiveFilePath)),
+                    server
+                }).then(
+                    () => {
+                        fs.unlinkSync(archiveFilePath);
+                        resolve();
+                    },
+                    err => {
+                        reject(err);
+                    }
+                );
+            });
+            archive.on('error', function(err) {
+                reject(err);
+            });
+
+            archive.pipe(output);
+
+            archive.directory(sourceSrcPath, path.basename(sourceSrcPath));
+            archive.finalize();
+        });
+    },
+
+    updateRepo({repoPath, server, version, hidden, changelog, releaseDate, androidBuildPath = null, iosBuildPath = null, angularBuildPath = null, rootPath}) {
         logger.section(`Update repository`);
 
         return new Promise((resolve, reject) => {
@@ -95,11 +130,14 @@ const Remote = {
                     if (iosBuildPath) {
                         build.iosBuildPath = iosBuildPath;
                     }
+                    if (angularBuildPath) {
+                        build.angularBuildPath = angularBuildPath;
+                    }
                     jsonFile.builds.unshift(build);
 
                     fs.writeFileSync(tmpJsonFile, JSON.stringify(jsonFile, null, 4), {encoding : 'utf-8', flag : 'w'});
                     Remote.uploadFile({
-                        localFile  : tmpJsonFile,
+                        localFile  : fs.readFileSync(tmpJsonFile),
                         remoteFile : repoPath,
                         server
                     }).then(
@@ -154,6 +192,95 @@ const Remote = {
         });
     },
 
+    deploy({folderSourcePath, folderDestPath, server, verbose}) {
+        let deployPromise;
+        if (server.port == 21) {
+            deployPromise = Remote._ftpDeploy({folderSourcePath, folderDestPath, server, verbose});
+        }
+        else if (server.port == 22) {
+            deployPromise = Remote._sftpDeploy({folderSourcePath, folderDestPath, server, verbose});
+        }
+        else {
+            verbose && logger.error(`Deploy on port ${server.port} not supported`);
+        }
+        return deployPromise;
+    },
+
+    _ftpDeploy({folderSourcePath, folderDestPath, server, verbose}) {
+        return new FtpDeploy().deploy({
+            user         : server.user,
+            password     : server.pass,
+            host         : server.host,
+            port         : server.port,
+            localRoot    : folderSourcePath,
+            remoteRoot   : folderDestPath,
+            include      : ['*', '**/*'],
+            deleteRemote : false
+        }).then(
+            res => {
+                verbose && logger.section('FTP deploy completed');
+            },
+            err => {
+                throw new Error(`FTP deploy error: ${err}`);
+            }
+        );
+    },
+
+    _sftpDeploy({folderSourcePath, folderDestPath, server, verbose}) {
+        return new Promise((resolve, reject) => {
+            const sftp = new SftpUpload({
+                username   : server.user,
+                password   : server.pass,
+                host       : server.host,
+                port       : server.port,
+                privateKey : server.privateKey ? fs.readFileSync(server.privateKey) : null,
+                path       : folderSourcePath,
+                remoteDir  : folderDestPath
+            });
+
+            sftp.on('error', function(err) {
+                err = `SFTP deploy error: ${err}`;
+                throw new Error(err);
+            })
+            .on('uploading', function(progress) {
+                verbose && process.stdout.write(`${progress.percent}%: ${progress.file}\r`);
+            })
+            .on('completed', function() {
+                verbose && process.stdout.clearLine();
+                verbose && process.stdout.cursorTo(0);
+                verbose && logger.section('SFTP deploy completed');
+                resolve();
+            })
+            .upload();
+        });
+    },
+
+    verifyAngularDeploySteps(config) {
+        if (!config.remote.deploy.host) {
+            throw new Error('FTP build upload error: missing "remote.deploy.hosts" value in config file');
+        }
+        if (!config.remote.deploy.port) {
+            throw new Error('FTP build upload error: missing "remote.deploy.port" value in config file');
+        }
+        if (!config.remote.deploy.user) {
+            throw new Error('FTP build upload error: missing "remote.deploy.user" value in config file');
+        }
+        if (!config.remote.deploy.password && !config.remote.deploy.privateKey) {
+            throw new Error('FTP build upload error: missing "remote.deploy.password" and "remote.deploy.privateKey" values in config file');
+        }
+
+        if (config.remote.deploy.privateKey && !fs.existsSync(config.remote.deploy.privateKey)) {
+            throw new Error('FTP build upload error: file not found on "remote.deploy.privateKey" value in config file');
+        }
+
+        const angularTasks = require('./angular').TASKS;
+        if (config.tasks.contains(angularTasks.DEPLOY_BUILD)) {
+            if (!config.remote.deploy.angularDestinationPath) {
+                throw new Error('FTP+Angular upload error: missing "remote.deploy.angularDestinationPath" value in config file');
+            }
+        }
+    },
+
     verifyUploadBuildsSteps(config) {
         if (!config.remote.builds.host) {
             throw new Error('FTP build upload error: missing "remote.builds.hosts" value in config file');
@@ -168,7 +295,9 @@ const Remote = {
             throw new Error('FTP build upload error: missing "remote.builds.password" value in config file');
         }
         const cordovaTasks = require('./cordova').TASKS;
-        if (config.tasks.contains(cordovaTasks.BUILD_IOS) || config.tasks.contains(cordovaTasks.BUILD_ANDROID)) {
+        if (config.tasks.contains(cordovaTasks.BUILD_IOS) ||
+            config.tasks.contains(cordovaTasks.BUILD_ANDROID)
+        ) {
             this.verifyRepoUpdate(config);
         }
         if (config.tasks.contains(cordovaTasks.BUILD_IOS)) {
@@ -252,6 +381,54 @@ const Remote = {
         });
     },
 
+    initializeAngularDeploy(config) {
+        return inquirer.prompt([{
+            type    : 'input',
+            name    : 'port',
+            message : 'remote.deploy.port',
+            default : '21'
+        }, {
+            type    : 'input',
+            name    : 'host',
+            message : 'remote.deploy.host',
+            default : 'lcapriniftp'
+        }, {
+            type    : 'input',
+            name    : 'user',
+            message : 'remote.deploy.user',
+            default : 'lcaprini-user'
+        }, {
+            type    : 'input',
+            name    : 'password',
+            message : 'remote.deploy.password',
+            default : 'lcaprini-password'
+        }, {
+            type    : 'input',
+            name    : 'angularDestinationPath',
+            message : 'remote.deploy.angularDestinationPath',
+            default : '/var/www/html/test/builds/angular'
+        }, {
+            type    : 'input',
+            name    : 'privateKey',
+            message : 'remote.deploy.privateKey',
+            default : ''
+        }]).then(({port, host, user, password, angularDestinationPath, privateKey}) => {
+            if (!config.remote) {
+                config.remote = {};
+            }
+            if (!config.remote.deploy) {
+                config.remote.deploy = {};
+            }
+            config.remote.deploy.port = port;
+            config.remote.deploy.host = host;
+            config.remote.deploy.user = user;
+            config.remote.deploy.password = password;
+            config.remote.deploy.angularDestinationPath = angularDestinationPath;
+            config.remote.deploy.privateKey = privateKey;
+            return config;
+        });
+    },
+
     initializeIosBuildUpload(config) {
         return inquirer.prompt([{
             type    : 'input',
@@ -314,6 +491,24 @@ const Remote = {
             config.remote.repo.password = password;
             config.remote.repo.jsonPath = jsonPath;
             config.remote.repo.homepageUrl = homepageUrl;
+            return config;
+        });
+    },
+
+    initializeAngularRepoUpdate(config) {
+        return inquirer.prompt([{
+            type    : 'input',
+            name    : 'angularUrlPath',
+            message : 'remote.repo.angularUrlPath',
+            default : 'https://mycert-server.lcaprini.com/angular'
+        }, {
+            type    : 'input',
+            name    : 'buildsPath',
+            message : 'remote.repo.buildsPath',
+            default : '/var/www/html/angular/builds'
+        }]).then(({angularUrlPath, buildsPath}) => {
+            config.remote.repo.angularUrlPath = angularUrlPath;
+            config.remote.repo.buildsPath = buildsPath;
             return config;
         });
     },

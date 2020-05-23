@@ -12,6 +12,8 @@ const logger = require('./logger');
 const utils = require('./utils');
 const cordovaTasks = require('./cordova').TASKS;
 const cordova = require('./cordova').CORDOVA;
+const angularTasks = require('./angular').TASKS;
+const angular = require('./angular').ANGULAR;
 const android = require('./android');
 const ios = require('./ios');
 const remote = require('./remote');
@@ -42,7 +44,12 @@ class Config {
         this.sources = {
             compileCommand  : '',
             compilePath     : '',
-            htmlVersionPath : ''
+            sourcePath      : '',
+            htmlVersionPath : '',
+            updateVersion   : {
+                replacingTag : '{version}',
+                filePath     : ''
+            }
         };
 
         this.cordova = {
@@ -93,7 +100,16 @@ class Config {
                 user                   : '',
                 password               : '',
                 iosDestinationPath     : '',
-                androidDestinationPath : ''
+                androidDestinationPath : '',
+                angularDestinationPath : ''
+            },
+
+            deploy : {
+                host                   : '',
+                port                   : 21,
+                user                   : '',
+                password               : '',
+                angularDestinationPath : ''
             },
 
             repo : {
@@ -106,7 +122,9 @@ class Config {
                 iosIpaUrlPath      : '',
                 iosManifestUrlPath : '',
                 androidUrlPath     : '',
-                homepageUrl        : ''
+                angularUrlPath     : '',
+                homepageUrl        : '',
+                buildsPath         : ''
             },
 
             sources : {
@@ -137,6 +155,8 @@ class Config {
                     try {
                         // Verify and set app version
                         config.setBuildVersion(program);
+                        config.setAndroidBuildVersion(program.androidVersionCode);
+                        config.setiOSBuildVersion(program.iosBundleVersion);
 
                         const configData = JSON.parse(fileData);
 
@@ -211,7 +231,92 @@ class Config {
                                 return;
                             }
                             try {
-                                config.verify();
+                                config.cordovaVerify();
+                                resolve();
+                            }
+                            catch (e) {
+                                reject(e);
+                            }
+                        });
+                    }
+                    catch (e) {
+                        reject(e);
+                    }
+                },
+                err => {
+                    reject(err);
+                }
+            );
+        });
+    }
+
+    angularInit({configPath, program}) {
+        let config = this;
+
+        return new Promise((resolve, reject) => {
+            fs.readFileAsync(configPath, 'utf8').then(
+                fileData => {
+                    try {
+                        // Verify and set app version
+                        config.setBuildVersion(program);
+
+                        const configData = JSON.parse(fileData);
+
+                        // Set all configurations from JSON
+                        _.merge(config, configData);
+
+                        // Set project root dir
+                        config.rootPath = (path.isAbsolute(configPath)) ? path.dirname(configPath) : process.cwd();
+                        // Calculate and set other dirs
+                        config.sources.sourcePath = path.isAbsolute(config.sources.sourcePath)
+                            ? config.sources.sourcePath
+                            : path.join(config.rootPath, config.sources.sourcePath);
+
+                        config.sources.updateVersion.filePath = path.isAbsolute(config.sources.updateVersion.filePath)
+                            ? config.sources.updateVersion.filePath
+                            : path.join(config.rootPath, config.sources.updateVersion.filePath);
+
+                        config.buildsDir = path.isAbsolute(config.buildsDir)
+                            ? config.buildsDir
+                            : path.join(config.rootPath, config.buildsDir);
+
+                        config.remote.repo.jsonPath = path.join(config.remote.repo.jsonPath, './builds.json');
+                        config.remote.repo.homepageUrl = config.remote.repo.homepageUrl.trim();
+                        if (config.remote.repo.homepageUrl.slice(-1) !== '/') {
+                            config.remote.repo.homepageUrl = config.remote.repo.homepageUrl + '/';
+                        }
+
+                        config.remote.repo.buildsPath = config.remote.repo.buildsPath.trim();
+                        if (config.remote.repo.buildsPath.slice(-1) !== '/') {
+                            config.remote.repo.buildsPath = config.remote.repo.buildsPath + '/';
+                        }
+
+                        let archiveFileName = `./${config.app.label}_v.${config.app.versionLabel}.zip`.replace(/ /g, '_');
+                        config.remote.sources.archiveFilePath = url.resolve(path.join(config.buildsDir, '../'), archiveFileName);
+                        // config.remote.sources.sourcesPath = path.join(config.remote.sources.sourcesPath, archiveFileName);
+                        config.remote.repo.angularUrlPath = url.resolve(config.remote.repo.angularUrlPath, archiveFileName);
+
+                        logger.setFileLogger(config.rootPath);
+
+                        // Set task list
+                        config.tasks = program.tasks.split('');
+
+                        // Set verbose mode
+                        config.verbose = (_.isBoolean(program.verbose)) ? program.verbose : false;
+
+                        // Set force mode
+                        config.force = (_.isBoolean(program.force)) ? program.force : false;
+
+                        // Set qrcode print
+                        config.qrcode = (_.isBoolean(program.qrCode)) ? program.qrCode : false;
+
+                        config.readChangeLog(program.changeLog, (err, next) => {
+                            if (err) {
+                                reject(err);
+                                return;
+                            }
+                            try {
+                                config.angularVerify();
                                 resolve();
                             }
                             catch (e) {
@@ -231,8 +336,7 @@ class Config {
     }
 
     /**
-     * Verifies app version and calculates app label,
-     * iOS Bundle Identifier and Android Version Code
+     * Verifies app version and calculates app label
      * @param {Object} program
      */
     setBuildVersion(program) {
@@ -247,12 +351,6 @@ class Config {
         // Set app version label from program args
         this.app.versionLabel = program.args[0];
 
-        // Set Android Version Code
-        this.android.versionCode = (program.androidVersionCode) ? program.androidVersionCode : android.calculateVersionCode(this.app.version);
-
-        // Set iOS Bundle Version
-        this.ios.bundleVersion = (program.iosBundleVersion) ? program.iosBundleVersion : ios.calculateBundleVersion(this.app.version);
-
         // Set if builds are hidden on wireless distribution html page
         if (_.isBoolean(program.hidden)) {
             this.hidden = program.hidden;
@@ -261,6 +359,22 @@ class Config {
         if (this.hidden) {
             this.app.versionLabel += '_DEV';
         }
+    }
+
+    /**
+     * Set Android Version Code
+     * @param {String} androidVersionCode
+     */
+    setAndroidBuildVersion(androidVersionCode) {
+        this.android.versionCode = androidVersionCode || android.calculateVersionCode(this.app.version);
+    }
+
+    /**
+     * Set iOS Bundle Identifier
+     * @param {String} iosBundleVersion
+     */
+    setiOSBuildVersion(iosBundleVersion) {
+        this.ios.bundleVersion = iosBundleVersion || ios.calculateBundleVersion(this.app.version);
     }
 
     readChangeLog(changeLog, next) {
@@ -311,15 +425,48 @@ class Config {
     }
 
     /**
-     * Verifies all configuration and params
+     * Verifies all angular configuration and params
      */
-    verify() {
+    angularVerify() {
+        // Check params for change version task
+        if (this.tasks.contains(angularTasks.CHANGE_VERSION)) {
+            angular.verifyVersionConfigs(this);
+        }
+
+        // Check params for angular
+        if (this.tasks.contains(angularTasks.BUILD)) {
+            angular.verifyBuildConfigs(this);
+        }
+
+        // Check params for FTP build deploy
+        if (this.tasks.contains(angularTasks.DEPLOY_BUILD)) {
+            angular.verifyBuildDir(this);
+            remote.verifyAngularDeploySteps(this);
+        }
+
+        // Check params for FTP build uploader on the repo
+        if (this.tasks.contains(angularTasks.UPLOAD_REPO)) {
+            angular.verifyBuildDir(this);
+            remote.verifyRepoUpdate(this);
+            angular.verifyUploadRepoConfigs(this);
+        }
+
+        // Check params for email sender
+        if (this.tasks.contains(angularTasks.SEND_EMAIL)) {
+            email.verify(this);
+        }
+    }
+
+    /**
+     * Verifies all cordova configuration and params
+     */
+    cordovaVerify() {
         // Check params for sources compiler steps
         if (this.tasks.contains(cordovaTasks.COMPILE_SOURCES)) {
             cordova.verifyCompileConfigs(this);
         }
 
-        // Check params for sources compiler steps
+        // Check params for change version task
         if (this.tasks.contains(cordovaTasks.CHANGE_VERSION)) {
             cordova.verifyVersionConfigs(this);
         }
@@ -352,8 +499,9 @@ class Config {
 
     printRecap() {
         const config = this;
+        let titleRecap = config.app.name || 'Distribute';
         return new Promise(resolve => {
-            asciimo.write('  ' + config.app.name, 'Ogre', art => {
+            asciimo.write('  ' + titleRecap, 'Ogre', art => {
                 logger.info('\n#########################################################');
                 logger.info(art);
                 logger.info('#########################################################');
@@ -369,6 +517,10 @@ class Config {
                     logger.info('  Android bundle id:\t\t', config.android.bundleId);
                     logger.info('  Android version code:\t\t', config.android.versionCode);
                 }
+                // if (config.tasks.contains(angularTasks.UPLOAD_REPO)) {
+                //     logger.info('  Angular version :\t\t', config.app.version);
+                //     logger.info('  Android version code:\t\t', config.android.versionCode);
+                // }
                 logger.info('  Change log:\t\t\t', config.changeLog[0]);
                 for (let i = 1; i < config.changeLog.length; i++) {
                     logger.info('\t\t\t\t', config.changeLog[i]);
