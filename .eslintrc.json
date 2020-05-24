@@ -7,23 +7,81 @@
     ],
     "rules": {
         "vue/jsx-uses-vars": 2,
-        "indent": ["error", 4],
-        "space-before-function-paren": ["error", "never"],
-        "key-spacing": ["error", {
-            "beforeColon": true,
-            "afterColon": true,
-            "mode": "minimum",
-            "align": {
-                "beforeColon": true,
-                "afterColon": true,
-                "on": "colon"
+        "indent": [
+            "error",
+            4
+        ],
+        "space-before-function-paren": [
+            "error",
+            "never"
+        ],
+        "semi": [
+            "error",
+            "always"
+        ],
+        "keyword-spacing": [
+            "error",
+            {
+                "before": true,
+                "after": true
             }
-        }],
-        "semi": ["error", "always"],
-        "keyword-spacing": ["error", {
-            "before": true,
-            "after": true
-        }],
-        "brace-style": ["error", "stroustrup"]
+        ],
+        "brace-style": [
+            "error",
+            "stroustrup"
+        ],
+        "arrow-spacing": "error",
+        "arrow-parens": [
+            "error",
+            "as-needed"
+        ],
+        "comma-dangle": [
+            "error",
+            "only-multiline"
+        ],
+        "block-spacing": [
+            "error",
+            "always"
+        ],
+        "func-call-spacing": [
+            "error",
+            "never"
+        ],
+        "key-spacing": [
+            "error",
+            {
+                "beforeColon": false,
+                "afterColon": true,
+                "mode": "strict"
+            }
+        ],
+        "no-const-assign": "error",
+        "no-multiple-empty-lines": [
+            "error",
+            {
+                "max": 1,
+                "maxEOF": 0
+            }
+        ],
+        "no-trailing-spaces": [
+            "error"
+        ],
+        "no-var": "error",
+        "quotes": [
+            "error",
+            "single"
+        ],
+        "quote-props": [
+            "error",
+            "as-needed"
+        ],
+        "space-before-blocks": "error",
+        "space-infix-ops": [
+            "error",
+            {
+                "int32Hint": false
+            }
+        ],
+        "camelcase": "off"
     }
 }
