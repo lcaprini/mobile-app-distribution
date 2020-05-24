@@ -3,116 +3,126 @@
 
 require('../protos');
 const program = require('commander');
+const cordovaRes = require('cordova-res');
 const fs = require('fs');
 const path = require('path');
-const splashiconGenerator = require('splashicon-generator');
-const commandExists = require('command-exists').sync;
 
-const TASKS = require('../cordova').TASKS;
 const logger = require('../logger');
-const ios = require('../ios');
-const android = require('../android');
 
-console.log('This utility will create all icons for requested platforms using graphicsmagick (http://www.graphicsmagick.org).\n');
-console.log('Press ^C at any time to quit.\n');
-
-const options = {
-    ICON_FILE: '',
-    ICON_PLATFORMS: [],
-    SPLASH_FILE: '',
-    SPLASH_PLATFORMS: []
+const PLATFORMS = {
+    IOS: 'i',
+    ANDROID: 'a'
 };
 
-program
-    .allowUnknownOption()
-    .usage('[options]')
-    .option('-i, --icon <icon-path>', 'icon path to crop and resize')
-    .option('-s, --splash <splash-path>', 'splash path to crop and resize')
-    .option(`-p, --platforms <[${TASKS.BUILD_IOS},${TASKS.BUILD_ANDROID}]>`, 'platforms to create icons or splash')
-    .parse(process.argv);
+const getIcon = iconPath => {
+    const iconFullPath = path.isAbsolute(iconPath) ? iconPath : path.join(process.cwd(), iconPath);
 
-if (!commandExists('gm')) {
-    console.error('No graphicsmagick found.\nPlease install graphicsmagick (http://www.graphicsmagick.org/download.html or via brew) and retry');
-    process.exit(1);
-}
-
-if (program.platforms) {
-    program.platforms = program.platforms.split(',');
-}
-else {
-    program.platforms = [
-        TASKS.BUILD_IOS,
-        TASKS.BUILD_ANDROID
-    ];
-}
-
-// If no icon and splash are spicified use the default ones
-// Else use only the specified items
-if (!program.icon && !program.splash) {
-    if (!program.icon) {
-        program.icon = 'resources/icon.png';
-    }
-
-    if (!program.splash) {
-        program.splash = 'resources/splash.png';
-    }
-}
-
-if (program.icon) {
-    options.ICON_FILE = path.isAbsolute(program.icon) ? program.icon : path.join(process.cwd(), program.icon);
-
-    if (!fs.existsSync(options.ICON_FILE)) {
-        logger.error(`No icon file at ${options.ICON_FILE}`);
+    if (!fs.existsSync(iconFullPath)) {
+        logger.error(`No icon image at ${iconFullPath}`);
         process.exit(1);
     }
 
-    if (program.platforms.contains(TASKS.BUILD_IOS)) {
-        let iconsPath = path.join(path.dirname(options.ICON_FILE), './ios/AppIcon.appiconset/');
-        options.ICON_PLATFORMS.push(ios.getIconsMap({
-            name: 'iOS',
-            iconsPath: iconsPath
-        }));
-        ios.copyIconsContentsJson(iconsPath);
-    }
+    return iconFullPath;
+};
 
-    if (program.platforms.contains(TASKS.BUILD_ANDROID)) {
-        options.ICON_PLATFORMS.push(android.getIconsMap({
-            name: 'Android',
-            iconsPath: path.join(path.dirname(options.ICON_FILE), './android/res/')
-        }));
-    }
-}
+const getSplash = splashPath => {
+    const splashFullPath = path.isAbsolute(splashPath) ? splashPath : path.join(process.cwd(), splashPath);
 
-if (program.splash) {
-    options.SPLASH_FILE = path.isAbsolute(program.splash) ? program.splash : path.join(process.cwd(), program.splash);
-
-    if (!fs.existsSync(options.SPLASH_FILE)) {
-        logger.error(`No splash file at ${options.SPLASH_FILE}`);
+    if (!fs.existsSync(splashFullPath)) {
+        logger.error(`No splash image at ${splashFullPath}`);
         process.exit(1);
     }
 
-    if (program.platforms.contains(TASKS.BUILD_IOS)) {
-        let splashesPath = path.join(path.dirname(options.SPLASH_FILE), './ios/LaunchImage.launchimage/');
-        options.SPLASH_PLATFORMS.push(ios.getSplashesMap({
-            name: 'iOS',
-            splashPath: splashesPath
-        }));
-        ios.copySplshesContentsJson(splashesPath);
+    return splashFullPath;
+};
+
+(async function() {
+    console.log('This utility will create all icons for requested platforms using cordova-res (https://github.com/ionic-team/cordova-res).\n');
+    console.log('Press ^C at any time to quit.\n');
+
+    program
+        .allowUnknownOption()
+        .usage('[options]')
+        .option('-i, --icon <icon-path>', 'icon path to crop and resize')
+        .option('-s, --splash <splash-path>', 'splash path to crop and resize')
+        .option(`-p, --platforms <[${PLATFORMS.IOS}${PLATFORMS.ANDROID}]>`, 'platforms to create icons and/or splash')
+        .option('-r, --resources-directory <resources-directory>', 'directory that contains the source images and the generated ones')
+        .parse(process.argv);
+
+    if (program.platforms) {
+        program.platforms = program.platforms.split('');
+    }
+    else {
+        program.platforms = [
+            PLATFORMS.IOS,
+            PLATFORMS.ANDROID
+        ];
     }
 
-    if (program.platforms.contains(TASKS.BUILD_ANDROID)) {
-        options.SPLASH_PLATFORMS.push(android.getSplashesMap({
-            name: 'Android',
-            splashPath: path.join(path.dirname(options.SPLASH_FILE), './android/res/')
-        }));
+    if (!program.resourcesDirectory) {
+        program.resourcesDirectory = 'resources';
     }
-}
 
-splashiconGenerator.generate(options).then(
-    () => {
-        process.exit(0);
-    },
-    err => {
-        logger.error(err.messages);
-        process.exit(1);
-    });
+    // If no icon and splash are spicified use the default ones
+    // Else use only the specified items
+    if (!program.icon && !program.splash) {
+        if (!program.icon) {
+            program.icon = `${program.resourcesDirectory}/icon.png`;
+        }
+
+        if (!program.splash) {
+            program.splash = `${program.resourcesDirectory}/splash.png`;
+        }
+    }
+
+    // Init options for cordova-res command
+    let cordovaResOptions = {
+        skipConfig: true,
+        logstream: process.stdout,
+        platforms: {},
+        resourcesDirectory: program.resourcesDirectory
+    };
+
+    // Set iOS icon and splash info
+    if (program.platforms.contains(PLATFORMS.IOS)) {
+        cordovaResOptions.platforms.ios = {};
+
+        if (program.icon) {
+            cordovaResOptions.platforms.ios.icon = {
+                sources: [getIcon(program.icon)]
+            };
+        }
+
+        if (program.splash) {
+            cordovaResOptions.platforms.ios.splash = {
+                sources: [getSplash(program.splash)]
+            };
+        }
+    }
+
+    // Set Android icon and splash info
+    if (program.platforms.contains(PLATFORMS.ANDROID)) {
+        cordovaResOptions.platforms.android = {};
+
+        if (program.icon) {
+            cordovaResOptions.platforms.android.icon = {
+                sources: [getIcon(program.icon)]
+            };
+        }
+
+        if (program.splash) {
+            cordovaResOptions.platforms.android.splash = {
+                sources: [getSplash(program.splash)]
+            };
+        }
+    }
+
+    cordovaRes.run(cordovaResOptions).then(
+        () => {
+            process.exit(0);
+        },
+        err => {
+            logger.error(err.messages);
+            process.exit(1);
+        });
+})();

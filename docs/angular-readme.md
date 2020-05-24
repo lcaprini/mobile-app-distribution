@@ -1,6 +1,6 @@
 ### Angular configuration
 
-To use `distribute angular` command you'll need to create a `distribute.json` first, like [`examples/angular-distribute.json`](../examples/angular-distribute.json).
+To use `distribute angular` command you'll need to create a `distribute.json` first, like [`examples/configs/angular-distribute.json`](../examples/configs/angular-distribute.json).
 
 The following paragraphs describes all sections of a tipical `distribute.json` for an Angular2+ app; by the way, you also have to add the [commons configurations](./commons-readme.md).
 

@@ -1,6 +1,6 @@
 ### Cordova configuration
 
-To use `distribute cordova` command you'll need to create a `distribute.json` first, like [`examples/cordova-distribute.json`](../examples/cordova-distribute.json).
+To use `distribute cordova` command you'll need to create a `distribute.json` first, like [`examples/configs/cordova-distribute.json`](../examples/configs/cordova-distribute.json).
 
 The following paragraphs describes all sections of a tipical `distribute.json` for a Cordova app; by the way, you also have to add the [commons configurations](./commons-readme.md), and check for the specific [iOS](./ios-readme.md) and [Android](./android-readme.md) configurations.
 

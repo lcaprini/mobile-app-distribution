@@ -9,7 +9,27 @@
       "request": "launch",
       "name": "Distribute Version",
       "program": "${workspaceRoot}/libs/bin/distribute.js",
-      "args": ["--version"]
+      "args": [
+        "--version"
+      ],
+      "outputCapture": "std"
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Distribute Help",
+      "program": "${workspaceRoot}/libs/bin/distribute.js",
+      "args": [
+        "--help"
+      ],
+      "outputCapture": "std"
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Distribute WD",
+      "program": "${workspaceRoot}/libs/bin/distribute-wd.js",
+      "args": []
     },
     {
       "type": "node",
@@ -59,24 +79,30 @@
     {
       "type": "node",
       "request": "launch",
-      "name": "Wd",
-      "program": "${workspaceRoot}/libs/bin/distribute-wd.js",
-      "args": []
-    },
-    {
-      "type": "node",
-      "request": "launch",
-      "name": "Generate Icon",
-      "program": "${workspaceRoot}/libs/bin/distribute-generate.js",
-      "args": ["--icon", "/Users/lcaprini/Development/mobile-app-distribution/icon.png"]
+      "name": "Distribute Resources",
+      "program": "${workspaceRoot}/libs/bin/distribute-resources.js",
+      "args": [
+        "--icon",
+        "${workspaceRoot}/examples/resources/icon.png",
+        "--splash",
+        "${workspaceRoot}/examples/resources/splash.png",
+        "-p",
+        "ia"
+      ],
+      "outputCapture": "std"
     },
     {
       "name": "Webpack",
       "type": "node",
       "request": "launch",
       "program": "${workspaceRoot}/remote/wd/node_modules/.bin/webpack-dev-server",
-      "args": ["--inline", "--hot"],
-      "outFiles": ["${workspaceRoot}/remote/wd/dist/*"],
+      "args": [
+        "--inline",
+        "--hot"
+      ],
+      "outFiles": [
+        "${workspaceRoot}/remote/wd/dist/*"
+      ],
       "stopOnEntry": false,
       "cwd": "${workspaceRoot}/remote/wd/",
       "runtimeExecutable": null,
