@@ -10,11 +10,11 @@ const email = require('./email');
 const utils = require('./utils');
 
 const TASKS = {
-    CHANGE_VERSION : 'v',
-    BUILD          : 'b',
-    DEPLOY_BUILD   : 'd',
-    UPLOAD_REPO    : 'u',
-    SEND_EMAIL     : 'e'
+    CHANGE_VERSION: 'v',
+    BUILD: 'b',
+    DEPLOY_BUILD: 'd',
+    UPLOAD_REPO: 'u',
+    SEND_EMAIL: 'e'
 };
 
 const Angular = {
@@ -24,7 +24,7 @@ const Angular = {
     build({ sourcePath, buildSourcesCmd, verbose = false }) {
         process.chdir(sourcePath);
         logger.section(`Compile source:\n$ ${buildSourcesCmd}`);
-        shell.exec(buildSourcesCmd, { silent : !verbose });
+        shell.exec(buildSourcesCmd, { silent: !verbose });
     },
 
     /**
@@ -36,7 +36,7 @@ const Angular = {
         this.checkReplacingTag({
             filePath,
             replacingTag,
-            checkBuildTask : false
+            checkBuildTask: false
         });
         try {
             let newVersionFile = versionFile.replace(replacingTag, version);
@@ -68,31 +68,31 @@ const Angular = {
         logger.section(`Upload angular build archive to ${config.remote.repo.homepageUrl} repo`);
         return new Promise((resolve, reject) => {
             remote.uploadArchivie({
-                archiveFilePath : config.remote.sources.archiveFilePath,
-                sourceSrcPath   : path.join(config.buildsDir),
-                server          : {
-                    host : config.remote.repo.host,
-                    port : config.remote.repo.port,
-                    user : config.remote.repo.user,
-                    pass : config.remote.repo.password
+                archiveFilePath: config.remote.sources.archiveFilePath,
+                sourceSrcPath: path.join(config.buildsDir),
+                server: {
+                    host: config.remote.repo.host,
+                    port: config.remote.repo.port,
+                    user: config.remote.repo.user,
+                    pass: config.remote.repo.password
                 },
-                sourceDestPath : config.remote.repo.buildsPath
+                sourceDestPath: config.remote.repo.buildsPath
             }).then(
                 res => {
                     remote.updateRepo({
-                        repoPath : config.remote.repo.jsonPath,
-                        server   : {
-                            host : config.remote.repo.host,
-                            port : config.remote.repo.port,
-                            user : config.remote.repo.user,
-                            pass : config.remote.repo.password
+                        repoPath: config.remote.repo.jsonPath,
+                        server: {
+                            host: config.remote.repo.host,
+                            port: config.remote.repo.port,
+                            user: config.remote.repo.user,
+                            pass: config.remote.repo.password
                         },
-                        angularBuildPath : config.remote.repo.angularUrlPath,
-                        version          : config.app.versionLabel,
-                        changelog        : config.changeLog,
-                        releaseDate      : config.releaseDate,
-                        hidden           : config.hidden,
-                        rootPath         : config.rootPath
+                        angularBuildPath: config.remote.repo.angularUrlPath,
+                        version: config.app.versionLabel,
+                        changelog: config.changeLog,
+                        releaseDate: config.releaseDate,
+                        hidden: config.hidden,
+                        rootPath: config.rootPath
                     }).then(resolve, reject);
                 },
                 reject
@@ -157,7 +157,7 @@ const Angular = {
         }
         if (!fs.existsSync(config.sources.sourcePath)) {
             throw new Error(`Source compile error: directory "sources.sourcePath" doesn't exists at ${config.sources.sourcePath}`
-      );
+            );
         }
         if (!config.app.version) {
             throw new Error('Invalid build version format: please, see http://semver.org');
@@ -216,23 +216,23 @@ const Angular = {
         }
     },
 
-  /**
+    /**
    * Inizialize configuration for angular build
    */
     initializeSourceBuild(config) {
         return inquirer
             .prompt([
                 {
-                    type    : 'input',
-                    name    : 'buildCommand',
-                    message : 'sources.buildCommand',
-                    default : 'ng build'
+                    type: 'input',
+                    name: 'buildCommand',
+                    message: 'sources.buildCommand',
+                    default: 'ng build'
                 },
                 {
-                    type    : 'input',
-                    name    : 'sourcePath',
-                    message : 'sources.sourcePath',
-                    default : './'
+                    type: 'input',
+                    name: 'sourcePath',
+                    message: 'sources.sourcePath',
+                    default: './'
                 }
             ])
             .then(({ buildCommand, sourcePath }) => {
@@ -252,21 +252,21 @@ const Angular = {
         return inquirer
             .prompt([
                 {
-                    type    : 'input',
-                    name    : 'replacingTag',
-                    message : 'sources.updateVersion.replacingTag',
-                    default : '{version}'
+                    type: 'input',
+                    name: 'replacingTag',
+                    message: 'sources.updateVersion.replacingTag',
+                    default: '{version}'
                 },
                 {
-                    type    : 'input',
-                    name    : 'filePath',
-                    message : 'sources.updateVersion.filePath',
-                    default : 'dist/app_name/index.html'
+                    type: 'input',
+                    name: 'filePath',
+                    message: 'sources.updateVersion.filePath',
+                    default: 'dist/app_name/index.html'
                 }
             ])
             .then(({ replacingTag, filePath }) => {
                 if (!config.sources) {
-                    config.sources = { updateVersion : {} };
+                    config.sources = { updateVersion: {} };
                 }
                 config.sources.updateVersion.replacingTag = replacingTag;
                 config.sources.updateVersion.filePath = filePath;
@@ -281,10 +281,10 @@ const Angular = {
         return inquirer
             .prompt([
                 {
-                    type    : 'input',
-                    name    : 'buildsDir',
-                    message : 'buildsDir',
-                    default : 'dist/'
+                    type: 'input',
+                    name: 'buildsDir',
+                    message: 'buildsDir',
+                    default: 'dist/'
                 }
             ])
             .then(({ buildsDir }) => {
@@ -301,25 +301,25 @@ const Angular = {
         let angular = this;
 
         const TASKS = {
-            CHANGE_VERSION : 'Change app version in file',
-            BUILD          : 'Build angular app',
-            DEPLOY_BUILD   : 'Deploy build to server',
-            UPLOAD_REPO    : 'Upload build on repo server',
-            SEND_EMAIL     : 'Send email to working group'
+            CHANGE_VERSION: 'Change app version in file',
+            BUILD: 'Build angular app',
+            DEPLOY_BUILD: 'Deploy build to server',
+            UPLOAD_REPO: 'Upload build on repo server',
+            SEND_EMAIL: 'Send email to working group'
         };
 
         return inquirer
             .prompt([
                 {
-                    type    : 'checkbox',
-                    message : 'Which tasks you want configure?',
-                    name    : 'tasks',
-                    choices : [
-                        { name : TASKS.CHANGE_VERSION },
-                        { name : TASKS.BUILD },
-                        { name : TASKS.DEPLOY_BUILD },
-                        { name : TASKS.UPLOAD_REPO },
-                        { name : TASKS.SEND_EMAIL }
+                    type: 'checkbox',
+                    message: 'Which tasks you want configure?',
+                    name: 'tasks',
+                    choices: [
+                        { name: TASKS.CHANGE_VERSION },
+                        { name: TASKS.BUILD },
+                        { name: TASKS.DEPLOY_BUILD },
+                        { name: TASKS.UPLOAD_REPO },
+                        { name: TASKS.SEND_EMAIL }
                     ]
                 }
             ])
@@ -363,6 +363,6 @@ const Angular = {
 };
 
 module.exports = {
-    ANGULAR : Angular,
-    TASKS   : TASKS
+    ANGULAR: Angular,
+    TASKS: TASKS
 };

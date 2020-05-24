@@ -18,27 +18,27 @@ const Remote = {
         return new Promise((resolve, reject) => {
             const client = new ftp.Client();
             client.access({
-                host     : server.host,
-                port     : server.port,
-                user     : server.user,
-                password : server.pass
+                host: server.host,
+                port: server.port,
+                user: server.user,
+                password: server.pass
             }).then(
-              () => {
-                  client.download(fs.createWriteStream(localFile), remoteFile).then(
-                  () => {
-                      client.close();
-                      resolve();
-                  },
-                  (err) => {
-                      reject(new Error(err));
-                      throw new Error(err);
-                  }
-                );
-              },
-              (err) => {
-                  reject(new Error(err));
-                  throw new Error(err);
-              }
+                () => {
+                    client.download(fs.createWriteStream(localFile), remoteFile).then(
+                        () => {
+                            client.close();
+                            resolve();
+                        },
+                        err => {
+                            reject(new Error(err));
+                            throw new Error(err);
+                        }
+                    );
+                },
+                err => {
+                    reject(new Error(err));
+                    throw new Error(err);
+                }
             );
         });
     },
@@ -47,42 +47,42 @@ const Remote = {
         return new Promise((resolve, reject) => {
             const client = new ftp.Client();
             client.access({
-                host     : server.host,
-                port     : server.port,
-                user     : server.user,
-                password : server.pass
+                host: server.host,
+                port: server.port,
+                user: server.user,
+                password: server.pass
             }).then(
-              () => {
-                  client.upload(fs.createReadStream(localFile), remoteFile).then(
-                  () => {
-                      client.close();
-                      resolve();
-                  },
-                  (err) => {
-                      reject(new Error(err));
-                      throw new Error(err);
-                  }
-                );
-              },
-              (err) => {
-                  reject(new Error(err));
-                  throw new Error(err);
-              }
+                () => {
+                    client.upload(fs.createReadStream(localFile), remoteFile).then(
+                        () => {
+                            client.close();
+                            resolve();
+                        },
+                        err => {
+                            reject(new Error(err));
+                            throw new Error(err);
+                        }
+                    );
+                },
+                err => {
+                    reject(new Error(err));
+                    throw new Error(err);
+                }
             );
         });
     },
 
     uploadArchivie({archiveFilePath, sourceSrcPath, server, sourceDestPath}) {
         return new Promise((resolve, reject) => {
-            var output = fs.createWriteStream(archiveFilePath);
-            var archive = archiver('zip', {
-                zlib : { level : 9 }
+            let output = fs.createWriteStream(archiveFilePath);
+            let archive = archiver('zip', {
+                zlib: { level: 9 }
             });
 
             output.on('close', function() {
                 Remote.uploadFile({
-                    localFile  : fs.readFileSync(archiveFilePath),
-                    remoteFile : path.join(sourceDestPath, path.basename(archiveFilePath)),
+                    localFile: fs.readFileSync(archiveFilePath),
+                    remoteFile: path.join(sourceDestPath, path.basename(archiveFilePath)),
                     server
                 }).then(
                     () => {
@@ -106,11 +106,11 @@ const Remote = {
     },
 
     updateRepo({repoPath, server, version, hidden, changelog, releaseDate, androidBuildPath = null, iosBuildPath = null, angularBuildPath = null, rootPath}) {
-        logger.section(`Update repository`);
+        logger.section('Update repository');
 
         return new Promise((resolve, reject) => {
-            const tmpJsonFile = path.join(rootPath, `./.builds.json`);
-            Remote.downloadFile({localFile : tmpJsonFile, remoteFile : repoPath, server}).then(
+            const tmpJsonFile = path.join(rootPath, './.builds.json');
+            Remote.downloadFile({localFile: tmpJsonFile, remoteFile: repoPath, server}).then(
                 () => {
                     let jsonFile = JSON.parse(fs.readFileSync(tmpJsonFile));
                     let build = _.remove(jsonFile.builds, b => {
@@ -135,10 +135,10 @@ const Remote = {
                     }
                     jsonFile.builds.unshift(build);
 
-                    fs.writeFileSync(tmpJsonFile, JSON.stringify(jsonFile, null, 4), {encoding : 'utf-8', flag : 'w'});
+                    fs.writeFileSync(tmpJsonFile, JSON.stringify(jsonFile, null, 4), {encoding: 'utf-8', flag: 'w'});
                     Remote.uploadFile({
-                        localFile  : fs.readFileSync(tmpJsonFile),
-                        remoteFile : repoPath,
+                        localFile: fs.readFileSync(tmpJsonFile),
+                        remoteFile: repoPath,
                         server
                     }).then(
                         () => {
@@ -159,15 +159,15 @@ const Remote = {
 
     uploadSources({archiveFilePath, sourceSrcPath, server, sourceDestPath}) {
         return new Promise((resolve, reject) => {
-            var output = fs.createWriteStream(archiveFilePath);
-            var archive = archiver('zip', {
-                zlib : { level : 9 }
+            let output = fs.createWriteStream(archiveFilePath);
+            let archive = archiver('zip', {
+                zlib: { level: 9 }
             });
 
             output.on('close', function() {
                 Remote.uploadFile({
-                    localFile  : archiveFilePath,
-                    remoteFile : sourceDestPath,
+                    localFile: archiveFilePath,
+                    remoteFile: sourceDestPath,
                     server
                 }).then(
                     () => {
@@ -186,7 +186,7 @@ const Remote = {
             archive.pipe(output);
 
             archive.directory(sourceSrcPath, 'app/www');
-            archive.file(path.join(__dirname, '../resources/source-upload-readme.md'), { name : 'app/README.md' });
+            archive.file(path.join(__dirname, '../resources/source-upload-readme.md'), { name: 'app/README.md' });
 
             archive.finalize();
         });
@@ -194,10 +194,10 @@ const Remote = {
 
     deploy({folderSourcePath, folderDestPath, server, verbose}) {
         let deployPromise;
-        if (server.port == 21) {
+        if (server.port === 21) {
             deployPromise = Remote._ftpDeploy({folderSourcePath, folderDestPath, server, verbose});
         }
-        else if (server.port == 22) {
+        else if (server.port === 22) {
             deployPromise = Remote._sftpDeploy({folderSourcePath, folderDestPath, server, verbose});
         }
         else {
@@ -208,14 +208,14 @@ const Remote = {
 
     _ftpDeploy({folderSourcePath, folderDestPath, server, verbose}) {
         return new FtpDeploy().deploy({
-            user         : server.user,
-            password     : server.pass,
-            host         : server.host,
-            port         : server.port,
-            localRoot    : folderSourcePath,
-            remoteRoot   : folderDestPath,
-            include      : ['*', '**/*'],
-            deleteRemote : false
+            user: server.user,
+            password: server.pass,
+            host: server.host,
+            port: server.port,
+            localRoot: folderSourcePath,
+            remoteRoot: folderDestPath,
+            include: ['*', '**/*'],
+            deleteRemote: false
         }).then(
             res => {
                 verbose && logger.section('FTP deploy completed');
@@ -229,29 +229,29 @@ const Remote = {
     _sftpDeploy({folderSourcePath, folderDestPath, server, verbose}) {
         return new Promise((resolve, reject) => {
             const sftp = new SftpUpload({
-                username   : server.user,
-                password   : server.pass,
-                host       : server.host,
-                port       : server.port,
-                privateKey : server.privateKey ? fs.readFileSync(server.privateKey) : null,
-                path       : folderSourcePath,
-                remoteDir  : folderDestPath
+                username: server.user,
+                password: server.pass,
+                host: server.host,
+                port: server.port,
+                privateKey: server.privateKey ? fs.readFileSync(server.privateKey) : null,
+                path: folderSourcePath,
+                remoteDir: folderDestPath
             });
 
             sftp.on('error', function(err) {
                 err = `SFTP deploy error: ${err}`;
                 throw new Error(err);
             })
-            .on('uploading', function(progress) {
-                verbose && process.stdout.write(`${progress.percent}%: ${progress.file}\r`);
-            })
-            .on('completed', function() {
-                verbose && process.stdout.clearLine();
-                verbose && process.stdout.cursorTo(0);
-                verbose && logger.section('SFTP deploy completed');
-                resolve();
-            })
-            .upload();
+                .on('uploading', function(progress) {
+                    verbose && process.stdout.write(`${progress.percent}%: ${progress.file}\r`);
+                })
+                .on('completed', function() {
+                    verbose && process.stdout.clearLine();
+                    verbose && process.stdout.cursorTo(0);
+                    verbose && logger.section('SFTP deploy completed');
+                    resolve();
+                })
+                .upload();
         });
     },
 
@@ -353,20 +353,20 @@ const Remote = {
 
     initializeBuildUpload(config) {
         return inquirer.prompt([{
-            type    : 'input',
-            name    : 'host',
-            message : 'remote.builds.host',
-            default : 'lcapriniftp'
+            type: 'input',
+            name: 'host',
+            message: 'remote.builds.host',
+            default: 'lcapriniftp'
         }, {
-            type    : 'input',
-            name    : 'user',
-            message : 'remote.builds.user',
-            default : 'lcaprini-user'
+            type: 'input',
+            name: 'user',
+            message: 'remote.builds.user',
+            default: 'lcaprini-user'
         }, {
-            type    : 'input',
-            name    : 'password',
-            message : 'remote.builds.password',
-            default : 'lcaprini-password'
+            type: 'input',
+            name: 'password',
+            message: 'remote.builds.password',
+            default: 'lcaprini-password'
         }]).then(({host, user, password}) => {
             if (!config.remote) {
                 config.remote = {};
@@ -383,35 +383,35 @@ const Remote = {
 
     initializeAngularDeploy(config) {
         return inquirer.prompt([{
-            type    : 'input',
-            name    : 'port',
-            message : 'remote.deploy.port',
-            default : '21'
+            type: 'input',
+            name: 'port',
+            message: 'remote.deploy.port',
+            default: '21'
         }, {
-            type    : 'input',
-            name    : 'host',
-            message : 'remote.deploy.host',
-            default : 'lcapriniftp'
+            type: 'input',
+            name: 'host',
+            message: 'remote.deploy.host',
+            default: 'lcapriniftp'
         }, {
-            type    : 'input',
-            name    : 'user',
-            message : 'remote.deploy.user',
-            default : 'lcaprini-user'
+            type: 'input',
+            name: 'user',
+            message: 'remote.deploy.user',
+            default: 'lcaprini-user'
         }, {
-            type    : 'input',
-            name    : 'password',
-            message : 'remote.deploy.password',
-            default : 'lcaprini-password'
+            type: 'input',
+            name: 'password',
+            message: 'remote.deploy.password',
+            default: 'lcaprini-password'
         }, {
-            type    : 'input',
-            name    : 'angularDestinationPath',
-            message : 'remote.deploy.angularDestinationPath',
-            default : '/var/www/html/test/builds/angular'
+            type: 'input',
+            name: 'angularDestinationPath',
+            message: 'remote.deploy.angularDestinationPath',
+            default: '/var/www/html/test/builds/angular'
         }, {
-            type    : 'input',
-            name    : 'privateKey',
-            message : 'remote.deploy.privateKey',
-            default : ''
+            type: 'input',
+            name: 'privateKey',
+            message: 'remote.deploy.privateKey',
+            default: ''
         }]).then(({port, host, user, password, angularDestinationPath, privateKey}) => {
             if (!config.remote) {
                 config.remote = {};
@@ -431,10 +431,10 @@ const Remote = {
 
     initializeIosBuildUpload(config) {
         return inquirer.prompt([{
-            type    : 'input',
-            name    : 'iosDestinationPath',
-            message : 'remote.builds.iosDestinationPath',
-            default : '/var/www/html/test/builds/iOS'
+            type: 'input',
+            name: 'iosDestinationPath',
+            message: 'remote.builds.iosDestinationPath',
+            default: '/var/www/html/test/builds/iOS'
         }]).then(({iosDestinationPath}) => {
             config.remote.builds.iosDestinationPath = iosDestinationPath;
             return config;
@@ -443,10 +443,10 @@ const Remote = {
 
     initializeAndroidBuildUpload(config) {
         return inquirer.prompt([{
-            type    : 'input',
-            name    : 'androidDestinationPath',
-            message : 'remote.builds.androidDestinationPath',
-            default : '/var/www/html/test/builds/Android'
+            type: 'input',
+            name: 'androidDestinationPath',
+            message: 'remote.builds.androidDestinationPath',
+            default: '/var/www/html/test/builds/Android'
         }]).then(({androidDestinationPath}) => {
             config.remote.builds.androidDestinationPath = androidDestinationPath;
             return config;
@@ -455,30 +455,30 @@ const Remote = {
 
     initializeRepoUpdate(config) {
         return inquirer.prompt([{
-            type    : 'input',
-            name    : 'host',
-            message : 'remote.repo.host',
-            default : 'lcapriniftp'
+            type: 'input',
+            name: 'host',
+            message: 'remote.repo.host',
+            default: 'lcapriniftp'
         }, {
-            type    : 'input',
-            name    : 'user',
-            message : 'remote.repo.user',
-            default : 'lcaprini-user'
+            type: 'input',
+            name: 'user',
+            message: 'remote.repo.user',
+            default: 'lcaprini-user'
         }, {
-            type    : 'input',
-            name    : 'password',
-            message : 'remote.repo.password',
-            default : 'lcaprini-password'
+            type: 'input',
+            name: 'password',
+            message: 'remote.repo.password',
+            default: 'lcaprini-password'
         }, {
-            type    : 'input',
-            name    : 'jsonPath',
-            message : 'remote.repo.jsonPath',
-            default : '/var/www/html/test/wd'
+            type: 'input',
+            name: 'jsonPath',
+            message: 'remote.repo.jsonPath',
+            default: '/var/www/html/test/wd'
         }, {
-            type    : 'input',
-            name    : 'homepageUrl',
-            message : 'remote.repo.homepageUrl',
-            default : 'https://lcaprini.com/test/wd'
+            type: 'input',
+            name: 'homepageUrl',
+            message: 'remote.repo.homepageUrl',
+            default: 'https://lcaprini.com/test/wd'
         }]).then(({host, user, password, jsonPath, homepageUrl}) => {
             if (!config.remote) {
                 config.remote = {};
@@ -497,15 +497,15 @@ const Remote = {
 
     initializeAngularRepoUpdate(config) {
         return inquirer.prompt([{
-            type    : 'input',
-            name    : 'angularUrlPath',
-            message : 'remote.repo.angularUrlPath',
-            default : 'https://mycert-server.lcaprini.com/angular'
+            type: 'input',
+            name: 'angularUrlPath',
+            message: 'remote.repo.angularUrlPath',
+            default: 'https://mycert-server.lcaprini.com/angular'
         }, {
-            type    : 'input',
-            name    : 'buildsPath',
-            message : 'remote.repo.buildsPath',
-            default : '/var/www/html/angular/builds'
+            type: 'input',
+            name: 'buildsPath',
+            message: 'remote.repo.buildsPath',
+            default: '/var/www/html/angular/builds'
         }]).then(({angularUrlPath, buildsPath}) => {
             config.remote.repo.angularUrlPath = angularUrlPath;
             config.remote.repo.buildsPath = buildsPath;
@@ -515,10 +515,10 @@ const Remote = {
 
     initializeIosRepoUpdate(config) {
         return inquirer.prompt([{
-            type    : 'input',
-            name    : 'iosUrlPath',
-            message : 'remote.repo.iosUrlPath',
-            default : 'https://mycert-server.lcaprini.com/iOS'
+            type: 'input',
+            name: 'iosUrlPath',
+            message: 'remote.repo.iosUrlPath',
+            default: 'https://mycert-server.lcaprini.com/iOS'
         }]).then(({iosUrlPath}) => {
             config.remote.repo.iosUrlPath = iosUrlPath;
             return config;
@@ -527,10 +527,10 @@ const Remote = {
 
     initializeAndroidRepoUpdate(config) {
         return inquirer.prompt([{
-            type    : 'input',
-            name    : 'androidUrlPath',
-            message : 'remote.repo.androidUrlPath',
-            default : 'https://mycert-server.lcaprini.com/Android'
+            type: 'input',
+            name: 'androidUrlPath',
+            message: 'remote.repo.androidUrlPath',
+            default: 'https://mycert-server.lcaprini.com/Android'
         }]).then(({androidUrlPath}) => {
             config.remote.repo.androidUrlPath = androidUrlPath;
             return config;
@@ -539,25 +539,25 @@ const Remote = {
 
     initializeSourcesUpload(config) {
         return inquirer.prompt([{
-            type    : 'input',
-            name    : 'host',
-            message : 'remote.sources.host',
-            default : 'lcapriniftp'
+            type: 'input',
+            name: 'host',
+            message: 'remote.sources.host',
+            default: 'lcapriniftp'
         }, {
-            type    : 'input',
-            name    : 'user',
-            message : 'remote.sources.user',
-            default : 'lcaprini-user'
+            type: 'input',
+            name: 'user',
+            message: 'remote.sources.user',
+            default: 'lcaprini-user'
         }, {
-            type    : 'input',
-            name    : 'password',
-            message : 'remote.sources.password',
-            default : 'lcaprini-password'
+            type: 'input',
+            name: 'password',
+            message: 'remote.sources.password',
+            default: 'lcaprini-password'
         }, {
-            type    : 'input',
-            name    : 'sourcesPath',
-            message : 'remote.sources.sourcesPath',
-            default : '/var/www/html/test/sources'
+            type: 'input',
+            name: 'sourcesPath',
+            message: 'remote.sources.sourcesPath',
+            default: '/var/www/html/test/sources'
         }]).then(({host, user, password, sourcesPath}) => {
             if (!config.remote) {
                 config.remote = {};

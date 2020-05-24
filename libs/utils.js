@@ -28,8 +28,8 @@ const Utils = {
     },
 
     printQRCode(data) {
-        var qrcode = require('qrcode-terminal');
-        qrcode.generate(data, {small : true});
+        let qrcode = require('qrcode-terminal');
+        qrcode.generate(data, {small: true});
     },
 
     findAppName() {
@@ -55,9 +55,9 @@ const Utils = {
         if (questions.length > 0) {
             let question = questions.shift();
             return question(config).then(
-            config => {
-                return utils.askQuestions(questions, config);
-            });
+                config => {
+                    return utils.askQuestions(questions, config);
+                });
         }
         else {
             return config;

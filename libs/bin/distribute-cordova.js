@@ -83,12 +83,12 @@ const finalize = () => {
      */
     if (config.tasks.contains(TASKS.SEND_EMAIL)) {
         let emailData = {
-            appName         : config.app.name,
-            appLabel        : config.app.label,
-            appVersion      : config.app.versionLabel,
-            changelog       : config.changeLog,
-            releaseDate     : config.releaseDate,
-            repoHomepageUrl : finalRepoHomepageUrl
+            appName: config.app.name,
+            appLabel: config.app.label,
+            appVersion: config.app.versionLabel,
+            changelog: config.changeLog,
+            releaseDate: config.releaseDate,
+            repoHomepageUrl: finalRepoHomepageUrl
         };
         if (config.tasks.contains(TASKS.BUILD_ANDROID)) {
             emailData.androidBuildPath = config.remote.repo.androidUrlPath;
@@ -98,17 +98,17 @@ const finalize = () => {
         }
         const emailBody = cordova.composeEmail(emailData);
         email.sendEmail({
-            from   : config.email.from,
-            to     : config.email.to,
-            server : {
-                host     : config.email.host,
-                port     : config.email.port,
-                user     : config.email.user,
-                password : config.email.password
+            from: config.email.from,
+            to: config.email.to,
+            server: {
+                host: config.email.host,
+                port: config.email.port,
+                user: config.email.user,
+                password: config.email.password
             },
-            appName    : config.app.name,
-            appVersion : config.app.versionLabel,
-            body       : emailBody
+            appName: config.app.name,
+            appVersion: config.app.versionLabel,
+            body: emailBody
         });
         email.SENDING_EMAIL.then(
             () => {
@@ -139,8 +139,8 @@ const startDistribution = () => {
          */
         if (config.tasks.contains(TASKS.CHANGE_VERSION)) {
             cordova.changeVersion({
-                filePath : config.sources.htmlVersionPath,
-                version  : config.app.versionLabel
+                filePath: config.sources.htmlVersionPath,
+                version: config.app.versionLabel
             });
         }
 
@@ -149,10 +149,10 @@ const startDistribution = () => {
          */
         if (config.tasks.contains(TASKS.COMPILE_SOURCES)) {
             cordova.compileSource({
-                sourcePath        : config.sources.compilePath,
-                compileSourcesCmd : config.sources.compileCommand,
+                sourcePath: config.sources.compilePath,
+                compileSourcesCmd: config.sources.compileCommand,
 
-                verbose : config.verbose
+                verbose: config.verbose
             });
         }
 
@@ -160,8 +160,8 @@ const startDistribution = () => {
          * Set version and name in config.xml
          */
         cordova.setVersion({
-            cordovaPath : config.cordova.path,
-            appVersion  : config.app.version
+            cordovaPath: config.cordova.path,
+            appVersion: config.app.version
         });
 
         /**
@@ -173,26 +173,26 @@ const startDistribution = () => {
         else {
             iosBuildProcessCompleted = new Promise((resolve, reject) => {
                 cordova.distributeIos({
-                    appName       : config.app.name,
-                    displayName   : config.app.label,
-                    ipaFileName   : config.ios.ipaFileName,
-                    id            : config.ios.bundleId,
-                    version       : config.app.version,
-                    bundleVersion : config.ios.bundleVersion,
+                    appName: config.app.name,
+                    displayName: config.app.label,
+                    ipaFileName: config.ios.ipaFileName,
+                    id: config.ios.bundleId,
+                    version: config.app.version,
+                    bundleVersion: config.ios.bundleVersion,
                     buildWorkspace: config.ios.buildWorkspace,
-                    schema        : config.ios.targetSchema,
+                    schema: config.ios.targetSchema,
 
-                    infoPlistPath          : config.ios.infoPlistPath,
-                    cordovaPath            : config.cordova.path,
-                    buildIosCommand        : config.cordova.buildIosCommand,
-                    exportOptionsPlist     : config.ios.exportOptionsPlist,
-                    exportOptionsPlistPath : config.ios.exportOptionsPlistPath,
-                    exportDir              : config.buildsDir,
+                    infoPlistPath: config.ios.infoPlistPath,
+                    cordovaPath: config.cordova.path,
+                    buildIosCommand: config.cordova.buildIosCommand,
+                    exportOptionsPlist: config.ios.exportOptionsPlist,
+                    exportOptionsPlistPath: config.ios.exportOptionsPlistPath,
+                    exportDir: config.buildsDir,
 
-                    ipaUrlPath   : config.remote.repo.iosIpaUrlPath,
-                    manifestPath : path.join(config.buildsDir, config.ios.manifestFileName),
+                    ipaUrlPath: config.remote.repo.iosIpaUrlPath,
+                    manifestPath: path.join(config.buildsDir, config.ios.manifestFileName),
 
-                    verbose : config.verbose
+                    verbose: config.verbose
                 });
 
                 if (!config.tasks.contains(TASKS.UPLOAD_BUILDS)) {
@@ -200,30 +200,30 @@ const startDistribution = () => {
                 }
                 else {
                     ios.uploadManifestAndIPA({
-                        ipaFilePath      : config.ios.ipaFilePath,
-                        manifestFilePath : config.ios.manifestFilePath,
-                        server           : {
-                            host : config.remote.builds.host,
-                            port : config.remote.builds.port,
-                            user : config.remote.builds.user,
-                            pass : config.remote.builds.password
+                        ipaFilePath: config.ios.ipaFilePath,
+                        manifestFilePath: config.ios.manifestFilePath,
+                        server: {
+                            host: config.remote.builds.host,
+                            port: config.remote.builds.port,
+                            user: config.remote.builds.user,
+                            pass: config.remote.builds.password
                         },
-                        destinationPath : config.remote.builds.iosDestinationPath
+                        destinationPath: config.remote.builds.iosDestinationPath
                     }).then(() => {
                         remote.updateRepo({
-                            repoPath : config.remote.repo.jsonPath,
-                            server   : {
-                                host : config.remote.repo.host,
-                                port : config.remote.repo.port,
-                                user : config.remote.repo.user,
-                                pass : config.remote.repo.password
+                            repoPath: config.remote.repo.jsonPath,
+                            server: {
+                                host: config.remote.repo.host,
+                                port: config.remote.repo.port,
+                                user: config.remote.repo.user,
+                                pass: config.remote.repo.password
                             },
-                            iosBuildPath : config.remote.repo.iosManifestUrlPath,
-                            version      : config.app.versionLabel,
-                            changelog    : config.changeLog,
-                            releaseDate  : config.releaseDate,
-                            hidden       : config.hidden,
-                            rootPath     : config.rootPath
+                            iosBuildPath: config.remote.repo.iosManifestUrlPath,
+                            version: config.app.versionLabel,
+                            changelog: config.changeLog,
+                            releaseDate: config.releaseDate,
+                            hidden: config.hidden,
+                            rootPath: config.rootPath
                         }).then(resolve, reject);
                     }, reject);
                 }
@@ -241,21 +241,21 @@ const startDistribution = () => {
                 iosBuildProcessCompleted.then(
                     () => {
                         cordova.distributeAndroid({
-                            launcherName : config.app.label,
-                            id           : config.android.bundleId,
-                            versionCode  : config.android.versionCode,
+                            launcherName: config.app.label,
+                            id: config.android.bundleId,
+                            versionCode: config.android.versionCode,
 
-                            cordovaPath         : config.cordova.path,
-                            buildAndroidCommand : config.cordova.buildAndroidCommand,
+                            cordovaPath: config.cordova.path,
+                            buildAndroidCommand: config.cordova.buildAndroidCommand,
 
-                            apkFilePath : config.android.apkFilePath,
-                            keystore    : {
-                                path     : config.android.keystore.path,
-                                alias    : config.android.keystore.alias,
-                                password : config.android.keystore.password
+                            apkFilePath: config.android.apkFilePath,
+                            keystore: {
+                                path: config.android.keystore.path,
+                                alias: config.android.keystore.alias,
+                                password: config.android.keystore.password
                             },
 
-                            verbose : config.verbose
+                            verbose: config.verbose
                         });
 
                         if (!config.tasks.contains(TASKS.UPLOAD_BUILDS)) {
@@ -263,29 +263,29 @@ const startDistribution = () => {
                         }
                         else {
                             android.uploadAPK({
-                                apkFilePath : config.android.apkFilePath,
-                                server      : {
-                                    host : config.remote.builds.host,
-                                    port : config.remote.builds.port,
-                                    user : config.remote.builds.user,
-                                    pass : config.remote.builds.password
+                                apkFilePath: config.android.apkFilePath,
+                                server: {
+                                    host: config.remote.builds.host,
+                                    port: config.remote.builds.port,
+                                    user: config.remote.builds.user,
+                                    pass: config.remote.builds.password
                                 },
-                                destinationPath : config.remote.builds.androidDestinationPath
+                                destinationPath: config.remote.builds.androidDestinationPath
                             }).then(() => {
                                 remote.updateRepo({
-                                    repoPath : config.remote.repo.jsonPath,
-                                    server   : {
-                                        host : config.remote.repo.host,
-                                        port : config.remote.repo.port,
-                                        user : config.remote.repo.user,
-                                        pass : config.remote.repo.password
+                                    repoPath: config.remote.repo.jsonPath,
+                                    server: {
+                                        host: config.remote.repo.host,
+                                        port: config.remote.repo.port,
+                                        user: config.remote.repo.user,
+                                        pass: config.remote.repo.password
                                     },
-                                    androidBuildPath : config.remote.repo.androidUrlPath,
-                                    version          : config.app.versionLabel,
-                                    changelog        : config.changeLog,
-                                    releaseDate      : config.releaseDate,
-                                    hidden           : config.hidden,
-                                    rootPath         : config.rootPath
+                                    androidBuildPath: config.remote.repo.androidUrlPath,
+                                    version: config.app.versionLabel,
+                                    changelog: config.changeLog,
+                                    releaseDate: config.releaseDate,
+                                    hidden: config.hidden,
+                                    rootPath: config.rootPath
                                 }).then(resolve, reject);
                             }, reject);
                         }
@@ -312,15 +312,15 @@ const startDistribution = () => {
             sourcesUploadProcessCompleted = Promise.all(processes).then(
                 () => {
                     return remote.uploadSources({
-                        archiveFilePath : config.remote.sources.archiveFilePath,
-                        sourceSrcPath   : path.join(config.cordova.path, './www'),
-                        server          : {
-                            host : config.remote.sources.host,
-                            port : config.remote.sources.port,
-                            user : config.remote.sources.user,
-                            pass : config.remote.sources.password
+                        archiveFilePath: config.remote.sources.archiveFilePath,
+                        sourceSrcPath: path.join(config.cordova.path, './www'),
+                        server: {
+                            host: config.remote.sources.host,
+                            port: config.remote.sources.port,
+                            user: config.remote.sources.user,
+                            pass: config.remote.sources.password
                         },
-                        sourceDestPath : config.remote.sources.sourcesPath
+                        sourceDestPath: config.remote.sources.sourcesPath
                     });
                 },
                 () => {
@@ -339,8 +339,8 @@ const startDistribution = () => {
  * Read config file and initialize all distribution process
  */
 config.init({
-    configPath : program.config,
-    program    : program
+    configPath: program.config,
+    program: program
 }).then(
     () => {
         try {

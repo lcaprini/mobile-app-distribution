@@ -31,7 +31,7 @@ class Ios {
         logger.section(`Archive iOS Workspace into '${xcarchiveFilePath}'`);
         process.chdir(projectPath);
         const cmdXcodebuildArchive = `xcodebuild archive -workspace '${xcodeWorkspaceFilePath}' -scheme '${schema}' -archivePath '${xcarchiveFilePath}'`;
-        let err = shell.exec(cmdXcodebuildArchive, { silent : !verbose }).stderr;
+        let err = shell.exec(cmdXcodebuildArchive, { silent: !verbose }).stderr;
         if (shell.error()) {
             // shelljs has already printed error,
             // so I print it only if verbose mode is OFF
@@ -48,7 +48,7 @@ class Ios {
         logger.section(`Archive iOS Project into '${xcarchiveFilePath}'`);
         process.chdir(projectPath);
         const cmdXcodebuildArchive = `xcodebuild archive -project '${xcodeprojFilePath}' -scheme '${schema}' -archivePath '${xcarchiveFilePath}'`;
-        let err = shell.exec(cmdXcodebuildArchive, { silent : !verbose }).stderr;
+        let err = shell.exec(cmdXcodebuildArchive, { silent: !verbose }).stderr;
         if (shell.error()) {
             // shelljs has already printed error,
             // so I print it only if verbose mode is OFF
@@ -69,14 +69,14 @@ class Ios {
         if (!exportOptionsPlistPath) {
             exportOptionsPlistPath = path.join(projectPath, './exportOptions.plist');
             this.createExportOptionsPlist({
-                exportOptionsPlistPath : exportOptionsPlistPath,
-                exportOptionsPlist     : exportOptionsPlist
+                exportOptionsPlistPath: exportOptionsPlistPath,
+                exportOptionsPlist: exportOptionsPlist
             });
         }
         logger.section(`Export IPA from '${xcarchiveFilePath}' into ${exportDir} directory`);
         process.chdir(projectPath);
         const cmdXcodebuildExport = `xcodebuild -exportArchive -archivePath '${xcarchiveFilePath}' -exportPath '${exportDir}' -exportOptionsPlist '${exportOptionsPlistPath}'`;
-        let err = shell.exec(cmdXcodebuildExport, { silent : !verbose }).stderr;
+        let err = shell.exec(cmdXcodebuildExport, { silent: !verbose }).stderr;
         if (shell.error()) {
             // shelljs has already printed error,
             // so I print it only if verbose mode is OFF
@@ -93,19 +93,19 @@ class Ios {
     createManifest({ id, version, ipaUrlPath, manifestPath, appName, schema, exportDir }) {
         logger.section(`Create iOS manifest for OTA install in '${exportDir}'`);
         const manifest = {
-            items : [{
-                assets : [{
-                    kind : 'software-package',
-                    url  : ipaUrlPath
+            items: [{
+                assets: [{
+                    kind: 'software-package',
+                    url: ipaUrlPath
                 }],
-                CFBundleURLTypes : [{
-                    CFBundleURLSchemes : [schema]
+                CFBundleURLTypes: [{
+                    CFBundleURLSchemes: [schema]
                 }],
-                metadata : {
-                    'bundle-identifier' : id,
-                    'bundle-version'    : version,
-                    kind                : 'software',
-                    title               : appName
+                metadata: {
+                    'bundle-identifier': id,
+                    'bundle-version': version,
+                    kind: 'software',
+                    title: appName
                 }
             }]
         };
@@ -117,9 +117,9 @@ class Ios {
         const remoteFile = path.join(destinationPath, path.basename(manifestFilePath));
         logger.section(`Upload iOS Manifest on ${remoteFile}`);
         return remote.uploadFile({
-            localFile  : manifestFilePath,
-            server     : server,
-            remoteFile : remoteFile
+            localFile: manifestFilePath,
+            server: server,
+            remoteFile: remoteFile
         });
     }
 
@@ -127,9 +127,9 @@ class Ios {
         const remoteFile = path.join(destinationPath, path.basename(ipaFilePath));
         logger.section(`Upload iOS IPA on ${remoteFile}`);
         return remote.uploadFile({
-            localFile  : ipaFilePath,
-            server     : server,
-            remoteFile : remoteFile
+            localFile: ipaFilePath,
+            server: server,
+            remoteFile: remoteFile
         });
     }
 
@@ -182,19 +182,19 @@ class Ios {
 
     initializeBuild(config) {
         return inquirer.prompt([{
-            type    : 'input',
-            name    : 'bundleId',
-            message : 'ios.bundleId',
-            default : 'it.lcaprini.test',
+            type: 'input',
+            name: 'bundleId',
+            message: 'ios.bundleId',
+            default: 'it.lcaprini.test',
             validate(input) {
                 const pattern = /^[a-z][a-z0-9_]*(\.[a-z0-9_]+)+[0-9a-z_]$/i;
                 return pattern.test(input);
             }
         }, {
-            type    : 'input',
-            name    : 'exportOptionsPlistMethod',
-            message : 'ios.exportOptionsPlist.method',
-            default : 'enterprise',
+            type: 'input',
+            name: 'exportOptionsPlistMethod',
+            message: 'ios.exportOptionsPlist.method',
+            default: 'enterprise',
             validate(input) {
                 const methodsAllowed = [
                     'app-store',
@@ -207,18 +207,18 @@ class Ios {
                 return methodsAllowed.contains(input);
             }
         }, {
-            type    : 'input',
-            name    : 'exportOptionsPlistTeamID',
-            message : 'ios.exportOptionsPlist.teamID',
-            default : 'ABC123DEF'
+            type: 'input',
+            name: 'exportOptionsPlistTeamID',
+            message: 'ios.exportOptionsPlist.teamID',
+            default: 'ABC123DEF'
         }]).then(({ bundleId, exportOptionsPlistMethod, exportOptionsPlistTeamID }) => {
             if (!config.ios) {
                 config.ios = {};
             }
             config.ios.bundleId = bundleId;
             config.ios.exportOptionsPlist = {
-                method : exportOptionsPlistMethod,
-                teamID : exportOptionsPlistTeamID
+                method: exportOptionsPlistMethod,
+                teamID: exportOptionsPlistTeamID
             };
             return config;
         });
@@ -227,15 +227,15 @@ class Ios {
     getIconsMap({name, iconsPath}) {
         const Contents = JSON.parse(fs.readFileSync(path.join(__dirname, '../resources/ios-icons-contents.json')));
         let iosPlatform = {
-            name      : name,
-            isAdded   : true,
-            iconsPath : iconsPath,
-            icons     : []
+            name: name,
+            isAdded: true,
+            iconsPath: iconsPath,
+            icons: []
         };
         _.each(Contents.images, icon => {
             iosPlatform.icons.push({
-                name : icon.filename,
-                size : parseInt(icon.size.split('x')[0]) * parseInt(icon.scale)
+                name: icon.filename,
+                size: parseInt(icon.size.split('x')[0]) * parseInt(icon.scale)
             });
         });
         return iosPlatform;
@@ -243,27 +243,27 @@ class Ios {
 
     copyIconsContentsJson(iconsPath) {
         if (!fs.existsSync(iconsPath)) {
-            utils.createPath({path : iconsPath});
+            utils.createPath({path: iconsPath});
         }
         fs.createReadStream(path.join(__dirname, '../resources/ios-icons-contents.json')).pipe(fs.createWriteStream(path.join(iconsPath, 'Contents.json')));
     }
 
     getSplashesMap({name, splashPath}) {
         let iosPlatform = {
-            name       : name,
-            isAdded    : true,
-            splashPath : splashPath,
-            splash     : [
-                { name : 'Default~iphone.png', width : 320, height : 480 },
-                { name : 'Default@2x~iphone.png', width : 640, height : 960 },
-                { name : 'Default-Portrait~ipad.png', width : 768, height : 1024 },
-                { name : 'Default-Portrait@2x~ipad.png', width : 1536, height : 2048 },
-                { name : 'Default-Landscape~ipad.png', width : 1024, height : 768 },
-                { name : 'Default-Landscape@2x~ipad.png', width : 2048, height : 1496 },
-                { name : 'Default-568h@2x~iphone.png', width : 640, height : 1136 },
-                { name : 'Default-667h.png', width : 750, height : 1334 },
-                { name : 'Default-736h.png', width : 1242, height : 2208 },
-                { name : 'Default-Landscape-736h.png', width : 2208, height : 1242 }
+            name: name,
+            isAdded: true,
+            splashPath: splashPath,
+            splash: [
+                { name: 'Default~iphone.png', width: 320, height: 480 },
+                { name: 'Default@2x~iphone.png', width: 640, height: 960 },
+                { name: 'Default-Portrait~ipad.png', width: 768, height: 1024 },
+                { name: 'Default-Portrait@2x~ipad.png', width: 1536, height: 2048 },
+                { name: 'Default-Landscape~ipad.png', width: 1024, height: 768 },
+                { name: 'Default-Landscape@2x~ipad.png', width: 2048, height: 1496 },
+                { name: 'Default-568h@2x~iphone.png', width: 640, height: 1136 },
+                { name: 'Default-667h.png', width: 750, height: 1334 },
+                { name: 'Default-736h.png', width: 1242, height: 2208 },
+                { name: 'Default-Landscape-736h.png', width: 2208, height: 1242 }
             ]
         };
         return iosPlatform;
@@ -271,7 +271,7 @@ class Ios {
 
     copySplshesContentsJson(splashPath) {
         if (!fs.existsSync(splashPath)) {
-            utils.createPath({path : splashPath});
+            utils.createPath({path: splashPath});
         }
         fs.createReadStream(path.join(__dirname, '../resources/ios-splashes-contents.json')).pipe(fs.createWriteStream(path.join(splashPath, 'Contents.json')));
     }

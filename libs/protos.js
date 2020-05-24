@@ -1,3 +1,4 @@
+/* eslint-disable no-extend-native */
 'use strict';
 
 // Prototype for Array contains

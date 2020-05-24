@@ -35,114 +35,114 @@ class Config {
         this.releaseDate = moment().format('DD/MM/YYYY HH:mm');
 
         this.app = {
-            name         : '',
-            label        : '',
-            version      : '',
-            versionLabel : ''
+            name: '',
+            label: '',
+            version: '',
+            versionLabel: ''
         };
 
         this.sources = {
-            compileCommand  : '',
-            compilePath     : '',
-            sourcePath      : '',
-            htmlVersionPath : '',
-            updateVersion   : {
-                replacingTag : '{version}',
-                filePath     : ''
+            compileCommand: '',
+            compilePath: '',
+            sourcePath: '',
+            htmlVersionPath: '',
+            updateVersion: {
+                replacingTag: '{version}',
+                filePath: ''
             }
         };
 
         this.cordova = {
-            path                : '',
-            configPath          : '',
-            rootPath            : '',
-            buildIosCommand     : 'cordova build ios',
-            buildAndroidCommand : 'cordova build --release android'
+            path: '',
+            configPath: '',
+            rootPath: '',
+            buildIosCommand: 'cordova build ios',
+            buildAndroidCommand: 'cordova build --release android'
         };
 
         this.buildsDir = 'builds/';
 
         this.ios = {
-            bundleId           : '',
-            bundleVersion      : '',
-            ipaFileName        : '',
-            ipaFilePath        : '',
-            infoPlistPath      : '',
-            buildWorkspace     : true,
-            targetSchema       : '',
-            exportOptionsPlist : {
-                method         : 'enterprise',
-                teamID         : '',
-                uploadSymbols  : false,
-                compileBitcode : false,
-                uploadBitcode  : false
+            bundleId: '',
+            bundleVersion: '',
+            ipaFileName: '',
+            ipaFilePath: '',
+            infoPlistPath: '',
+            buildWorkspace: true,
+            targetSchema: '',
+            exportOptionsPlist: {
+                method: 'enterprise',
+                teamID: '',
+                uploadSymbols: false,
+                compileBitcode: false,
+                uploadBitcode: false
             },
-            exportOptionsPlistPath : '',
-            manifestFileName       : '',
-            manifestFilePath       : ''
+            exportOptionsPlistPath: '',
+            manifestFileName: '',
+            manifestFilePath: ''
         };
 
         this.android = {
-            bundleId    : '',
-            versionCode : '',
-            keystore    : {
-                path     : '',
-                alias    : '',
-                password : ''
+            bundleId: '',
+            versionCode: '',
+            keystore: {
+                path: '',
+                alias: '',
+                password: ''
             }
         };
 
         this.remote = {
 
-            builds : {
-                host                   : '',
-                port                   : 21,
-                user                   : '',
-                password               : '',
-                iosDestinationPath     : '',
-                androidDestinationPath : '',
-                angularDestinationPath : ''
+            builds: {
+                host: '',
+                port: 21,
+                user: '',
+                password: '',
+                iosDestinationPath: '',
+                androidDestinationPath: '',
+                angularDestinationPath: ''
             },
 
-            deploy : {
-                host                   : '',
-                port                   : 21,
-                user                   : '',
-                password               : '',
-                angularDestinationPath : ''
+            deploy: {
+                host: '',
+                port: 21,
+                user: '',
+                password: '',
+                angularDestinationPath: ''
             },
 
-            repo : {
-                host               : '',
-                port               : 21,
-                user               : '',
-                password           : '',
-                jsonPath           : '',
-                iosUrlPath         : '',
-                iosIpaUrlPath      : '',
-                iosManifestUrlPath : '',
-                androidUrlPath     : '',
-                angularUrlPath     : '',
-                homepageUrl        : '',
-                buildsPath         : ''
+            repo: {
+                host: '',
+                port: 21,
+                user: '',
+                password: '',
+                jsonPath: '',
+                iosUrlPath: '',
+                iosIpaUrlPath: '',
+                iosManifestUrlPath: '',
+                androidUrlPath: '',
+                angularUrlPath: '',
+                homepageUrl: '',
+                buildsPath: ''
             },
 
-            sources : {
-                host            : '',
-                port            : 21,
-                user            : '',
-                sourcesPath     : '',
-                archiveFilePath : ''
+            sources: {
+                host: '',
+                port: 21,
+                user: '',
+                sourcesPath: '',
+                archiveFilePath: ''
             }
         };
 
         this.email = {
-            host     : '',
-            port     : 25,
-            user     : '',
-            password : '',
-            from     : '',
-            to       : []
+            host: '',
+            port: 25,
+            user: '',
+            password: '',
+            from: '',
+            to: []
         };
     }
 
@@ -340,7 +340,7 @@ class Config {
      * @param {Object} program
      */
     setBuildVersion(program) {
-        let version = findVersions(program.args[0], {loose : true});
+        let version = findVersions(program.args[0], {loose: true});
         if (!version[0]) {
             throw new Error('Invalid build version format: please, see http://semver.org');
         }

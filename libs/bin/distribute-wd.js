@@ -14,7 +14,7 @@ const workingDir = path.join(process.cwd(), './wd');
 
 program
     .allowUnknownOption()
-    .usage(``)
+    .usage('')
     .parse(process.argv);
 
 console.log('This utility will create a new folder called \'wd\' with all repository file to manually upload in your FTP server.\n');
@@ -29,10 +29,10 @@ const createWd = ({create}) => {
             fs.createReadStream(path.join(wdModuleDir, './index.html')).pipe(fs.createWriteStream(path.join(workingDir, 'index.html')));
             fs.createReadStream(path.join(wdModuleDir, './build.js')).pipe(fs.createWriteStream(path.join(workingDir, 'build.js')));
             const buildsJson = {
-                appName : appName,
-                builds  : []
+                appName: appName,
+                builds: []
             };
-            fs.writeFileSync(path.join(workingDir, './builds.json'), JSON.stringify(buildsJson, null, 4), {encoding : 'utf-8', flag : 'w'});
+            fs.writeFileSync(path.join(workingDir, './builds.json'), JSON.stringify(buildsJson, null, 4), {encoding: 'utf-8', flag: 'w'});
 
             logger.section('wd folder created');
         },
@@ -47,7 +47,7 @@ if (fs.existsSync(workingDir)) {
     utils.prompt('wd folder already exists. Overwrite it and its content? (y/N)').then(
         result => {
             if (result.toLowerCase() === 'y') {
-                createWd({create : false});
+                createWd({create: false});
             }
         },
         err => {
@@ -57,5 +57,5 @@ if (fs.existsSync(workingDir)) {
     );
 }
 else {
-    createWd({create : true});
+    createWd({create: true});
 }

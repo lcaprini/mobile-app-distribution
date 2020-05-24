@@ -17,15 +17,15 @@ console.log('This utility will create all icons for requested platforms using gr
 console.log('Press ^C at any time to quit.\n');
 
 const options = {
-    ICON_FILE        : '',
-    ICON_PLATFORMS   : [],
-    SPLASH_FILE      : '',
-    SPLASH_PLATFORMS : []
+    ICON_FILE: '',
+    ICON_PLATFORMS: [],
+    SPLASH_FILE: '',
+    SPLASH_PLATFORMS: []
 };
 
 program
     .allowUnknownOption()
-    .usage(`[options]`)
+    .usage('[options]')
     .option('-i, --icon <icon-path>', 'icon path to crop and resize')
     .option('-s, --splash <splash-path>', 'splash path to crop and resize')
     .option(`-p, --platforms <[${TASKS.BUILD_IOS},${TASKS.BUILD_ANDROID}]>`, 'platforms to create icons or splash')
@@ -69,16 +69,16 @@ if (program.icon) {
     if (program.platforms.contains(TASKS.BUILD_IOS)) {
         let iconsPath = path.join(path.dirname(options.ICON_FILE), './ios/AppIcon.appiconset/');
         options.ICON_PLATFORMS.push(ios.getIconsMap({
-            name      : 'iOS',
-            iconsPath : iconsPath
+            name: 'iOS',
+            iconsPath: iconsPath
         }));
         ios.copyIconsContentsJson(iconsPath);
     }
 
     if (program.platforms.contains(TASKS.BUILD_ANDROID)) {
         options.ICON_PLATFORMS.push(android.getIconsMap({
-            name      : 'Android',
-            iconsPath : path.join(path.dirname(options.ICON_FILE), './android/res/')
+            name: 'Android',
+            iconsPath: path.join(path.dirname(options.ICON_FILE), './android/res/')
         }));
     }
 }
@@ -94,16 +94,16 @@ if (program.splash) {
     if (program.platforms.contains(TASKS.BUILD_IOS)) {
         let splashesPath = path.join(path.dirname(options.SPLASH_FILE), './ios/LaunchImage.launchimage/');
         options.SPLASH_PLATFORMS.push(ios.getSplashesMap({
-            name       : 'iOS',
-            splashPath : splashesPath
+            name: 'iOS',
+            splashPath: splashesPath
         }));
         ios.copySplshesContentsJson(splashesPath);
     }
 
     if (program.platforms.contains(TASKS.BUILD_ANDROID)) {
         options.SPLASH_PLATFORMS.push(android.getSplashesMap({
-            name       : 'Android',
-            splashPath : path.join(path.dirname(options.SPLASH_FILE), './android/res/')
+            name: 'Android',
+            splashPath: path.join(path.dirname(options.SPLASH_FILE), './android/res/')
         }));
     }
 }

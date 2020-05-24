@@ -21,17 +21,17 @@ console.log('Press ^C at any time to quit\n');
 
 const init = () => {
     const DISTRIBUTE = {
-        CORDOVA : 'Cordova',
-        IOS     : 'iOS',
-        ANDROID : 'Android',
-        ANGULAR : 'Angular'
+        CORDOVA: 'Cordova',
+        IOS: 'iOS',
+        ANDROID: 'Android',
+        ANGULAR: 'Angular'
     };
 
     inquirer.prompt({
-        type    : 'list',
-        name    : 'distribute',
-        message : 'Which distribute system you want initilize?',
-        choices : [
+        type: 'list',
+        name: 'distribute',
+        message: 'Which distribute system you want initilize?',
+        choices: [
             DISTRIBUTE.CORDOVA,
             DISTRIBUTE.IOS,
             DISTRIBUTE.ANDROID,
@@ -41,44 +41,44 @@ const init = () => {
         let config = {};
         let appName = utils.findAppName();
         inquirer.prompt([{
-                type    : 'input',
-                name    : 'name',
-                message : 'app.name',
-                default : appName
-            }, {
-                type    : 'input',
-                name    : 'label',
-                message : 'app.label',
-                default : appName
-            }]).then(({name, label}) => {
-                config.app = {
-                    name  : name,
-                    label : label
-                };
-                switch (distribute) {
-                case DISTRIBUTE.CORDOVA:
-                    cordova.init(config).then(
-                        config => {
-                            fs.writeFileSync(path.join(workingDir, './distribute.json'), JSON.stringify(config, null, 4));
-                            logger.section('distribute.json created');
-                            process.exit(0);
-                        }
-                    );
-                    break;
-                case DISTRIBUTE.ANGULAR:
-                    angular.init(config).then(
-                                config => {
-                                    fs.writeFileSync(path.join(workingDir, './distribute.json'), JSON.stringify(config, null, 4));
-                                    logger.section('distribute.json created');
-                                    process.exit(0);
-                                }
-                            );
-                    break;
-                default:
-                    logger.info('Coming soon...');
-                    process.exit(0);
-                }
-            });
+            type: 'input',
+            name: 'name',
+            message: 'app.name',
+            default: appName
+        }, {
+            type: 'input',
+            name: 'label',
+            message: 'app.label',
+            default: appName
+        }]).then(({name, label}) => {
+            config.app = {
+                name: name,
+                label: label
+            };
+            switch (distribute) {
+            case DISTRIBUTE.CORDOVA:
+                cordova.init(config).then(
+                    config => {
+                        fs.writeFileSync(path.join(workingDir, './distribute.json'), JSON.stringify(config, null, 4));
+                        logger.section('distribute.json created');
+                        process.exit(0);
+                    }
+                );
+                break;
+            case DISTRIBUTE.ANGULAR:
+                angular.init(config).then(
+                    config => {
+                        fs.writeFileSync(path.join(workingDir, './distribute.json'), JSON.stringify(config, null, 4));
+                        logger.section('distribute.json created');
+                        process.exit(0);
+                    }
+                );
+                break;
+            default:
+                logger.info('Coming soon...');
+                process.exit(0);
+            }
+        });
     });
 };
 

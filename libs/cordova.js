@@ -13,13 +13,13 @@ const email = require('./email');
 const utils = require('./utils');
 
 const TASKS = {
-    CHANGE_VERSION  : 'v',
-    COMPILE_SOURCES : 'c',
-    BUILD_IOS       : 'i',
-    BUILD_ANDROID   : 'a',
-    UPLOAD_BUILDS   : 'u',
-    UPLOAD_SOURCES  : 'z',
-    SEND_EMAIL      : 'e'
+    CHANGE_VERSION: 'v',
+    COMPILE_SOURCES: 'c',
+    BUILD_IOS: 'i',
+    BUILD_ANDROID: 'a',
+    UPLOAD_BUILDS: 'u',
+    UPLOAD_SOURCES: 'z',
+    SEND_EMAIL: 'e'
 };
 
 const Cordova = {
@@ -30,7 +30,7 @@ const Cordova = {
     compileSource({sourcePath, compileSourcesCmd, verbose = false}) {
         process.chdir(sourcePath);
         logger.section(`Compile source:\n$ ${compileSourcesCmd}`);
-        shell.exec(compileSourcesCmd, {silent : !verbose});
+        shell.exec(compileSourcesCmd, {silent: !verbose});
     },
 
     /**
@@ -88,7 +88,7 @@ const Cordova = {
     buildAndroid({buildAndroidCommand, cordovaPath, verbose}) {
         logger.section(`Build Android platform:\n$ ${buildAndroidCommand}`);
         process.chdir(cordovaPath);
-        let err = shell.exec(buildAndroidCommand, {silent : !verbose}).stderr;
+        let err = shell.exec(buildAndroidCommand, {silent: !verbose}).stderr;
         if (shell.error()) {
             // shelljs has already printed error,
             // so I print it only if verbose mode is OFF
@@ -106,9 +106,9 @@ const Cordova = {
         this.setId({cordovaPath, id});
         this.setAndroidVersionCode({cordovaPath, versionCode});
         let androidPlatformPath = path.join(cordovaPath, './platforms/android/');
-        android.setLauncherName({rootPath : androidPlatformPath, launcherName});
+        android.setLauncherName({rootPath: androidPlatformPath, launcherName});
         this.buildAndroid({buildAndroidCommand, cordovaPath, verbose});
-        android.finalizeApk({projectPath : androidPlatformPath, keystore, apkFilePath, verbose});
+        android.finalizeApk({projectPath: androidPlatformPath, keystore, apkFilePath, verbose});
     },
 
     /**
@@ -128,7 +128,7 @@ const Cordova = {
     buildIos({buildIosCommand, cordovaPath, verbose}) {
         logger.section(`Build iOS platform:\n$ ${buildIosCommand}`);
         process.chdir(cordovaPath);
-        let err = shell.exec(buildIosCommand, {silent : !verbose}).stderr;
+        let err = shell.exec(buildIosCommand, {silent: !verbose}).stderr;
         if (shell.error()) {
             // shelljs has already printed error,
             // so I print it only if verbose mode is OFF
@@ -148,7 +148,7 @@ const Cordova = {
         this.buildIos({buildIosCommand, cordovaPath, verbose});
         ios.setDisplayName({infoPlistPath, displayName});
         const projectPath = path.join(cordovaPath, './platforms/ios');
-        if(buildWorkspace){
+        if (buildWorkspace) {
             ios.archiveWorkspace({projectPath, appName, schema, verbose});
         }
         else {
@@ -256,15 +256,15 @@ const Cordova = {
      */
     initializeSourceCompile(config) {
         return inquirer.prompt([{
-            type    : 'input',
-            name    : 'compileCommand',
-            message : 'sources.compileCommand',
-            default : 'grunt build:production'
+            type: 'input',
+            name: 'compileCommand',
+            message: 'sources.compileCommand',
+            default: 'grunt build:production'
         }, {
-            type    : 'input',
-            name    : 'compilePath',
-            message : 'sources.compilePath',
-            default : 'src'
+            type: 'input',
+            name: 'compilePath',
+            message: 'sources.compilePath',
+            default: 'src'
         }]).then(({compileCommand, compilePath}) => {
             if (!config.sources) {
                 config.sources = {};
@@ -280,10 +280,10 @@ const Cordova = {
      */
     initializeChangeVersion(config) {
         return inquirer.prompt([{
-            type    : 'input',
-            name    : 'htmlVersionPath',
-            message : 'sources.htmlVersionPath',
-            default : 'src/html/partials/login.html'
+            type: 'input',
+            name: 'htmlVersionPath',
+            message: 'sources.htmlVersionPath',
+            default: 'src/html/partials/login.html'
         }]).then(({htmlVersionPath}) => {
             if (!config.sources) {
                 config.sources = {};
@@ -298,15 +298,15 @@ const Cordova = {
      */
     initializeGeneral(config) {
         return inquirer.prompt([{
-            type    : 'input',
-            name    : 'rootPath',
-            message : 'cordova.rootPath',
-            default : 'app'
+            type: 'input',
+            name: 'rootPath',
+            message: 'cordova.rootPath',
+            default: 'app'
         }, {
-            type    : 'input',
-            name    : 'buildsDir',
-            message : 'buildsDir',
-            default : 'builds/'
+            type: 'input',
+            name: 'buildsDir',
+            message: 'buildsDir',
+            default: 'builds/'
         }]).then(({rootPath, buildsDir}) => {
             if (!config.cordova) {
                 config.cordova = {};
@@ -325,91 +325,91 @@ const Cordova = {
         let cordova = this;
 
         const TASKS = {
-            CHANGE_VERSION  : 'Change app version in HTML',
-            COMPILE_SOURCES : 'Compile web app sources',
-            BUILD_IOS       : 'Build Cordova iOS platform',
-            BUILD_ANDROID   : 'Build Cordova Android platform',
-            UPLOAD_BUILDS   : 'Upload builds',
-            UPLOAD_SOURCES  : 'Upload sources',
-            SEND_EMAIL      : 'Send email to working group'
+            CHANGE_VERSION: 'Change app version in HTML',
+            COMPILE_SOURCES: 'Compile web app sources',
+            BUILD_IOS: 'Build Cordova iOS platform',
+            BUILD_ANDROID: 'Build Cordova Android platform',
+            UPLOAD_BUILDS: 'Upload builds',
+            UPLOAD_SOURCES: 'Upload sources',
+            SEND_EMAIL: 'Send email to working group'
         };
 
         return inquirer.prompt([{
-            type    : 'checkbox',
-            message : 'Which tasks you want configure?',
-            name    : 'tasks',
-            choices : [
-                { name : TASKS.CHANGE_VERSION },
-                { name : TASKS.COMPILE_SOURCES },
-                { name : TASKS.BUILD_IOS },
-                { name : TASKS.BUILD_ANDROID },
-                { name : TASKS.UPLOAD_BUILDS },
-                { name : TASKS.UPLOAD_SOURCES },
-                { name : TASKS.SEND_EMAIL }
+            type: 'checkbox',
+            message: 'Which tasks you want configure?',
+            name: 'tasks',
+            choices: [
+                { name: TASKS.CHANGE_VERSION },
+                { name: TASKS.COMPILE_SOURCES },
+                { name: TASKS.BUILD_IOS },
+                { name: TASKS.BUILD_ANDROID },
+                { name: TASKS.UPLOAD_BUILDS },
+                { name: TASKS.UPLOAD_SOURCES },
+                { name: TASKS.SEND_EMAIL }
             ]}]).then(({tasks}) => {
-                let questions = [];
+            let questions = [];
 
-                if (tasks.contains(TASKS.COMPILE_SOURCES)) {
-                    questions.push(cordova.initializeSourceCompile);
-                }
+            if (tasks.contains(TASKS.COMPILE_SOURCES)) {
+                questions.push(cordova.initializeSourceCompile);
+            }
 
-                if (tasks.contains(TASKS.CHANGE_VERSION)) {
-                    questions.push(cordova.initializeChangeVersion);
-                }
+            if (tasks.contains(TASKS.CHANGE_VERSION)) {
+                questions.push(cordova.initializeChangeVersion);
+            }
 
-                questions.push(cordova.initializeGeneral);
+            questions.push(cordova.initializeGeneral);
+
+            if (tasks.contains(TASKS.BUILD_IOS)) {
+                questions.push(ios.initializeBuild);
+            }
+
+            if (tasks.contains(TASKS.BUILD_ANDROID)) {
+                questions.push(android.initializeBuild);
+            }
+
+            if (tasks.contains(TASKS.UPLOAD_BUILDS)) {
+                questions.push(remote.initializeBuildUpload);
 
                 if (tasks.contains(TASKS.BUILD_IOS)) {
-                    questions.push(ios.initializeBuild);
+                    questions.push(remote.initializeIosBuildUpload);
                 }
 
                 if (tasks.contains(TASKS.BUILD_ANDROID)) {
-                    questions.push(android.initializeBuild);
+                    questions.push(remote.initializeAndroidBuildUpload);
                 }
 
-                if (tasks.contains(TASKS.UPLOAD_BUILDS)) {
-                    questions.push(remote.initializeBuildUpload);
+                questions.push(remote.initializeRepoUpdate);
 
-                    if (tasks.contains(TASKS.BUILD_IOS)) {
-                        questions.push(remote.initializeIosBuildUpload);
-                    }
-
-                    if (tasks.contains(TASKS.BUILD_ANDROID)) {
-                        questions.push(remote.initializeAndroidBuildUpload);
-                    }
-
-                    questions.push(remote.initializeRepoUpdate);
-
-                    if (tasks.contains(TASKS.BUILD_IOS)) {
-                        questions.push(remote.initializeIosRepoUpdate);
-                    }
-
-                    if (tasks.contains(TASKS.BUILD_ANDROID)) {
-                        questions.push(remote.initializeAndroidRepoUpdate);
-                    }
+                if (tasks.contains(TASKS.BUILD_IOS)) {
+                    questions.push(remote.initializeIosRepoUpdate);
                 }
 
-                if (tasks.contains(TASKS.UPLOAD_SOURCES)) {
-                    questions.push(remote.initializeSourcesUpload);
+                if (tasks.contains(TASKS.BUILD_ANDROID)) {
+                    questions.push(remote.initializeAndroidRepoUpdate);
                 }
+            }
 
-                if (tasks.contains(TASKS.SEND_EMAIL)) {
-                    questions.push(email.initializeSend);
-                }
+            if (tasks.contains(TASKS.UPLOAD_SOURCES)) {
+                questions.push(remote.initializeSourcesUpload);
+            }
 
-                return utils.askQuestions(questions, config).then(
-                    config => {
-                        return config;
-                    },
-                    err => {
-                        logger.error(err);
-                        process.exit(1);
-                    });
-            });
+            if (tasks.contains(TASKS.SEND_EMAIL)) {
+                questions.push(email.initializeSend);
+            }
+
+            return utils.askQuestions(questions, config).then(
+                config => {
+                    return config;
+                },
+                err => {
+                    logger.error(err);
+                    process.exit(1);
+                });
+        });
     }
 };
 
 module.exports = {
-    CORDOVA : Cordova,
-    TASKS   : TASKS
+    CORDOVA: Cordova,
+    TASKS: TASKS
 };

@@ -48,7 +48,7 @@ class Android {
             let stringsTree = new et.ElementTree(et.XML(strings));
             let launcherNameElement = stringsTree.findall('./string/[@name="launcher_name"]')[0];
             launcherNameElement.text = launcherName;
-            fs.writeFileSync(androidStringsPath, stringsTree.write({indent : 4}), 'utf-8');
+            fs.writeFileSync(androidStringsPath, stringsTree.write({indent: 4}), 'utf-8');
         }
         catch (err) {
             logger.error(err);
@@ -105,10 +105,10 @@ class Android {
      * @param {String} param0.keystore.password - Keystore alias' password
      * @param {Boolean} param0.verbose - The logger prints every process message only if it's true
      */
-    signAPK({apkReleasePath, keystore : {path : keystorePath, alias : keystoreAlias, password : keystorePassword}, verbose}) {
-        logger.section(`Sign Android apk with jarsigner command`);
+    signAPK({apkReleasePath, keystore: {path: keystorePath, alias: keystoreAlias, password: keystorePassword}, verbose}) {
+        logger.section('Sign Android apk with jarsigner command');
         const cmdAndroidSignAPK = `jarsigner -verbose -sigalg SHA1withRSA -digestalg SHA1 -keystore '${keystorePath}' -storepass '${keystorePassword}' '${apkReleasePath}' '${keystoreAlias}'`;
-        let err = shell.exec(cmdAndroidSignAPK, {silent : !verbose}).stderr;
+        let err = shell.exec(cmdAndroidSignAPK, {silent: !verbose}).stderr;
         if (shell.error()) {
             // shelljs has already printed error,
             // so I print it only if verbose mode is OFF
@@ -127,9 +127,9 @@ class Android {
      * @param {Boolean} param0.verbose - The logger prints every process message only if it's true
      */
     alignAPK({apkReleasePath, apkFilePath, verbose}) {
-        logger.section(`Align signed Android apk with zipalign command`);
+        logger.section('Align signed Android apk with zipalign command');
         const cmdAndroidAlignAPK = `zipalign -vf 4 '${apkReleasePath}' '${apkFilePath}'`;
-        let err = shell.exec(cmdAndroidAlignAPK, {silent : !verbose}).stderr;
+        let err = shell.exec(cmdAndroidAlignAPK, {silent: !verbose}).stderr;
         if (shell.error()) {
             // shelljs has already printed error,
             // so I print it only if verbose mode is OFF
@@ -167,9 +167,9 @@ class Android {
         logger.section(`Upload Android apk on ${destinationPath}`);
         const remoteFile = path.join(destinationPath, path.basename(apkFilePath));
         return remote.uploadFile({
-            localFile  : apkFilePath,
-            server     : server,
-            remoteFile : remoteFile
+            localFile: apkFilePath,
+            server: server,
+            remoteFile: remoteFile
         });
     }
 
@@ -181,9 +181,9 @@ class Android {
         if (!fs.existsSync(projectPath)) {
             throw new Error(`Android build error: no Android project in "${projectPath}" directory`);
         }
-        const stringsPath = this.getStringsPath({rootPath : projectPath});
+        const stringsPath = this.getStringsPath({rootPath: projectPath});
         if (!stringsPath) {
-            throw new Error(`Android build error: strings.xml file does not exists`);
+            throw new Error('Android build error: strings.xml file does not exists');
         }
         if (!fs.existsSync(config.android.keystore.path)) {
             throw new Error(`Android build error: missing file "${config.android.keystore.path}"`);
@@ -195,7 +195,7 @@ class Android {
             throw new Error('Android build error: missing "android.keystore.password" value in config file');
         }
         if (!fs.existsSync(config.buildsDir)) {
-            utils.createPath({workingPath : config.rootPath, path : config.buildsDir});
+            utils.createPath({workingPath: config.rootPath, path: config.buildsDir});
         }
         if (!commandExists('jarsigner')) {
             throw new Error('Android build error: command "jarsigner" not found, please add Android SDK tools in $PATH');
@@ -207,38 +207,38 @@ class Android {
 
     initializeBuild(config) {
         return inquirer.prompt([{
-            type    : 'input',
-            name    : 'bundleId',
-            message : 'android.bundleId',
-            default : 'it.lcaprini.test',
+            type: 'input',
+            name: 'bundleId',
+            message: 'android.bundleId',
+            default: 'it.lcaprini.test',
             validate(input) {
                 const pattern = /^[a-z][a-z0-9_]*(\.[a-z0-9_]+)+[0-9a-z_]$/i;
                 return pattern.test(input);
             }
         }, {
-            type    : 'input',
-            name    : 'path',
-            message : 'android.keystore.path',
-            default : 'resources/android/lcaprini.keystore'
+            type: 'input',
+            name: 'path',
+            message: 'android.keystore.path',
+            default: 'resources/android/lcaprini.keystore'
         }, {
-            type    : 'input',
-            name    : 'alias',
-            message : 'android.keystore.alias',
-            default : 'lcaprini-alias'
+            type: 'input',
+            name: 'alias',
+            message: 'android.keystore.alias',
+            default: 'lcaprini-alias'
         }, {
-            type    : 'input',
-            name    : 'password',
-            message : 'android.keystore.password',
-            default : 'lcaprini-password'
+            type: 'input',
+            name: 'password',
+            message: 'android.keystore.password',
+            default: 'lcaprini-password'
         }]).then(({bundleId, path, alias, password}) => {
             if (!config.android) {
                 config.android = {};
             }
             config.android.bundleId = bundleId;
             config.android.keystore = {
-                path     : path,
-                alias    : alias,
-                password : password
+                path: path,
+                alias: alias,
+                password: password
             };
             return config;
         });
@@ -246,16 +246,16 @@ class Android {
 
     getIconsMap({name, iconsPath}) {
         let androidPlatform = {
-            name      : name,
-            isAdded   : true,
-            iconsPath : iconsPath,
-            icons     : [
-                { name : path.join('mipmap-ldpi', 'icon.png'), size : 36, density : 'ldpi' },
-                { name : path.join('mipmap-mdpi', 'icon.png'), size : 48, density : 'mdpi' },
-                { name : path.join('mipmap-hdpi', 'icon.png'), size : 72, density : 'hdpi' },
-                { name : path.join('mipmap-xhdpi', 'icon.png'), size : 96, density : 'xhdpi' },
-                { name : path.join('mipmap-xxhdpi', 'icon.png'), size : 144, density : 'xxhdpi' },
-                { name : path.join('mipmap-xxxhdpi', 'icon.png'), size : 192, density : 'xxxhdpi' }
+            name: name,
+            isAdded: true,
+            iconsPath: iconsPath,
+            icons: [
+                { name: path.join('mipmap-ldpi', 'icon.png'), size: 36, density: 'ldpi' },
+                { name: path.join('mipmap-mdpi', 'icon.png'), size: 48, density: 'mdpi' },
+                { name: path.join('mipmap-hdpi', 'icon.png'), size: 72, density: 'hdpi' },
+                { name: path.join('mipmap-xhdpi', 'icon.png'), size: 96, density: 'xhdpi' },
+                { name: path.join('mipmap-xxhdpi', 'icon.png'), size: 144, density: 'xxhdpi' },
+                { name: path.join('mipmap-xxxhdpi', 'icon.png'), size: 192, density: 'xxxhdpi' }
             ]
         };
         return androidPlatform;
@@ -263,22 +263,22 @@ class Android {
 
     getSplashesMap({name, splashPath}) {
         let androidPlatform = {
-            name       : name,
-            isAdded    : true,
-            splashPath : splashPath,
-            splash     : [
-                { name : path.join('drawable-port-ldpi', 'screen.png'), width : 320, height : 426, density : 'port-ldpi' },
-                { name : path.join('drawable-land-ldpi', 'screen.png'), width : 426, height : 320, density : 'land-ldpi' },
-                { name : path.join('drawable-port-hdpi', 'screen.png'), width : 480, height : 640, density : 'port-hdpi' },
-                { name : path.join('drawable-land-hdpi', 'screen.png'), width : 640, height : 480, density : 'land-hdpi' },
-                { name : path.join('drawable-port-mdpi', 'screen.png'), width : 320, height : 470, density : 'port-mdpi' },
-                { name : path.join('drawable-land-mdpi', 'screen.png'), width : 470, height : 320, density : 'land-mdpi' },
-                { name : path.join('drawable-port-xhdpi', 'screen.png'), width : 720, height : 960, density : 'port-xhdpi' },
-                { name : path.join('drawable-land-xhdpi', 'screen.png'), width : 960, height : 720, density : 'land-xhdpi' },
-                { name : path.join('drawable-port-xxhdpi', 'screen.png'), width : 960, height : 1600, density : 'port-xxhdpi' },
-                { name : path.join('drawable-land-xxhdpi', 'screen.png'), width : 1600, height : 960, density : 'land-xxhdpi' },
-                { name : path.join('drawable-port-xxxhdpi', 'screen.png'), width : 1280, height : 1920, density : 'port-xxhdpi' },
-                { name : path.join('drawable-land-xxxhdpi', 'screen.png'), width : 1920, height : 1280, density : 'land-xxhdpi' }
+            name: name,
+            isAdded: true,
+            splashPath: splashPath,
+            splash: [
+                { name: path.join('drawable-port-ldpi', 'screen.png'), width: 320, height: 426, density: 'port-ldpi' },
+                { name: path.join('drawable-land-ldpi', 'screen.png'), width: 426, height: 320, density: 'land-ldpi' },
+                { name: path.join('drawable-port-hdpi', 'screen.png'), width: 480, height: 640, density: 'port-hdpi' },
+                { name: path.join('drawable-land-hdpi', 'screen.png'), width: 640, height: 480, density: 'land-hdpi' },
+                { name: path.join('drawable-port-mdpi', 'screen.png'), width: 320, height: 470, density: 'port-mdpi' },
+                { name: path.join('drawable-land-mdpi', 'screen.png'), width: 470, height: 320, density: 'land-mdpi' },
+                { name: path.join('drawable-port-xhdpi', 'screen.png'), width: 720, height: 960, density: 'port-xhdpi' },
+                { name: path.join('drawable-land-xhdpi', 'screen.png'), width: 960, height: 720, density: 'land-xhdpi' },
+                { name: path.join('drawable-port-xxhdpi', 'screen.png'), width: 960, height: 1600, density: 'port-xxhdpi' },
+                { name: path.join('drawable-land-xxhdpi', 'screen.png'), width: 1600, height: 960, density: 'land-xxhdpi' },
+                { name: path.join('drawable-port-xxxhdpi', 'screen.png'), width: 1280, height: 1920, density: 'port-xxhdpi' },
+                { name: path.join('drawable-land-xxxhdpi', 'screen.png'), width: 1920, height: 1280, density: 'land-xxhdpi' }
             ]
         };
         return androidPlatform;
