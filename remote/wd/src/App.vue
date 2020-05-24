@@ -1,28 +1,21 @@
 <template>
     <div id="app" class="container">
-
         <Spin size="large" fix v-if="!ready">
-            <Icon type="load-c" size=18 class="demo-spin-icon-load"></Icon>
+            <Icon type="load-c" size="18" class="demo-spin-icon-load"></Icon>
             <div>Loading</div>
         </Spin>
 
         <div id="header">
-            <h2 class="title"> {{ appName }} </h2>
-            <app-changelog
-                :builds="builds"
-                @selected="showVersionDetails"></app-changelog>
+            <h2 class="title">{{ appName }}</h2>
+            <app-changelog :builds="builds" @selected="showVersionDetails"></app-changelog>
         </div>
 
         <div class="tabs">
-
             <div class="versions" :class="{'no-builds': ready && builds.length === 0}">
-
                 <Card v-if="ready && builds.length === 0" class="no-builds">
                     <div>
-                        <Icon
-                            type="sad-outline"
-                            size="28"></Icon>
-                        <h3> No builds available </h3>
+                        <Icon type="sad-outline" size="28"></Icon>
+                        <h3>No builds available</h3>
                     </div>
                 </Card>
 
@@ -40,7 +33,8 @@
                     :iosLink="build.iosBuildPath"
                     :angularLink="build.angularBuildPath"
                     :active="selectedVersion.version == build.version"
-                    @selected="showVersionDetails"></version-tab>
+                    @selected="showVersionDetails"
+                ></version-tab>
             </div>
 
             <version-details
@@ -55,10 +49,9 @@
                 :iosLink="selectedVersion.iosBuildPath"
                 :angularLink="selectedVersion.angularBuildPath"
                 v-show="ready"
-                class="hidden-xs"></version-details>
-
+                class="hidden-xs"
+            ></version-details>
         </div>
-
     </div>
 </template>
 
@@ -72,82 +65,93 @@ import VersionDetails from './VersionDetails.vue';
 import Changelog from './Changelog.vue';
 
 export default {
-    components:{
-        VersionTab : VersionTab,
-        VersionDetails : VersionDetails,
-        AppChangelog : Changelog
+    components: {
+        VersionTab: VersionTab,
+        VersionDetails: VersionDetails,
+        AppChangelog: Changelog,
     },
-    data(){
+    data() {
         return {
-            appName : '',
-            builds : [],
-            selectedVersion : {},
-            ready: false
-        }
+            appName: '',
+            builds: [],
+            selectedVersion: {},
+            ready: false,
+        };
     },
     created() {
         let App = this;
         const url = window.location.href;
         let showAll = false;
-        if(this.getParameterByName(url, 'all')){
+        if (this.getParameterByName(url, 'all')) {
             showAll = this.getParameterByName(url, 'all') === 'true';
         }
-		// const builds = (process.env.NODE_ENV === 'production')? './builds.json' : 'http://fiatpvt-coll.engbms.it/FiatApp/ilcc/wd/builds.json';
-		const builds = './builds.json';
+        // const builds = (process.env.NODE_ENV === 'production')? './builds.json' : 'http://fiatpvt-coll.engbms.it/FiatApp/ilcc/wd/builds.json';
+        const builds = './builds.json';
         this.$http.get(`${builds}?t=${new Date().getTime()}`).then(
             jsonFile => {
-                try{
+                try {
                     App.appName = jsonFile.body.appName;
 
-                    if(showAll){
+                    if (showAll) {
                         each(jsonFile.body.builds, b => {
-                            b.changelogString = `✓ ${b.changelog.join('<br/>✓ ')}`;
+                            b.changelogString = `✓ ${b.changelog.join(
+                                '<br/>✓ ',
+                            )}`;
                             App.builds.push(b);
                         });
-                    }
-                    else{
+                    } else {
                         each(jsonFile.body.builds, b => {
-                            if(typeof b.hidden === 'undefined' || b.hidden === false){
-                                b.changelogString = `✓ ${b.changelog.join('<br/>✓ ')}`;
+                            if (
+                                typeof b.hidden === 'undefined' ||
+                                b.hidden === false
+                            ) {
+                                b.changelogString = `✓ ${b.changelog.join(
+                                    '<br/>✓ ',
+                                )}`;
                                 App.builds.push(b);
                             }
                         });
                     }
 
-                    Vue.nextTick(function () {
-                        if(App.builds.length > 0){
-                            if(App.getParameterByName(url, 'v')){
-                                App.showVersionDetails(findIndex(App.builds, {version : App.getParameterByName(url, 'v')}));
-                            }
-                            else{
+                    Vue.nextTick(function() {
+                        if (App.builds.length > 0) {
+                            if (App.getParameterByName(url, 'v')) {
+                                App.showVersionDetails(
+                                    findIndex(App.builds, {
+                                        version: App.getParameterByName(
+                                            url,
+                                            'v',
+                                        ),
+                                    }),
+                                );
+                            } else {
                                 App.showVersionDetails(0);
                             }
                         }
                         App.ready = true;
-                    })
+                    });
 
                     document.title = App.appName;
-                }
-                catch(err){
+                } catch (err) {
                     alert(err);
                 }
             },
-            () => alert('builds.json not found')
-        )
+            () => alert('builds.json not found'),
+        );
     },
-    methods : {
-        showVersionDetails(versionIndex){
-            if(!versionIndex || versionIndex === -1){
+    methods: {
+        showVersionDetails(versionIndex) {
+            if (!versionIndex || versionIndex === -1) {
                 versionIndex = 0;
             }
             this.selectedVersion = this.builds[versionIndex];
-            if(window.innerWidth < 560){
+            if (window.innerWidth < 560) {
                 const App = this;
                 setTimeout(() => {
                     const options = {
                         container: '.versions',
                         easing: 'ease-in',
-                        offset: -50
+                        offset: -50,
                     };
                     App.$scrollTo(`#v_${versionIndex}`, 300, options);
                 }, 250);
@@ -155,15 +159,15 @@ export default {
         },
         getParameterByName(url, name) {
             if (!url) url = window.location.href;
-            name = name.replace(/[\[\]]/g, "\\$&");
-            var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
+            name = name.replace(/[\[\]]/g, '\\$&');
+            var regex = new RegExp('[?&]' + name + '(=([^&#]*)|&|#|$)'),
                 results = regex.exec(url);
             if (!results) return null;
             if (!results[2]) return '';
-            return decodeURIComponent(results[2].replace(/\+/g, " "));
-        }
-    }
-}
+            return decodeURIComponent(results[2].replace(/\+/g, ' '));
+        },
+    },
+};
 </script>
 
 <style lang="sass">

@@ -1,91 +1,89 @@
 <template>
-<div>
-    <div class="tab">
-        <button class="tab-toggle" :class="{active : active}" @click="select">
-            {{version}}
-            <div class="platforms">
-                <i class="ivu-icon ivu-icon-social-apple" v-if="iosLink"></i>
-                <i class="ivu-icon ivu-icon-social-android" v-if="androidLink"></i>
-                <i class="ivu-icon ivu-icon-social-angular" v-if="angularLink"></i>
-            </div>
-        </button>
+    <div>
+        <div class="tab">
+            <button class="tab-toggle" :class="{active : active}" @click="select">
+                {{version}}
+                <div class="platforms">
+                    <i class="ivu-icon ivu-icon-social-apple" v-if="iosLink"></i>
+                    <i class="ivu-icon ivu-icon-social-android" v-if="androidLink"></i>
+                    <i class="ivu-icon ivu-icon-social-angular" v-if="angularLink"></i>
+                </div>
+            </button>
+        </div>
+        <version-details
+            id="main-viewer"
+            :app-name="appName"
+            :version="version"
+            :hidden="hidden"
+            :changelog="changelog"
+            :date="date"
+            :androidLink="androidLink"
+            :iosLink="iosLink"
+            :angularLink="angularLink"
+            class="details visible visible-xs"
+            v-if="active"
+        ></version-details>
     </div>
-    <version-details
-        id="main-viewer"
-        :app-name="appName"
-        :version="version"
-        :hidden="hidden"
-        :changelog="changelog"
-        :date="date"
-        :androidLink="androidLink"
-        :iosLink="iosLink"
-        :angularLink="angularLink"
-        class="details visible visible-xs"
-        v-if="active"></version-details>
-</div>
 </template>
 <script>
-
 import VersionDetails from './VersionDetails.vue';
 
 export default {
-    components : {
-        VersionDetails :VersionDetails
+    components: {
+        VersionDetails: VersionDetails,
     },
     props: {
         appName: {
             type: String,
-            required: true
+            required: true,
         },
         index: {
-            type: Number
+            type: Number,
         },
         version: {
             type: String,
-            required: true
+            required: true,
         },
         hidden: {
             type: Boolean,
-            default: false
+            default: false,
         },
         changelog: {
             type: String,
-            required: true
+            required: true,
         },
         date: {
             type: String,
-            default: ''
+            default: '',
         },
         androidLink: {
             type: String,
-            default: null
+            default: null,
         },
         iosLink: {
             type: String,
-            default: null
+            default: null,
         },
         angularLink: {
             type: String,
-            default: null
+            default: null,
         },
-        active : {
+        active: {
             type: Boolean,
-            default: false
-        }
+            default: false,
+        },
     },
-    methods:{
-        select($event){
+    methods: {
+        select($event) {
             this.$emit('selected', this.index);
-        }
-    }
-}
+        },
+    },
+};
 </script>
 <style lang="sass" scoped>
-
 @import "assets/css/main";
 
 .tab {
-
     .tab-toggle {
         position: relative;
         outline: none;

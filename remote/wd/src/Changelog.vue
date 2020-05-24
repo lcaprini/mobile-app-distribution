@@ -1,21 +1,21 @@
 <template>
     <span id="changelog" v-if="builds.length > 0">
-
         <Button
             type="ghost"
             class="visible-xs"
             shape="circle"
             icon="clipboard"
-            @click="changelogModal = true"></Button>
+            @click="changelogModal = true"
+        ></Button>
 
-        <Button type="ghost" class="hidden-xs" @click="changelogModal = true"> Changelog </Button>
+        <Button type="ghost" class="hidden-xs" @click="changelogModal = true">Changelog</Button>
 
         <Modal
             v-model="changelogModal"
             title="Changelog"
             class="no-footer body-no-padding"
-            :styles="{top: '20px'}">
-
+            :styles="{top: '20px'}"
+        >
             <form class="form-inline">
                 <Input type="text" class="search" v-model="search" placeholder="Search..."></Input>
                 <Button
@@ -25,7 +25,8 @@
                     size="small"
                     icon="close-round"
                     @click="search = ''"
-                    class="cancel"></Button>
+                    class="cancel"
+                ></Button>
             </form>
             <div class="version-list-container">
                 <ul class="version-list">
@@ -42,13 +43,13 @@
                                 shape="circle"
                                 size="small"
                                 @click="showVersion(iB)"
-                                class="select"> Show ▶ </Button>
+                                class="select"
+                            >Show ▶</Button>
                         </p>
                         <p class="changelog" v-html="build.changelogString"></p>
                     </li>
                 </ul>
             </div>
-
         </Modal>
     </span>
 </template>
@@ -57,40 +58,42 @@
 import each from 'lodash/each';
 
 export default {
-    data(){
+    data() {
         return {
             changelogModal: false,
-            search: ''
-        }
+            search: '',
+        };
     },
     props: {
-        builds : {
-            type : Array,
-            default : []
-        }
+        builds: {
+            type: Array,
+            default: [],
+        },
     },
     computed: {
-        filteredBuilds(){
-            if(this.search){
+        filteredBuilds() {
+            if (this.search) {
                 const search = this.search.toLowerCase();
                 let filtered = [];
                 each(this.builds, build => {
-                    if(build.changelogString.toLowerCase().indexOf(search) > -1){
+                    if (
+                        build.changelogString.toLowerCase().indexOf(search) > -1
+                    ) {
                         filtered.push(build);
                     }
                 });
                 return filtered;
             }
             return this.builds;
-        }
+        },
     },
     methods: {
-        showVersion(version){
+        showVersion(version) {
             this.changelogModal = false;
             this.$emit('selected', version);
-        }
-    }
-}
+        },
+    },
+};
 </script>
 
 <style lang="sass">

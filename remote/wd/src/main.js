@@ -13,6 +13,6 @@ Vue.use(iView);
 Vue.use(VueScrollTo);
 
 new Vue({
-    el     : '#app',
-    render : h => h(App)
+    el: '#app',
+    render: h => h(App)
 });

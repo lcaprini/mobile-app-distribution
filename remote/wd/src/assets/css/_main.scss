@@ -1,4 +1,3 @@
-
 @import 'colors';
 @import 'button';
 @import 'modal';
@@ -15,20 +14,23 @@ body {
         margin-right: auto;
         margin-left: auto;
         height: 100%;
-        -webkit-display : flex;
+        -webkit-display: flex;
         display: flex;
         -webkit-flex-direction: column;
         flex-direction: column;
     }
 }
-.visible-lg, .visible-md, .visible-sm, .visible-xs {
-    display: none!important;
+.visible-lg,
+.visible-md,
+.visible-sm,
+.visible-xs {
+    display: none !important;
 }
-@media (max-width: 560px){
+@media (max-width: 560px) {
     .hidden-xs {
-        display: none!important;
+        display: none !important;
     }
     .visible-xs {
-        display: block!important;
+        display: block !important;
     }
 }
