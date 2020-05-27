@@ -243,46 +243,6 @@ class Android {
             return config;
         });
     }
-
-    getIconsMap({name, iconsPath}) {
-        let androidPlatform = {
-            name: name,
-            isAdded: true,
-            iconsPath: iconsPath,
-            icons: [
-                { name: path.join('mipmap-ldpi', 'icon.png'), size: 36, density: 'ldpi' },
-                { name: path.join('mipmap-mdpi', 'icon.png'), size: 48, density: 'mdpi' },
-                { name: path.join('mipmap-hdpi', 'icon.png'), size: 72, density: 'hdpi' },
-                { name: path.join('mipmap-xhdpi', 'icon.png'), size: 96, density: 'xhdpi' },
-                { name: path.join('mipmap-xxhdpi', 'icon.png'), size: 144, density: 'xxhdpi' },
-                { name: path.join('mipmap-xxxhdpi', 'icon.png'), size: 192, density: 'xxxhdpi' }
-            ]
-        };
-        return androidPlatform;
-    }
-
-    getSplashesMap({name, splashPath}) {
-        let androidPlatform = {
-            name: name,
-            isAdded: true,
-            splashPath: splashPath,
-            splash: [
-                { name: path.join('drawable-port-ldpi', 'screen.png'), width: 320, height: 426, density: 'port-ldpi' },
-                { name: path.join('drawable-land-ldpi', 'screen.png'), width: 426, height: 320, density: 'land-ldpi' },
-                { name: path.join('drawable-port-hdpi', 'screen.png'), width: 480, height: 640, density: 'port-hdpi' },
-                { name: path.join('drawable-land-hdpi', 'screen.png'), width: 640, height: 480, density: 'land-hdpi' },
-                { name: path.join('drawable-port-mdpi', 'screen.png'), width: 320, height: 470, density: 'port-mdpi' },
-                { name: path.join('drawable-land-mdpi', 'screen.png'), width: 470, height: 320, density: 'land-mdpi' },
-                { name: path.join('drawable-port-xhdpi', 'screen.png'), width: 720, height: 960, density: 'port-xhdpi' },
-                { name: path.join('drawable-land-xhdpi', 'screen.png'), width: 960, height: 720, density: 'land-xhdpi' },
-                { name: path.join('drawable-port-xxhdpi', 'screen.png'), width: 960, height: 1600, density: 'port-xxhdpi' },
-                { name: path.join('drawable-land-xxhdpi', 'screen.png'), width: 1600, height: 960, density: 'land-xxhdpi' },
-                { name: path.join('drawable-port-xxxhdpi', 'screen.png'), width: 1280, height: 1920, density: 'port-xxhdpi' },
-                { name: path.join('drawable-land-xxxhdpi', 'screen.png'), width: 1920, height: 1280, density: 'land-xxhdpi' }
-            ]
-        };
-        return androidPlatform;
-    }
 }
 
 module.exports = new Android();

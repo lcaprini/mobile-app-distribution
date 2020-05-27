@@ -4,11 +4,9 @@ const path = require('path');
 const plist = require('plist');
 const shell = require('shelljs');
 const inquirer = require('inquirer');
-const _ = require('lodash');
 
 const logger = require('./logger');
 const remote = require('./remote');
-const utils = require('./utils');
 
 class Ios {
     calculateBundleVersion(appVersion) {
@@ -222,58 +220,6 @@ class Ios {
             };
             return config;
         });
-    }
-
-    getIconsMap({name, iconsPath}) {
-        const Contents = JSON.parse(fs.readFileSync(path.join(__dirname, '../resources/ios-icons-contents.json')));
-        let iosPlatform = {
-            name: name,
-            isAdded: true,
-            iconsPath: iconsPath,
-            icons: []
-        };
-        _.each(Contents.images, icon => {
-            iosPlatform.icons.push({
-                name: icon.filename,
-                size: parseInt(icon.size.split('x')[0]) * parseInt(icon.scale)
-            });
-        });
-        return iosPlatform;
-    }
-
-    copyIconsContentsJson(iconsPath) {
-        if (!fs.existsSync(iconsPath)) {
-            utils.createPath({path: iconsPath});
-        }
-        fs.createReadStream(path.join(__dirname, '../resources/ios-icons-contents.json')).pipe(fs.createWriteStream(path.join(iconsPath, 'Contents.json')));
-    }
-
-    getSplashesMap({name, splashPath}) {
-        let iosPlatform = {
-            name: name,
-            isAdded: true,
-            splashPath: splashPath,
-            splash: [
-                { name: 'Default~iphone.png', width: 320, height: 480 },
-                { name: 'Default@2x~iphone.png', width: 640, height: 960 },
-                { name: 'Default-Portrait~ipad.png', width: 768, height: 1024 },
-                { name: 'Default-Portrait@2x~ipad.png', width: 1536, height: 2048 },
-                { name: 'Default-Landscape~ipad.png', width: 1024, height: 768 },
-                { name: 'Default-Landscape@2x~ipad.png', width: 2048, height: 1496 },
-                { name: 'Default-568h@2x~iphone.png', width: 640, height: 1136 },
-                { name: 'Default-667h.png', width: 750, height: 1334 },
-                { name: 'Default-736h.png', width: 1242, height: 2208 },
-                { name: 'Default-Landscape-736h.png', width: 2208, height: 1242 }
-            ]
-        };
-        return iosPlatform;
-    }
-
-    copySplshesContentsJson(splashPath) {
-        if (!fs.existsSync(splashPath)) {
-            utils.createPath({path: splashPath});
-        }
-        fs.createReadStream(path.join(__dirname, '../resources/ios-splashes-contents.json')).pipe(fs.createWriteStream(path.join(splashPath, 'Contents.json')));
     }
 }
 

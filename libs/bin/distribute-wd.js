@@ -9,7 +9,7 @@ const path = require('path');
 const logger = require('../logger');
 const utils = require('../utils');
 
-const wdModuleDir = path.join(__dirname, '../../remote/wd');
+const wdModuleDir = path.join(__dirname, '../../remote/wd/dist');
 const workingDir = path.join(process.cwd(), './wd');
 
 program

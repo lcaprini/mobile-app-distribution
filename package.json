@@ -36,6 +36,7 @@
     "commander": "^2.9.0",
     "connect": "^3.6.3",
     "cordova-config": "https://github.com/lcaprini/cordova-config.git#major-0",
+    "cordova-res": "^0.14.0",
     "corser": "^2.0.1",
     "elementtree": "^0.1.7",
     "find-versions": "^2.0.0",
@@ -51,7 +52,6 @@
     "serve-static": "^1.12.4",
     "sftp-upload": "^1.0.1",
     "shelljs": "^0.7.7",
-    "splashicon-generator": "https://github.com/lcaprini/splashicon-generator.git",
     "winston": "^2.3.1"
   },
   "devDependencies": {
