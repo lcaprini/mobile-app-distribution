@@ -1,1 +1,6 @@
 node_modules
+dist
+distribute-err.log
+distribute.log
+distribute.json
+wd

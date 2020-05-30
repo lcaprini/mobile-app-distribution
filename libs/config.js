@@ -108,6 +108,7 @@ class Config {
                 host: '',
                 port: 21,
                 user: '',
+                type: 'sftp',
                 password: '',
                 angularDestinationPath: ''
             },

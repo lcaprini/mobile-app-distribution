@@ -173,6 +173,7 @@ const startDistribution = () => {
                 server: {
                     host: config.remote.deploy.host,
                     port: config.remote.deploy.port,
+                    type: config.remote.deploy.type,
                     user: config.remote.deploy.user,
                     pass: config.remote.deploy.password,
                     privateKey: config.remote.deploy.privateKey
