@@ -1,5 +1,6 @@
 'use strict';
 
+const readline = require('readline');
 const _ = require('lodash');
 const FtpDeploy = require('ftp-deploy');
 const SftpUpload = require('sftp-upload');
@@ -11,6 +12,11 @@ const Promise = require('bluebird');
 const inquirer = require('inquirer');
 
 const logger = require('./logger');
+
+const REMOTE_TYPE = {
+    SFTP: 'sftp',
+    FTP: 'ftp'
+};
 
 const Remote = {
 
@@ -194,10 +200,13 @@ const Remote = {
 
     deploy({folderSourcePath, folderDestPath, server, verbose}) {
         let deployPromise;
-        if (server.port === 21) {
+        const port = server.port && parseInt(server.port);
+        const type = server.type;
+
+        if (port && type === REMOTE_TYPE.FTP) {
             deployPromise = Remote._ftpDeploy({folderSourcePath, folderDestPath, server, verbose});
         }
-        else if (server.port === 22) {
+        else if (port && type === REMOTE_TYPE.SFTP) {
             deployPromise = Remote._sftpDeploy({folderSourcePath, folderDestPath, server, verbose});
         }
         else {
@@ -246,8 +255,8 @@ const Remote = {
                     verbose && process.stdout.write(`${progress.percent}%: ${progress.file}\r`);
                 })
                 .on('completed', function() {
-                    verbose && process.stdout.clearLine();
-                    verbose && process.stdout.cursorTo(0);
+                    verbose && readline.clearLine(process.stdout, 1);
+                    verbose && readline.cursorTo(process.stdout, 0);
                     verbose && logger.section('SFTP deploy completed');
                     resolve();
                 })
@@ -257,26 +266,29 @@ const Remote = {
 
     verifyAngularDeploySteps(config) {
         if (!config.remote.deploy.host) {
-            throw new Error('FTP build upload error: missing "remote.deploy.hosts" value in config file');
+            throw new Error('Remote deploy error: missing "remote.deploy.hosts" value in config file');
         }
         if (!config.remote.deploy.port) {
-            throw new Error('FTP build upload error: missing "remote.deploy.port" value in config file');
+            throw new Error('Remote deploy error: missing "remote.deploy.port" value in config file');
+        }
+        if (!config.remote.deploy.type) {
+            throw new Error('Remote deploy error: missing "remote.deploy.type" value in config file');
         }
         if (!config.remote.deploy.user) {
-            throw new Error('FTP build upload error: missing "remote.deploy.user" value in config file');
+            throw new Error('Remote deploy error: missing "remote.deploy.user" value in config file');
         }
         if (!config.remote.deploy.password && !config.remote.deploy.privateKey) {
-            throw new Error('FTP build upload error: missing "remote.deploy.password" and "remote.deploy.privateKey" values in config file');
+            throw new Error('Remote deploy error: missing "remote.deploy.password" and "remote.deploy.privateKey" values in config file');
         }
 
         if (config.remote.deploy.privateKey && !fs.existsSync(config.remote.deploy.privateKey)) {
-            throw new Error('FTP build upload error: file not found on "remote.deploy.privateKey" value in config file');
+            throw new Error('Remote deploy error: file not found on "remote.deploy.privateKey" value in config file');
         }
 
         const angularTasks = require('./angular').TASKS;
         if (config.tasks.contains(angularTasks.DEPLOY_BUILD)) {
             if (!config.remote.deploy.angularDestinationPath) {
-                throw new Error('FTP+Angular upload error: missing "remote.deploy.angularDestinationPath" value in config file');
+                throw new Error('Remote deploy error: missing "remote.deploy.angularDestinationPath" value in config file');
             }
         }
     },
@@ -394,6 +406,15 @@ const Remote = {
             default: 'lcapriniftp'
         }, {
             type: 'input',
+            name: 'type',
+            message: 'remote.deploy.type',
+            default: 'sftp',
+            choices: [
+                REMOTE_TYPE.SFTP,
+                REMOTE_TYPE.FTP
+            ]
+        }, {
+            type: 'input',
             name: 'user',
             message: 'remote.deploy.user',
             default: 'lcaprini-user'
@@ -412,7 +433,7 @@ const Remote = {
             name: 'privateKey',
             message: 'remote.deploy.privateKey',
             default: ''
-        }]).then(({port, host, user, password, angularDestinationPath, privateKey}) => {
+        }]).then(({port, host, type, user, password, angularDestinationPath, privateKey}) => {
             if (!config.remote) {
                 config.remote = {};
             }
@@ -421,6 +442,7 @@ const Remote = {
             }
             config.remote.deploy.port = port;
             config.remote.deploy.host = host;
+            config.remote.deploy.type = type;
             config.remote.deploy.user = user;
             config.remote.deploy.password = password;
             config.remote.deploy.angularDestinationPath = angularDestinationPath;
