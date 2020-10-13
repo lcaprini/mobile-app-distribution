@@ -10,10 +10,10 @@ All details about app or webapp;
 
 ```js
 "app": {
-    // * App's project name
+    // App's project name
     "name": "MyApp",
 
-    // * Real app's name on client side
+    // Real app's name on client side
     "label": "My App"
 }
 ```
@@ -23,7 +23,7 @@ All details about app or webapp;
 Every distribution process creates one or more files as output: the `buildsDir` attribute is the path (absolute or relative) will contains the build files.
 
 ```js
-// * Path of output directory
+// Path of output directory
 "buildsDir": "./builds"
 ```
 
@@ -33,10 +33,10 @@ All commons details about source (pre)compiling tasks: if you want to compile so
 
 ```js
 "sources": {
-    // * Command line tool used to build the web app
+    // Command line tool used to build the web app
     "compileCommand": "grunt build:production",
 
-    // * Path to launch the `sources.compileCommand`
+    // Path to launch the `sources.compileCommand`
     "compilePath": "src"
 }
 ```
@@ -49,56 +49,56 @@ In order to send the final email, you have to add the task `u` in the `distribut
 ```js
 "remote": {
     "builds": {
-        // * (S)FTP host for builds upload
+        // (S)FTP host for builds upload
         "host": "lcapriniftp",
 
         // (S)FTP port for builds upload
         // default 21
         "port": 1111,
 
-        // * Username for (S)FTP connection with read and write permissions
+        // Username for (S)FTP connection with read and write permissions
         "user": "lcaprini-user",
 
-        // * Password of `emote.builds.user
+        // Password of `emote.builds.user
         "password": "lcaprini-password",
     },
 
     "repo": {
-        // * (S)FTP host for repository update
+        // (S)FTP host for repository update
         "host": "lcapriniftp",
 
-        // * (S)FTP port for repository update
+        // (S)FTP port for repository update
         // default 21
         "port": 1111,
 
-        // * Username for (S)FTP connection with read and write permissions
+        // Username for (S)FTP connection with read and write permissions
         "user": "lcaprini-user",
 
-        // * Password of remote.repo.user
+        // Password of remote.repo.user
         "password": "lcaprini-password",
 
-        // * Absolute path of remote folder that contains builds.json file to update it
+        // Absolute path of remote folder that contains builds.json file to update it
         "jsonPath": "/var/www/html/test/wd",
 
-        // * Public URL of remote.repo.jsonPath for wireless distribution repository
+        // Public URL of remote.repo.jsonPath for wireless distribution repository
         "homepageUrl": "https://lcaprini.com/test/wd"
     },
 
     "sources": {
-        // * (S)FTP host for sources upload
+        // (S)FTP host for sources upload
         "host": "lcapriniftp",
 
-        // * (S)FTP port for sources upload
+        // (S)FTP port for sources upload
         // default 21
         "port": 1111,
 
-        // * Username for (S)FTP connection with read and write permissions
+        // Username for (S)FTP connection with read and write permissions
         "user": "lcaprini-user",
 
-        // * Password of remote.sources.user
+        // Password of remote.sources.user
         "password": "lcaprini-passwd",
 
-        // * Absolute path of folder will contains all zipped sources
+        // Absolute path of folder will contains all zipped sources
         "sourcesPath": "/var/www/html/test/sources"
     }
 }
@@ -111,23 +111,23 @@ In order to send the final email, you have to add the task `e` in every `distrib
 
 ```js
 "email" : {
-    // * SMTP host of email service
+    // SMTP host of email service
     "host": "mail.gmail.com",
 
     // SMTP port of email service
     // default 25
     "port": 1111,
 
-    // * Email sender public name
+    // Email sender public name
     "user": "lcaprini-user",
 
-    // * Password of email.user
+    // Password of email.user
     "password": "lcaprini-password",
 
-    // * Sender's email
+    // Sender's email
     "from": "luca.caprini@gmail.com",
 
-    // * List of email's recipients
+    // List of email's recipients
     "to": ["luca.caprini@gmail.com"]
 }
 ```

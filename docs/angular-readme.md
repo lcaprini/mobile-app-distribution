@@ -13,10 +13,10 @@ Some specific details about web app version change.
 ```js
 "sources": {
     "updateVersion" : {
-        // * Path of file that contains sources.updateVersion.replacingTag tag that will be used to print inside the app's version label
+        // Path of file that contains sources.updateVersion.replacingTag tag that will be used to print inside the app's version label
         "filePath": "",
 
-        // * Tag to replace
+        // Tag to replace
         // default "{version}"
         "replacingTag": ""
     }
@@ -31,7 +31,7 @@ In order to deploy the builded app, you have to add the task `d` in the `distrib
 ```js
 "remote": {
     "deploy": {
-        // * (S)FTP host for builds deploy
+        // (S)FTP host for builds deploy
         "host": "lcapriniftp",
 
         // Port for build deploy, can take two values:
@@ -40,13 +40,13 @@ In order to deploy the builded app, you have to add the task `d` in the `distrib
         // default 21:
         "port": 22,
 
-        // * Username for (S)FTP connection with read and write permissions
+        // Username for (S)FTP connection with read and write permissions
         "user": "lcaprini-user",
 
-        // * Password of remote.deploy.user
+        // Password of remote.deploy.user
         "password": "lcaprini-password",
 
-        // * Absolute path of remote server folder (usualy is the folder of document root of http server)
+        // Absolute path of remote server folder (usualy is the folder of document root of http server)
         "angularDestinationPath": "/var/www/html/test/angular_app",
 
         // ...
@@ -62,10 +62,10 @@ Some specific details about web app repo OTA distribution.
 ```js
 "remote": {
     "repo": {
-        // * Absolute path of remote repo server folder will contains all Angular `.zip` files
+        // Absolute path of remote repo server folder will contains all Angular `.zip` files
         "buildsPath": "https://lcaprini.com/test/Angular",
 
-        // * Public URL of remote.repo.buildsPath for Angular app download.
+        // Public URL of remote.repo.buildsPath for Angular app download.
         "angularUrlPath": "https://lcaprini.com/test/wd"
     }
 }

@@ -11,13 +11,13 @@ In order to build the Android project you have to add the task `i` in the `distr
 
 ```js
 "Android": {
-    // * JSON object that specify an Android keystore and its credentials for signing process
+    // JSON object that specify an Android keystore and its credentials for signing process
     "keystore": {
-        // * Path of the keystore file
+        // Path of the keystore file
         "path": "resources/android/lcaprini.keystore",
-        // * Alias of the keystore file
+        // Alias of the keystore file
         "alias": "lcaprini-alias",
-        // * Alias of the keystore file
+        // Alias of the keystore file
         "password": "lcaprini-password"
     }
 }
@@ -31,12 +31,12 @@ In order to send the final email, you have to add the task `u` in the `distribut
 ```js
 "remote": {
     "builds": {
-        // * Absolute path of folder will contains all Android `.ipa` and `.plist` files
+        // Absolute path of folder will contains all Android `.ipa` and `.plist` files
         "androidDestinationPath": "/var/www/html/test/Android",
     },
 
     "repo": {
-        // * Public URL of remote.builds.AndroidDestinationPath for Android app download
+        // Public URL of remote.builds.AndroidDestinationPath for Android app download
         "androidUrlPath": "https://lcaprini.com/test/Android",
     }
 }

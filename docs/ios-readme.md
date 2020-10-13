@@ -26,7 +26,7 @@ In order to build the iOS project you have to add the task `i` in the `distribut
     // JSON object with same attributes and values of iOS's export options plist file (`xcodebuild --help` to view all docs)
     // At least the following attributes must be specified
     "exportOptionsPlist": {
-        // * Describes how Xcode should export the archive;
+        // Describes how Xcode should export the archive;
         // Supports the values "app-store", "package", "ad-hoc", "enterprise", "development", "developer-id"
         // default "enterprise"
         "method": "enterprise",
@@ -47,12 +47,12 @@ In order to send the final email, you have to add the task `u` in the `distribut
 ```js
 "remote": {
     "builds": {
-        // * Absolute path of folder will contains all iOS `.ipa` and `.plist` files
+        // Absolute path of folder will contains all iOS `.ipa` and `.plist` files
         "iosDestinationPath": "/var/www/html/test/iOS",
     },
 
     "repo": {
-        // * Public URL of remote.builds.iosDestinationPath for iOS app download
+        // Public URL of remote.builds.iosDestinationPath for iOS app download
         "iosUrlPath": "https://lcaprini.com/test/iOS",
     }
 }

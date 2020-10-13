@@ -12,7 +12,7 @@ If you want to dynamically change version in an HTML file, use the `<mad-app-ver
 
 ```js
 "source": {
-    // * Path of HTML file that contains `<mad-app-version>` tag
+    // Path of HTML file that contains `<mad-app-version>` tag
     "htmlVersionPath": "src/app/login/login.html"
 }
 ```
@@ -23,7 +23,7 @@ All details about Cordova build process.
 
 ```js
 "cordova": {
-    // * Path in where to launch all cordova commands
+    // Path in where to launch all cordova commands
     "path": "app",
 
     // Custom command to build Android platform
@@ -42,13 +42,13 @@ Specific configurations for build iOS and Android platforms.
 
 ```js
 "ios": {
-    // * iOS app's bundleId to write into id attribute inside config.xml file,
+    // iOS app's bundleId to write into id attribute inside config.xml file,
     // before build the iOS platform
     "bundleId": "it.lcaprini.test",
 },
 
 "android": {
-    // * Android app's package name to write into id attribute inside config.xml file,
+    // Android app's package name to write into id attribute inside config.xml file,
     // before build the Android platform
     "bundleId": "it.lcaprini.test",
 }
