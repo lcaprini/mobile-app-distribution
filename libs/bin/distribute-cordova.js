@@ -37,6 +37,7 @@ program
     .option('-q, --qr-code', 'prints QRCode of repository homepage', config.qrcode)
     .option('-v, --verbose', 'prints all logs in console', config.verbose)
     .option('-f, --force', 'forces with yes all questions', config.force)
+    .option('-u, --unsigned', 'skip jarsigner and zipalign on Android build', config.unsigned)
     .option('-h, --hidden', 'hides build in HTML download page', config.hidden)
     .parse(process.argv);
 
@@ -254,6 +255,7 @@ const startDistribution = () => {
                                 alias: config.android.keystore.alias,
                                 password: config.android.keystore.password
                             },
+                            unsigned: config.unsigned,
 
                             verbose: config.verbose
                         });

@@ -37,7 +37,7 @@ const init = () => {
             DISTRIBUTE.ANDROID,
             DISTRIBUTE.ANGULAR
         ]
-    }).then(({distribute}) => {
+    }).then(({ distribute }) => {
         let config = {};
         let appName = utils.findAppName();
         inquirer.prompt([{
@@ -50,33 +50,33 @@ const init = () => {
             name: 'label',
             message: 'app.label',
             default: appName
-        }]).then(({name, label}) => {
+        }]).then(({ name, label }) => {
             config.app = {
                 name: name,
                 label: label
             };
             switch (distribute) {
-            case DISTRIBUTE.CORDOVA:
-                cordova.init(config).then(
-                    config => {
-                        fs.writeFileSync(path.join(workingDir, './distribute.json'), JSON.stringify(config, null, 4));
-                        logger.section('distribute.json created');
-                        process.exit(0);
-                    }
-                );
-                break;
-            case DISTRIBUTE.ANGULAR:
-                angular.init(config).then(
-                    config => {
-                        fs.writeFileSync(path.join(workingDir, './distribute.json'), JSON.stringify(config, null, 4));
-                        logger.section('distribute.json created');
-                        process.exit(0);
-                    }
-                );
-                break;
-            default:
-                logger.info('Coming soon...');
-                process.exit(0);
+                case DISTRIBUTE.CORDOVA:
+                    cordova.init(config).then(
+                        config => {
+                            fs.writeFileSync(path.join(workingDir, './distribute.json'), JSON.stringify(config, null, 4));
+                            logger.section('distribute.json created');
+                            process.exit(0);
+                        }
+                    );
+                    break;
+                case DISTRIBUTE.ANGULAR:
+                    angular.init(config).then(
+                        config => {
+                            fs.writeFileSync(path.join(workingDir, './distribute.json'), JSON.stringify(config, null, 4));
+                            logger.section('distribute.json created');
+                            process.exit(0);
+                        }
+                    );
+                    break;
+                default:
+                    logger.info('Coming soon...');
+                    process.exit(0);
             }
         });
     });

@@ -20,7 +20,7 @@ const REMOTE_TYPE = {
 
 const Remote = {
 
-    downloadFile({localFile, remoteFile, server}) {
+    downloadFile({ localFile, remoteFile, server }) {
         return new Promise((resolve, reject) => {
             const client = new ftp.Client();
             client.access({
@@ -49,7 +49,7 @@ const Remote = {
         });
     },
 
-    uploadFile({localFile, server, remoteFile}) {
+    uploadFile({ localFile, server, remoteFile }) {
         return new Promise((resolve, reject) => {
             const client = new ftp.Client();
             client.access({
@@ -78,14 +78,14 @@ const Remote = {
         });
     },
 
-    uploadArchivie({archiveFilePath, sourceSrcPath, server, sourceDestPath}) {
+    uploadArchivie({ archiveFilePath, sourceSrcPath, server, sourceDestPath }) {
         return new Promise((resolve, reject) => {
             let output = fs.createWriteStream(archiveFilePath);
             let archive = archiver('zip', {
                 zlib: { level: 9 }
             });
 
-            output.on('close', function() {
+            output.on('close', function () {
                 Remote.uploadFile({
                     localFile: fs.readFileSync(archiveFilePath),
                     remoteFile: path.join(sourceDestPath, path.basename(archiveFilePath)),
@@ -100,7 +100,7 @@ const Remote = {
                     }
                 );
             });
-            archive.on('error', function(err) {
+            archive.on('error', function (err) {
                 reject(err);
             });
 
@@ -111,12 +111,12 @@ const Remote = {
         });
     },
 
-    updateRepo({repoPath, server, version, hidden, changelog, releaseDate, androidBuildPath = null, iosBuildPath = null, angularBuildPath = null, rootPath}) {
+    updateRepo({ repoPath, server, version, hidden, changelog, releaseDate, androidBuildPath = null, iosBuildPath = null, angularBuildPath = null, rootPath }) {
         logger.section('Update repository');
 
         return new Promise((resolve, reject) => {
             const tmpJsonFile = path.join(rootPath, './.builds.json');
-            Remote.downloadFile({localFile: tmpJsonFile, remoteFile: repoPath, server}).then(
+            Remote.downloadFile({ localFile: tmpJsonFile, remoteFile: repoPath, server }).then(
                 () => {
                     let jsonFile = JSON.parse(fs.readFileSync(tmpJsonFile));
                     let build = _.remove(jsonFile.builds, b => {
@@ -141,7 +141,7 @@ const Remote = {
                     }
                     jsonFile.builds.unshift(build);
 
-                    fs.writeFileSync(tmpJsonFile, JSON.stringify(jsonFile, null, 4), {encoding: 'utf-8', flag: 'w'});
+                    fs.writeFileSync(tmpJsonFile, JSON.stringify(jsonFile, null, 4), { encoding: 'utf-8', flag: 'w' });
                     Remote.uploadFile({
                         localFile: fs.readFileSync(tmpJsonFile),
                         remoteFile: repoPath,
@@ -163,14 +163,14 @@ const Remote = {
         });
     },
 
-    uploadSources({archiveFilePath, sourceSrcPath, server, sourceDestPath}) {
+    uploadSources({ archiveFilePath, sourceSrcPath, server, sourceDestPath }) {
         return new Promise((resolve, reject) => {
             let output = fs.createWriteStream(archiveFilePath);
             let archive = archiver('zip', {
                 zlib: { level: 9 }
             });
 
-            output.on('close', function() {
+            output.on('close', function () {
                 Remote.uploadFile({
                     localFile: archiveFilePath,
                     remoteFile: sourceDestPath,
@@ -185,7 +185,7 @@ const Remote = {
                     }
                 );
             });
-            archive.on('error', function(err) {
+            archive.on('error', function (err) {
                 reject(err);
             });
 
@@ -198,16 +198,16 @@ const Remote = {
         });
     },
 
-    deploy({folderSourcePath, folderDestPath, server, verbose}) {
+    deploy({ folderSourcePath, folderDestPath, server, verbose }) {
         let deployPromise;
         const port = server.port && parseInt(server.port);
         const type = server.type;
 
         if (port && type === REMOTE_TYPE.FTP) {
-            deployPromise = Remote._ftpDeploy({folderSourcePath, folderDestPath, server, verbose});
+            deployPromise = Remote._ftpDeploy({ folderSourcePath, folderDestPath, server, verbose });
         }
         else if (port && type === REMOTE_TYPE.SFTP) {
-            deployPromise = Remote._sftpDeploy({folderSourcePath, folderDestPath, server, verbose});
+            deployPromise = Remote._sftpDeploy({ folderSourcePath, folderDestPath, server, verbose });
         }
         else {
             verbose && logger.error(`Deploy on port ${server.port} not supported`);
@@ -215,7 +215,7 @@ const Remote = {
         return deployPromise;
     },
 
-    _ftpDeploy({folderSourcePath, folderDestPath, server, verbose}) {
+    _ftpDeploy({ folderSourcePath, folderDestPath, server, verbose }) {
         return new FtpDeploy().deploy({
             user: server.user,
             password: server.pass,
@@ -235,7 +235,7 @@ const Remote = {
         );
     },
 
-    _sftpDeploy({folderSourcePath, folderDestPath, server, verbose}) {
+    _sftpDeploy({ folderSourcePath, folderDestPath, server, verbose }) {
         return new Promise((resolve, reject) => {
             const sftp = new SftpUpload({
                 username: server.user,
@@ -247,14 +247,14 @@ const Remote = {
                 remoteDir: folderDestPath
             });
 
-            sftp.on('error', function(err) {
+            sftp.on('error', function (err) {
                 err = `SFTP deploy error: ${err}`;
                 throw new Error(err);
             })
-                .on('uploading', function(progress) {
+                .on('uploading', function (progress) {
                     verbose && process.stdout.write(`${progress.percent}%: ${progress.file}\r`);
                 })
-                .on('completed', function() {
+                .on('completed', function () {
                     verbose && readline.clearLine(process.stdout, 1);
                     verbose && readline.cursorTo(process.stdout, 0);
                     verbose && logger.section('SFTP deploy completed');
@@ -379,7 +379,7 @@ const Remote = {
             name: 'password',
             message: 'remote.builds.password',
             default: 'lcaprini-password'
-        }]).then(({host, user, password}) => {
+        }]).then(({ host, user, password }) => {
             if (!config.remote) {
                 config.remote = {};
             }
@@ -433,7 +433,7 @@ const Remote = {
             name: 'privateKey',
             message: 'remote.deploy.privateKey',
             default: ''
-        }]).then(({port, host, type, user, password, angularDestinationPath, privateKey}) => {
+        }]).then(({ port, host, type, user, password, angularDestinationPath, privateKey }) => {
             if (!config.remote) {
                 config.remote = {};
             }
@@ -457,7 +457,7 @@ const Remote = {
             name: 'iosDestinationPath',
             message: 'remote.builds.iosDestinationPath',
             default: '/var/www/html/test/builds/iOS'
-        }]).then(({iosDestinationPath}) => {
+        }]).then(({ iosDestinationPath }) => {
             config.remote.builds.iosDestinationPath = iosDestinationPath;
             return config;
         });
@@ -469,7 +469,7 @@ const Remote = {
             name: 'androidDestinationPath',
             message: 'remote.builds.androidDestinationPath',
             default: '/var/www/html/test/builds/Android'
-        }]).then(({androidDestinationPath}) => {
+        }]).then(({ androidDestinationPath }) => {
             config.remote.builds.androidDestinationPath = androidDestinationPath;
             return config;
         });
@@ -501,7 +501,7 @@ const Remote = {
             name: 'homepageUrl',
             message: 'remote.repo.homepageUrl',
             default: 'https://lcaprini.com/test/wd'
-        }]).then(({host, user, password, jsonPath, homepageUrl}) => {
+        }]).then(({ host, user, password, jsonPath, homepageUrl }) => {
             if (!config.remote) {
                 config.remote = {};
             }
@@ -528,7 +528,7 @@ const Remote = {
             name: 'buildsPath',
             message: 'remote.repo.buildsPath',
             default: '/var/www/html/angular/builds'
-        }]).then(({angularUrlPath, buildsPath}) => {
+        }]).then(({ angularUrlPath, buildsPath }) => {
             config.remote.repo.angularUrlPath = angularUrlPath;
             config.remote.repo.buildsPath = buildsPath;
             return config;
@@ -541,7 +541,7 @@ const Remote = {
             name: 'iosUrlPath',
             message: 'remote.repo.iosUrlPath',
             default: 'https://mycert-server.lcaprini.com/iOS'
-        }]).then(({iosUrlPath}) => {
+        }]).then(({ iosUrlPath }) => {
             config.remote.repo.iosUrlPath = iosUrlPath;
             return config;
         });
@@ -553,7 +553,7 @@ const Remote = {
             name: 'androidUrlPath',
             message: 'remote.repo.androidUrlPath',
             default: 'https://mycert-server.lcaprini.com/Android'
-        }]).then(({androidUrlPath}) => {
+        }]).then(({ androidUrlPath }) => {
             config.remote.repo.androidUrlPath = androidUrlPath;
             return config;
         });
@@ -580,7 +580,7 @@ const Remote = {
             name: 'sourcesPath',
             message: 'remote.sources.sourcesPath',
             default: '/var/www/html/test/sources'
-        }]).then(({host, user, password, sourcesPath}) => {
+        }]).then(({ host, user, password, sourcesPath }) => {
             if (!config.remote) {
                 config.remote = {};
             }

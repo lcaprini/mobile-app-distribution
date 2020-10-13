@@ -20,7 +20,7 @@ program
 console.log('This utility will create a new folder called \'wd\' with all repository file to manually upload in your FTP server.\n');
 console.log('Press ^C at any time to quit.\n');
 
-const createWd = ({create}) => {
+const createWd = ({ create }) => {
     utils.askAppName().then(
         appName => {
             if (create) {
@@ -32,7 +32,7 @@ const createWd = ({create}) => {
                 appName: appName,
                 builds: []
             };
-            fs.writeFileSync(path.join(workingDir, './builds.json'), JSON.stringify(buildsJson, null, 4), {encoding: 'utf-8', flag: 'w'});
+            fs.writeFileSync(path.join(workingDir, './builds.json'), JSON.stringify(buildsJson, null, 4), { encoding: 'utf-8', flag: 'w' });
 
             logger.section('wd folder created');
         },
@@ -47,7 +47,7 @@ if (fs.existsSync(workingDir)) {
     utils.prompt('wd folder already exists. Overwrite it and its content? (y/N)').then(
         result => {
             if (result.toLowerCase() === 'y') {
-                createWd({create: false});
+                createWd({ create: false });
             }
         },
         err => {
@@ -57,5 +57,5 @@ if (fs.existsSync(workingDir)) {
     );
 }
 else {
-    createWd({create: true});
+    createWd({ create: true });
 }

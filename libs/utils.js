@@ -20,7 +20,7 @@ const Utils = {
         });
     },
 
-    createPath({workingPath = null, path}) {
+    createPath({ workingPath = null, path }) {
         if (workingPath) {
             process.chdir(workingPath);
         }
@@ -29,7 +29,7 @@ const Utils = {
 
     printQRCode(data) {
         let qrcode = require('qrcode-terminal');
-        qrcode.generate(data, {small: true});
+        qrcode.generate(data, { small: true });
     },
 
     findAppName() {

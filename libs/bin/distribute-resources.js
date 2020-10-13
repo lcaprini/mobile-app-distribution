@@ -36,7 +36,7 @@ const getSplash = splashPath => {
     return splashFullPath;
 };
 
-(async function() {
+(async function () {
     console.log('This utility will create all icons for requested platforms using cordova-res (https://github.com/ionic-team/cordova-res).\n');
     console.log('Press ^C at any time to quit.\n');
 

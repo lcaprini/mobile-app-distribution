@@ -8,7 +8,7 @@ const Email = {
 
     SENDING_EMAIL: Promise.resolve(),
 
-    sendEmail({from, to, server, appName, appVersion, body}) {
+    sendEmail({ from, to, server, appName, appVersion, body }) {
         const logger = require('./logger');
         logger.section('Send email to working group');
 
@@ -90,7 +90,7 @@ const Email = {
             name: 'to',
             message: 'email.to',
             default: 'lcap@gmail.com, capr_l@gmail.com'
-        }]).then(({host, user, password, from, to}) => {
+        }]).then(({ host, user, password, from, to }) => {
             if (!config.email) {
                 config.email = {};
             }

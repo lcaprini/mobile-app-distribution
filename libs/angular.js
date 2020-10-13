@@ -55,9 +55,9 @@ const Angular = {
      * @param {Object} server
      * @param {Boolean} verbose
      */
-    deploy({folderSourcePath, folderDestPath, server, verbose}) {
+    deploy({ folderSourcePath, folderDestPath, server, verbose }) {
         logger.section(`Deploy angular build at ${folderSourcePath} to server ${server.host}:${folderDestPath}`);
-        return remote.deploy({folderSourcePath, folderDestPath, server, verbose});
+        return remote.deploy({ folderSourcePath, folderDestPath, server, verbose });
     },
 
     /**
@@ -196,7 +196,7 @@ const Angular = {
      * @param {Object} replacingTag
      * @param {Object} checkBuildTask
      */
-    checkReplacingTag({filePath, replacingTag, checkBuildTask}) {
+    checkReplacingTag({ filePath, replacingTag, checkBuildTask }) {
         let versionFile = fs.readFileSync(filePath, 'utf-8');
         if (versionFile.indexOf(replacingTag) === -1 && !checkBuildTask) {
             throw new Error(`Angular change version error: replacingTag ${replacingTag} not found at file path ${filePath}`);

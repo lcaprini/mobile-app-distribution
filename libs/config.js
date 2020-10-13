@@ -26,6 +26,7 @@ class Config {
         this.force = false;
         this.hidden = false;
         this.qrcode = false;
+        this.unsigned = false;
 
         this.path = 'distribute.json';
         this.rootPath = '';
@@ -147,7 +148,7 @@ class Config {
         };
     }
 
-    init({configPath, program}) {
+    init({ configPath, program }) {
         let config = this;
 
         return new Promise((resolve, reject) => {
@@ -164,6 +165,9 @@ class Config {
                         // Set all configurations from JSON
                         _.merge(config, configData);
 
+                        // Set unsigned mode
+                        config.unsigned = (_.isBoolean(program.unsigned)) ? program.unsigned : false;
+
                         // Set project root dir
                         config.rootPath = (path.isAbsolute(configPath)) ? path.dirname(configPath) : process.cwd();
                         // Calculate and set other dirs
@@ -174,7 +178,7 @@ class Config {
                         config.buildsDir = path.isAbsolute(config.buildsDir) ? config.buildsDir : path.join(config.rootPath, config.buildsDir);
 
                         config.android.keystore.path = path.isAbsolute(config.android.keystore.path) ? config.android.keystore.path : path.join(config.rootPath, config.android.keystore.path);
-                        config.android.apkFileName = `${config.app.label}_v.${config.app.versionLabel}.apk`.replace(/ /g, '_');
+                        config.android.apkFileName = `${config.app.label}_v.${config.app.versionLabel}${config.unsigned ? '_unsigned' : ''}.apk`.replace(/ /g, '_');
                         config.android.apkFilePath = path.join(config.buildsDir, config.android.apkFileName);
 
                         config.ios.ipaFileName = `${config.app.label}_v.${config.app.versionLabel}.ipa`.replace(/ /g, '_');
@@ -251,7 +255,7 @@ class Config {
         });
     }
 
-    angularInit({configPath, program}) {
+    angularInit({ configPath, program }) {
         let config = this;
 
         return new Promise((resolve, reject) => {
@@ -341,7 +345,7 @@ class Config {
      * @param {Object} program
      */
     setBuildVersion(program) {
-        let version = findVersions(program.args[0], {loose: true});
+        let version = findVersions(program.args[0], { loose: true });
         if (!version[0]) {
             throw new Error('Invalid build version format: please, see http://semver.org');
         }

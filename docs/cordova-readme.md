@@ -92,12 +92,20 @@ To correcly run process you'll need to specify the app version in [semver](http:
 
 -   _option_: `-q, --qr-code`
     _descr_: Print a QRCode coded with repository homepage in the terminal window when process is complete
+    _default_: `false`
 
-*   _option_: `-v, --verbose`
+*   _option_: `-u, --unsigned`
+    _descr_: Skips `jarsigner` and `zipalign` tasks during the Android build process [Android only]
+    _default_: `false`
+
+-   _option_: `-v, --verbose`
     _descr_: Print all messages in terminal insted only the task details
+    _default_: `false`
 
--   _option_: `-f, --force`
+*   _option_: `-f, --force`
     _descr_: The process starts and doesn't ask anything during all tasks
+    _default_: `false`
 
-*   _option_: `-h, --hidden`
+-   _option_: `-h, --hidden`
     _descr_: Hide this build from repository homepage; use it for pre release and alpha/beta versions
+    _default_: `false`

@@ -56,7 +56,7 @@ const endDistribute = err => {
     const logger = require('../logger');
 
     if (err) {
-    // logger.error(err);
+        // logger.error(err);
         logger.error(err.message);
         process.exit(1);
     }
@@ -136,9 +136,9 @@ const finalize = () => {
  */
 const startDistribution = () => {
     try {
-    /**
-     * BUILD SOURCES
-     */
+        /**
+         * BUILD SOURCES
+         */
         if (config.tasks.contains(TASKS.BUILD)) {
             angular.build({
                 sourcePath: config.sources.sourcePath,
@@ -218,7 +218,7 @@ config
             }
         },
         err => {
-        // print red
+            // print red
             console.error('\x1b[31m', err.message);
             // print reset
             console.log('\x1b[0m');

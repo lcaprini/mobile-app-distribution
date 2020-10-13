@@ -27,16 +27,16 @@ const Cordova = {
     /**
      * Compile web app sources in cordova app using task manager like, grunt, gulp, webpack, ecc...
      */
-    compileSource({sourcePath, compileSourcesCmd, verbose = false}) {
+    compileSource({ sourcePath, compileSourcesCmd, verbose = false }) {
         process.chdir(sourcePath);
         logger.section(`Compile source:\n$ ${compileSourcesCmd}`);
-        shell.exec(compileSourcesCmd, {silent: !verbose});
+        shell.exec(compileSourcesCmd, { silent: !verbose });
     },
 
     /**
      * Set app version in config.xml using cordova-config module
      */
-    setVersion({cordovaPath, appVersion}) {
+    setVersion({ cordovaPath, appVersion }) {
         logger.section(`Set '${appVersion}' as version in config.xml`);
         const cordovaConfigPath = path.join(cordovaPath, './config.xml');
         const config = new CordovaConfig(cordovaConfigPath);
@@ -47,7 +47,7 @@ const Cordova = {
     /**
      * Set app label version in HTML
      */
-    changeVersion({filePath, version}) {
+    changeVersion({ filePath, version }) {
         logger.section(`Set '${version}' as version in ${filePath} HTML`);
         let versionFile = fs.readFileSync(filePath, 'utf-8');
         try {
@@ -63,7 +63,7 @@ const Cordova = {
     /**
      * Set bundle id in config.xml using cordova-config module
      */
-    setId({cordovaPath, id}) {
+    setId({ cordovaPath, id }) {
         logger.section(`Set '${id}' as bundle id in config.xml`);
         const cordovaConfigPath = path.join(cordovaPath, './config.xml');
         const config = new CordovaConfig(cordovaConfigPath);
@@ -74,7 +74,7 @@ const Cordova = {
     /**
      * Set Android version code in config.xml using cordova-config module
      */
-    setAndroidVersionCode({cordovaPath, versionCode}) {
+    setAndroidVersionCode({ cordovaPath, versionCode }) {
         logger.section(`Set '${versionCode}' as Android version code in config.xml`);
         const cordovaConfigPath = path.join(cordovaPath, './config.xml');
         const config = new CordovaConfig(cordovaConfigPath);
@@ -85,10 +85,10 @@ const Cordova = {
     /**
      * Build Android Cordova Platform
      */
-    buildAndroid({buildAndroidCommand, cordovaPath, verbose}) {
+    buildAndroid({ buildAndroidCommand, cordovaPath, verbose }) {
         logger.section(`Build Android platform:\n$ ${buildAndroidCommand}`);
         process.chdir(cordovaPath);
-        let err = shell.exec(buildAndroidCommand, {silent: !verbose}).stderr;
+        let err = shell.exec(buildAndroidCommand, { silent: !verbose }).stderr;
         if (shell.error()) {
             // shelljs has already printed error,
             // so I print it only if verbose mode is OFF
@@ -102,19 +102,19 @@ const Cordova = {
     /**
      * Exec all task to prepare and build the Android platform
      */
-    distributeAndroid({launcherName, id, versionCode, cordovaPath, buildAndroidCommand = 'cordova build --release android', apkFilePath, keystore, verbose = false}) {
-        this.setId({cordovaPath, id});
-        this.setAndroidVersionCode({cordovaPath, versionCode});
+    distributeAndroid({ launcherName, id, versionCode, cordovaPath, buildAndroidCommand = 'cordova build --release android', apkFilePath, keystore, unsigned = false, verbose = false }) {
+        this.setId({ cordovaPath, id });
+        this.setAndroidVersionCode({ cordovaPath, versionCode });
         let androidPlatformPath = path.join(cordovaPath, './platforms/android/');
-        android.setLauncherName({rootPath: androidPlatformPath, launcherName});
-        this.buildAndroid({buildAndroidCommand, cordovaPath, verbose});
-        android.finalizeApk({projectPath: androidPlatformPath, keystore, apkFilePath, verbose});
+        android.setLauncherName({ rootPath: androidPlatformPath, launcherName });
+        this.buildAndroid({ buildAndroidCommand, cordovaPath, verbose });
+        android.finalizeApk({ projectPath: androidPlatformPath, keystore, apkFilePath, unsigned, verbose });
     },
 
     /**
      * Set iOS version code in config.xml using cordova-config module
      */
-    setIosBundleVersion({cordovaPath, bundleVersion}) {
+    setIosBundleVersion({ cordovaPath, bundleVersion }) {
         logger.section(`Set '${bundleVersion}' as iOS bundle version in config.xml`);
         const cordovaConfigPath = path.join(cordovaPath, './config.xml');
         const config = new CordovaConfig(cordovaConfigPath);
@@ -125,10 +125,10 @@ const Cordova = {
     /**
      * Build iOS Cordova Platform
      */
-    buildIos({buildIosCommand, cordovaPath, verbose}) {
+    buildIos({ buildIosCommand, cordovaPath, verbose }) {
         logger.section(`Build iOS platform:\n$ ${buildIosCommand}`);
         process.chdir(cordovaPath);
-        let err = shell.exec(buildIosCommand, {silent: !verbose}).stderr;
+        let err = shell.exec(buildIosCommand, { silent: !verbose }).stderr;
         if (shell.error()) {
             // shelljs has already printed error,
             // so I print it only if verbose mode is OFF
@@ -142,26 +142,26 @@ const Cordova = {
     /**
      * Exec all task to prepare and build the iOS platform
      */
-    distributeIos({appName, displayName, ipaFileName, id, version, bundleVersion, buildWorkspace, schema, infoPlistPath, cordovaPath, buildIosCommand = 'cordova build ios', exportOptionsPlist, exportOptionsPlistPath, exportDir, ipaUrlPath, manifestPath, verbose = false}) {
-        this.setId({cordovaPath, id});
-        this.setIosBundleVersion({cordovaPath, bundleVersion});
-        this.buildIos({buildIosCommand, cordovaPath, verbose});
-        ios.setDisplayName({infoPlistPath, displayName});
+    distributeIos({ appName, displayName, ipaFileName, id, version, bundleVersion, buildWorkspace, schema, infoPlistPath, cordovaPath, buildIosCommand = 'cordova build ios', exportOptionsPlist, exportOptionsPlistPath, exportDir, ipaUrlPath, manifestPath, verbose = false }) {
+        this.setId({ cordovaPath, id });
+        this.setIosBundleVersion({ cordovaPath, bundleVersion });
+        this.buildIos({ buildIosCommand, cordovaPath, verbose });
+        ios.setDisplayName({ infoPlistPath, displayName });
         const projectPath = path.join(cordovaPath, './platforms/ios');
         if (buildWorkspace) {
-            ios.archiveWorkspace({projectPath, appName, schema, verbose});
+            ios.archiveWorkspace({ projectPath, appName, schema, verbose });
         }
         else {
-            ios.archiveProject({projectPath, appName, schema, verbose});
+            ios.archiveProject({ projectPath, appName, schema, verbose });
         }
-        ios.exportIpa({projectPath, appName, ipaFileName, exportOptionsPlist, exportOptionsPlistPath, exportDir, verbose});
-        ios.createManifest({id, version, ipaUrlPath, manifestPath, appName, schema, exportDir});
+        ios.exportIpa({ projectPath, appName, ipaFileName, exportOptionsPlist, exportOptionsPlistPath, exportDir, verbose });
+        ios.createManifest({ id, version, ipaUrlPath, manifestPath, appName, schema, exportDir });
     },
 
     /**
      * Compose email for
      */
-    composeEmail({appName, appLabel, appVersion, changelog, releaseDate, repoHomepageUrl, androidBuildPath = null, iosBuildPath = null}) {
+    composeEmail({ appName, appLabel, appVersion, changelog, releaseDate, repoHomepageUrl, androidBuildPath = null, iosBuildPath = null }) {
         let bodyEmail = fs.readFileSync(path.join(__dirname, '../resources/distribute-email.tmpl.html')).toString();
 
         bodyEmail = bodyEmail.replace(/___APP_LABEL___/g, appLabel);
@@ -265,7 +265,7 @@ const Cordova = {
             name: 'compilePath',
             message: 'sources.compilePath',
             default: 'src'
-        }]).then(({compileCommand, compilePath}) => {
+        }]).then(({ compileCommand, compilePath }) => {
             if (!config.sources) {
                 config.sources = {};
             }
@@ -284,7 +284,7 @@ const Cordova = {
             name: 'htmlVersionPath',
             message: 'sources.htmlVersionPath',
             default: 'src/html/partials/login.html'
-        }]).then(({htmlVersionPath}) => {
+        }]).then(({ htmlVersionPath }) => {
             if (!config.sources) {
                 config.sources = {};
             }
@@ -307,7 +307,7 @@ const Cordova = {
             name: 'buildsDir',
             message: 'buildsDir',
             default: 'builds/'
-        }]).then(({rootPath, buildsDir}) => {
+        }]).then(({ rootPath, buildsDir }) => {
             if (!config.cordova) {
                 config.cordova = {};
             }
@@ -346,7 +346,8 @@ const Cordova = {
                 { name: TASKS.UPLOAD_BUILDS },
                 { name: TASKS.UPLOAD_SOURCES },
                 { name: TASKS.SEND_EMAIL }
-            ]}]).then(({tasks}) => {
+            ]
+        }]).then(({ tasks }) => {
             let questions = [];
 
             if (tasks.contains(TASKS.COMPILE_SOURCES)) {
