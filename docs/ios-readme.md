@@ -9,7 +9,7 @@ All `*` marked fields are mandatory.
 All details about building, exporting and signing and iOS project.
 In order to build the iOS project you have to add the task `i` in the `distribute cordova` command.
 
-```json
+```js
 "ios": {
     // Main plist of iOS XCode project.
     // If not specified the tool will look for Info.plist or <app.name>-Info.plist
@@ -44,7 +44,7 @@ In order to build the iOS project you have to add the task `i` in the `distribut
 All specific details about the processes to upload created iOS builds over (S)FTP and update the remote file to allow the OTA installations.
 In order to send the final email, you have to add the task `u` in the `distribute cordova` command.
 
-```json
+```js
 "remote": {
     "builds": {
         // * Absolute path of folder will contains all iOS `.ipa` and `.plist` files

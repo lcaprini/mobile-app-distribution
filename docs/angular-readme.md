@@ -10,7 +10,7 @@ All `*` marked fields are mandatory.
 
 Some specific details about web app version change.
 
-```json
+```js
 "sources": {
     "updateVersion" : {
         // * Path of file that contains sources.updateVersion.replacingTag tag that will be used to print inside the app's version label
@@ -28,7 +28,7 @@ Some specific details about web app version change.
 All details about the processes to sever deploy over (S)FTP.
 In order to deploy the builded app, you have to add the task `d` in the `distribute angular` commands.
 
-```json
+```js
 "remote": {
     "deploy": {
         // * (S)FTP host for builds deploy
@@ -59,7 +59,7 @@ In order to deploy the builded app, you have to add the task `d` in the `distrib
 
 Some specific details about web app repo OTA distribution.
 
-```json
+```js
 "remote": {
     "repo": {
         // * Absolute path of remote repo server folder will contains all Angular `.zip` files

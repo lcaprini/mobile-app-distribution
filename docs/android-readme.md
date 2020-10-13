@@ -9,7 +9,7 @@ All `*` marked fields are mandatory.
 All details about building, exporting and signing and Android project.
 In order to build the Android project you have to add the task `i` in the `distribute cordova` command.
 
-```json
+```js
 "Android": {
     // * JSON object that specify an Android keystore and its credentials for signing process
     "keystore": {
@@ -28,7 +28,7 @@ In order to build the Android project you have to add the task `i` in the `distr
 All specific details about the processes to upload created Android builds over (S)FTP and update the remote file to allow the OTA installations.
 In order to send the final email, you have to add the task `u` in the `distribute cordova` command.
 
-```json
+```js
 "remote": {
     "builds": {
         // * Absolute path of folder will contains all Android `.ipa` and `.plist` files

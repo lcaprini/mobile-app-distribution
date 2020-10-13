@@ -8,7 +8,7 @@ All `*` marked fields are mandatory.
 
 All details about app or webapp;
 
-```json
+```js
 "app": {
     // * App's project name
     "name": "MyApp",
@@ -22,7 +22,7 @@ All details about app or webapp;
 
 Every distribution process creates one or more files as output: the `buildsDir` attribute is the path (absolute or relative) will contains the build files.
 
-```json
+```js
 // * Path of output directory
 "buildsDir": "./builds"
 ```
@@ -31,7 +31,7 @@ Every distribution process creates one or more files as output: the `buildsDir` 
 
 All commons details about source (pre)compiling tasks: if you want to compile sources you have to add the `c` task in `distribute` command and it runs before the distribution process tasks, like `ios`, `android` and of course `remote` and `email`. You could run NodeJS script, `package.json` `npm` scripts, and so on.
 
-```json
+```js
 "sources": {
     // * Command line tool used to build the web app
     "compileCommand": "grunt build:production",
@@ -46,7 +46,7 @@ All commons details about source (pre)compiling tasks: if you want to compile so
 All commons details about the processes to upload created builds over (S)FTP and update the remote file to allow the OTA installations.
 In order to send the final email, you have to add the task `u` in the `distribute cordova` command.
 
-```json
+```js
 "remote": {
     "builds": {
         // * (S)FTP host for builds upload
@@ -109,7 +109,7 @@ In order to send the final email, you have to add the task `u` in the `distribut
 All details about final email sender;
 In order to send the final email, you have to add the task `e` in every `distribute`'s subcommands.
 
-```json
+```js
 "email" : {
     // * SMTP host of email service
     "host": "mail.gmail.com",

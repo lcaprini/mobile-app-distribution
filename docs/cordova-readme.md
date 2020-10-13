@@ -10,7 +10,7 @@ All `*` marked fields are mandatory.
 
 If you want to dynamically change version in an HTML file, use the `<mad-app-version>` tag and specify the HTML file path in `htmlVersionPath` attribute. Of course you also have to add the `v` task in `distribute cordova` command.
 
-```json
+```js
 "source": {
     // * Path of HTML file that contains `<mad-app-version>` tag
     "htmlVersionPath": "src/app/login/login.html"
@@ -21,7 +21,7 @@ If you want to dynamically change version in an HTML file, use the `<mad-app-ver
 
 All details about Cordova build process.
 
-```json
+```js
 "cordova": {
     // * Path in where to launch all cordova commands
     "path": "app",
@@ -40,7 +40,7 @@ All details about Cordova build process.
 
 Specific configurations for build iOS and Android platforms.
 
-```json
+```js
 "ios": {
     // * iOS app's bundleId to write into id attribute inside config.xml file,
     // before build the iOS platform
